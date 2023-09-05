@@ -47,7 +47,7 @@ class Evaluator:
         self, model: Union[PMF, FM], indices: list = None
     ) -> np.ndarray:
         if indices is None:
-            indices = np.arange(len(self.X))
+            indices = np.arange(len(self.y_true))
 
         if model.__class__ == FM:
             y_scores = model.predict(self.X[indices])

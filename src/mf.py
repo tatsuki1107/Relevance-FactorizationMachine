@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Tuple
 from dataclasses import dataclass
 from utils.optimizer import Adam
 from tqdm import tqdm
@@ -40,7 +41,12 @@ class ProbabilisticMatrixFactorization:
         b_i = np.zeros(self.n_items)
         self.b_i = Adam(params=b_i, lr=self.lr)
 
-    def fit(self, trains, vals, test) -> list:
+    def fit(
+        self,
+        trains: Tuple[np.ndarray, np.ndarray],
+        vals: Tuple[np.ndarray, np.ndarray],
+        test: np.ndarray,
+    ) -> list:
         train, train_pscores = trains
         val, val_pscores = vals
 
@@ -99,7 +105,9 @@ class ProbabilisticMatrixFactorization:
 
         return train_loss, val_loss, test_loss
 
-    def predict(self, user_ids, item_ids):
+    def predict(
+        self, user_ids: np.ndarray, item_ids: np.ndarray
+    ) -> np.ndarray:
         return np.array(
             [
                 self._predict_pair(user_id, item_id)
@@ -107,7 +115,7 @@ class ProbabilisticMatrixFactorization:
             ]
         )
 
-    def _predict_pair(self, user_id, item_id):
+    def _predict_pair(self, user_id: int, item_id: int) -> float:
         return self._sigmoid(
             np.dot(self.P(user_id), self.Q(item_id))
             + self.b_u(user_id)
@@ -116,7 +124,11 @@ class ProbabilisticMatrixFactorization:
         )
 
     def _cross_entropy_loss(
-        self, user_ids, item_ids, clicks, pscores
+        self,
+        user_ids: np.ndarray,
+        item_ids: np.ndarray,
+        clicks: np.ndarray,
+        pscores: np.ndarray,
     ) -> float:
         pred_scores = self.predict(user_ids, item_ids)
         loss = -np.sum(
@@ -125,5 +137,5 @@ class ProbabilisticMatrixFactorization:
         ) / len(clicks)
         return loss
 
-    def _sigmoid(self, x):
+    def _sigmoid(self, x: np.ndarray) -> np.ndarray:
         return 1 / (1 + np.exp(-x))

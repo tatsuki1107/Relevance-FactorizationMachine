@@ -1,9 +1,9 @@
 import numpy as np
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Optional
 from tqdm import tqdm
 from sklearn.utils import resample
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, diags
 
 
 @dataclass
@@ -21,13 +21,11 @@ class FactorizationMachine:
 
         self.w0 = 0.0
         self.w = np.zeros(self.n_features)
-        # self.w = Adam(params=w, lr=self.lr)
 
         self.V = np.random.normal(
             scale=self.scale,
             size=(self.n_features, self.n_factors),
         )
-        # self.V = Adam(params=V, lr=self.lr)
 
     def fit(
         self,
@@ -56,26 +54,36 @@ class FactorizationMachine:
             self.w0 -= self.lr * w0_grad
 
             # update wi
-            w_grad = -np.sum(error[:, None] * batch_X, axis=0)
+            w_grad = -(diags(error) @ batch_X).sum(axis=0).A.flatten()
             self.w -= self.lr * w_grad
-            # self.w.update(grad=w_grad)
 
             # 事前に計算できる部分を計算
-            V_dot_X_T = self.V.T @ batch_X.T
-            X_square = batch_X**2
+            V_dot_X_T = self.V.T @ batch_X.T  # shape: (n_factors, n_samples)
+            X_square = batch_X.power(2)  # shape: (n_samples, n_features)
 
-            # term1: V[:,factor]@X.T * X[:,feature] の計算
-            term1 = np.einsum("di,fd->dif", batch_X, V_dot_X_T)
+            # 各factorごとに計算
+            for f in range(self.V.shape[1]):
+                # V[:,factor]@X.T * X[:,feature] の計算
+                term1_f = batch_X.multiply(
+                    V_dot_X_T[f, :][:, np.newaxis]
+                )  # shape: (n_samples, n_features)
 
-            # term2: V[feature, factor]*X[:,feature]**2 の計算
-            term2 = self.V * X_square[:, :, np.newaxis]
+                # V[feature, factor]*X[:,feature]**2 の計算
+                term2_f = X_square.multiply(
+                    self.V[:, f]
+                )  # shape: (n_samples, n_features)
 
-            # update V
-            grad_V = -np.sum(
-                error[:, np.newaxis, np.newaxis] * (term1 - term2), axis=0
-            )
-            self.V -= self.lr * grad_V
-            # self.V.update(grad=grad_V)
+                # error[:, np.newaxis] * (term1_f - term2_f) の計算
+                grad_V_f = -(
+                    (term1_f - term2_f).multiply(error[:, None]).sum(axis=0)
+                )  # shape: (1, n_features)
+                # Vの該当する列（factor）を更新
+                non_zero_feature_indices = grad_V_f.nonzero()[1]
+
+                # update V
+                self.V[non_zero_feature_indices, f] -= (
+                    self.lr * grad_V_f[0, non_zero_feature_indices].A1
+                )
 
             trainloss = self._cross_entropy_loss(
                 X=batch_X, y=batch_y, pscores=batch_pscores
@@ -94,18 +102,23 @@ class FactorizationMachine:
 
         return train_loss, val_loss, test_loss
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: csr_matrix) -> np.ndarray:
         # 2項目
-        linear_out = np.dot(X, self.w)
+        linear_out = X.dot(self.w)
 
         # 3項目
-        term1 = np.sum((X @ self.V) ** 2, axis=1)
-        term2 = np.sum((X**2) @ (self.V**2), axis=1)
+        term1 = np.sum(X.dot(self.V) ** 2, axis=1)
+        term2 = np.sum((X.power(2)).dot(self.V**2), axis=1)
         factor_out = 0.5 * (term1 - term2)
 
         return self._sigmoid(self.w0 + linear_out + factor_out)
 
-    def _cross_entropy_loss(self, X, y, pscores=None):
+    def _cross_entropy_loss(
+        self,
+        X: csr_matrix,
+        y: np.ndarray,
+        pscores: Optional[np.ndarray] = None,
+    ) -> float:
         if pscores is None:
             pscores = np.ones_like(y)
 
@@ -116,5 +129,5 @@ class FactorizationMachine:
         ) / len(y)
         return loss
 
-    def _sigmoid(self, x):
+    def _sigmoid(self, x: np.ndarray) -> np.ndarray:
         return 1 / (1 + np.exp(-x))
