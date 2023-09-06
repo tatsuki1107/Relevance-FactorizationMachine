@@ -207,32 +207,5 @@ def _create_item_features_df(
     item_features_df["feat"] = item_features_df["feat"].apply(
         lambda x: literal_eval(x)
     )
-    ##############################
 
-    columns = columns | columns2
-
-    usecols = [key for key, value in columns.items() if value == "multilabel"][
-        0
-    ]
-
-    item_tags = item_features_df[usecols].to_list()
-    # MultiLabelBinarizerを初期化
-    mlb = MultiLabelBinarizer()
-    # マルチワンホットエンコーディングを実行
-    multi_hot_tags = mlb.fit_transform(item_tags)
-    item_tags_df = pd.DataFrame(multi_hot_tags)
-    item_features_df = pd.concat([item_features_df, item_tags_df], axis=1)
-    item_features_df.drop(usecols, axis=1, inplace=True)
-
-    usecols = [
-        key for key, value in columns.items() if value in {"int", "float"}
-    ]
-    scaler = StandardScaler()
-    item_features_df[usecols] = scaler.fit_transform(item_features_df[usecols])
-    item_features_df[usecols].fillna(
-        item_features_df[usecols].mean(), inplace=True
-    )
-    item_features_df.drop(["video_id"], axis=1, inplace=True)
-    sparse_video_features = csr_matrix(item_features_df.values)
-
-    return sparse_video_features
+    return item_features_df
