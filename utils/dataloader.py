@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from collections import defaultdict
 from scipy.sparse import csr_matrix, hstack
 from ast import literal_eval
 from sklearn.preprocessing import (
@@ -8,134 +9,45 @@ from sklearn.preprocessing import (
 )
 
 
-def data_loader():
-    interaction_df = _create_interaction_df()
+def dataloader(params):
+    interaction_df, basefeatures = _create_interaction_df()
     user_features_df = _create_user_features_df(
-        user_ids=interaction_df["user_id"]
+        interaction_df=interaction_df[["user_id"]], params=params
+    )
+    item_features_df = _create_item_features_df(
+        interaction_df=interaction_df[["video_id"]], params=params
     )
 
-    features = csr_matrix(
-        pd.get_dummies(
-            interaction_df["user_index"], drop_first=True, dtype=int
-        ).values
-    )
+    dfs = {
+        "interaction": interaction_df,
+        "user": user_features_df,
+        "video": item_features_df,
+    }
+    features = [basefeatures]
+    for df_name, df in dfs.items():
+        columns = params.features.__dict__[df_name]
+        if df_name == "video":
+            columns = columns["daily"] | columns["category"]
 
-    video_indices = csr_matrix(
-        pd.get_dummies(
-            interaction_df["video_index"], drop_first=True, dtype=int
-        ).values
-    )
-    features = hstack([features, video_indices])
+        _df = _feature_engineering(df=df, columns=columns)
+        if df_name == "interaction":
+            sparse_features = csr_matrix(_df[columns].values)
 
-    use_cols = [
-        "onehot_feat0",
-        "onehot_feat1",
-        "onehot_feat2",
-        "onehot_feat6",
-        "onehot_feat11",
-        "onehot_feat12",
-        "onehot_feat13",
-        "onehot_feat14",
-    ]
-    user_features_df = pd.get_dummies(
-        user_features_df, columns=use_cols, drop_first=True, dtype=int
-    )
-    sparse_user_features_df = pd.merge(
-        interaction_df[["user_id"]], user_features_df, on="user_id", how="left"
-    )
-    sparse_user_features_df.drop(
-        ["user_id", "register_days"], axis=1, inplace=True
-    )
-    features = hstack([features, csr_matrix(sparse_user_features_df.values)])
-    del sparse_user_features_df
+        else:
+            features_df = pd.merge(
+                interaction_df[[f"{df_name}_id"]],
+                _df,
+                on=f"{df_name}_id",
+                how="left",
+            )
+            features_df.drop([f"{df_name}_id"], axis=1, inplace=True)
+            sparse_features = csr_matrix(features_df.values)
 
-    usecols = [
-        "video_id",
-        "play_progress",
-        "like_cnt",
-        "share_user_num",
-        "video_duration",
-    ]
-    item_daily_features_df = pd.read_csv(
-        "../data/item_daily_features.csv", usecols=usecols
-    )
-    item_daily_features_df = item_daily_features_df.groupby("video_id").first()
-    isin_video_ids = item_daily_features_df.index.isin(
-        interaction_df["video_id"]
-    )
-    item_daily_features_df = item_daily_features_df[isin_video_ids]
-    item_daily_features_df.rename_axis("index", inplace=True)
-    item_daily_features_df["video_id"] = item_daily_features_df.index.values
-    item_daily_features_df.reset_index(inplace=True)
-    item_daily_features_df.drop("index", axis=1, inplace=True)
+        features.append(sparse_features)
 
-    item_categories_df = pd.read_csv("../data/item_categories.csv")
-    isin_video_ids = item_categories_df["video_id"].isin(
-        interaction_df["video_id"]
-    )
-    item_categories_df = item_categories_df[isin_video_ids]
-    video_ids = item_categories_df["video_id"].values
-    # 文字列から配列へ変換
-    item_categories_df["feat"] = item_categories_df["feat"].apply(
-        lambda x: literal_eval(x)
-    )
-    item_tags = item_categories_df["feat"].to_list()
-    mlb = MultiLabelBinarizer()
-    multi_hot_tags = mlb.fit_transform(item_tags)
-    item_categories_df = pd.DataFrame(multi_hot_tags)
-    item_categories_df["video_id"] = video_ids
+    features = hstack(features)
 
-    item_categories_df = pd.merge(
-        interaction_df[["video_id"]],
-        item_categories_df,
-        on="video_id",
-        how="left",
-    )
-    item_categories_df.drop(["video_id"], axis=1, inplace=True)
-    features = hstack([features, csr_matrix(item_categories_df.values)])
-
-    scaler = StandardScaler()
-    # 欠損処理しないと使えない！！
-    interaction_df[["timestamp"]] = scaler.fit_transform(
-        interaction_df[["timestamp"]]
-    )
-    user_features_df[["register_days"]] = scaler.fit_transform(
-        user_features_df[["register_days"]]
-    )
-    use_cols = [
-        "video_duration",
-        "play_progress",
-        "like_cnt",
-        "share_user_num",
-    ]
-    item_daily_features_df[use_cols] = scaler.fit_transform(
-        item_daily_features_df[use_cols]
-    )
-
-    continuous_features_df = pd.merge(
-        interaction_df[["user_id", "video_id", "timestamp"]],
-        user_features_df[["user_id", "register_days"]],
-        on="user_id",
-        how="left",
-    )
-    continuous_features_df = pd.merge(
-        continuous_features_df,
-        item_daily_features_df,
-        on="video_id",
-        how="left",
-    )
-
-    continuous_features_df.drop(["user_id", "video_id"], axis=1, inplace=True)
-    # ひとまず、列ごとの平均で埋める。(標準化したあとの)
-    continuous_features_df.fillna(continuous_features_df.mean(), inplace=True)
-    continuous_features = csr_matrix(continuous_features_df.values)
-    features = hstack([features, continuous_features])
-
-    # split_ratio = (0.8, 0.1, 0.1)
-    # split_index = [int(data_size*r) for r in split_ratio[:2]]
-    # split_index[1] += split_index[0]
-
-    return features, interaction_df
+    return interaction_df, features
 
 
 def _create_interaction_df() -> pd.DataFrame:
@@ -204,26 +116,123 @@ def _create_interaction_df() -> pd.DataFrame:
     data_size = interaction_df.shape[0] // 20
     interaction_df = interaction_df.iloc[:data_size]
 
-    return interaction_df
-
-
-def _create_user_features_df(user_ids: pd.Series) -> pd.DataFrame:
-    use_cols = [
-        "user_id",
-        "onehot_feat0",
-        "onehot_feat1",
-        "onehot_feat2",
-        "onehot_feat6",
-        "onehot_feat11",
-        "register_days",
-        "onehot_feat12",
-        "onehot_feat13",
-        "onehot_feat14",
-    ]
-    user_features_df = pd.read_csv(
-        "../data/user_features.csv", usecols=use_cols
+    sparse_user_indices = csr_matrix(
+        pd.get_dummies(
+            interaction_df["user_index"], drop_first=True, dtype=int
+        ).values
     )
-    isin_user_ids = user_features_df["user_id"].isin(user_ids)
-    user_features_df = user_features_df[isin_user_ids]
+    sparse_video_indices = csr_matrix(
+        pd.get_dummies(
+            interaction_df["video_index"], drop_first=True, dtype=int
+        ).values
+    )
+    basefeatures = hstack([sparse_user_indices, sparse_video_indices])
+
+    return interaction_df, basefeatures
+
+
+def _create_user_features_df(
+    interaction_df: pd.DataFrame, params
+) -> pd.DataFrame:
+    columns = params.__dict__
+    usecols = list(columns.keys()) + ["user_id"]
+    user_features_df = pd.read_csv(
+        "../data/user_features.csv", usecols=usecols
+    )
+    isin_user_ids = user_features_df["user_id"].isin(interaction_df["user_id"])
+    user_features_df = user_features_df[isin_user_ids].reset_index(drop=True)
 
     return user_features_df
+
+
+def _feature_engineering(df: pd.DataFrame, columns: dict) -> pd.DataFrame:
+    datatypes = defaultdict(list)
+    for feature_name, datatype in columns.items():
+        datatypes[datatype].append(feature_name)
+
+    if datatypes["label"]:
+        df = pd.get_dummies(
+            df, columns=datatypes["label"], drop_first=True, dtype=int
+        )
+
+    if datatypes["int"] or datatypes["float"]:
+        usecols = datatypes["int"] + datatypes["float"]
+        scaler = StandardScaler()
+        df[usecols] = scaler.fit_transform(df[usecols])
+        df[usecols].fillna(df[usecols].mean(), inplace=True)
+
+    if datatypes["multilabel"]:
+        for col in datatypes["multilabel"]:
+            multilabels = df[col].to_list()
+            # MultiLabelBinarizerを初期化
+            mlb = MultiLabelBinarizer()
+            multi_hot_tags = mlb.fit_transform(multilabels)
+            item_tags_df = pd.DataFrame(multi_hot_tags)
+            df = pd.concat([df, item_tags_df], axis=1)
+            df.drop(col, axis=1, inplace=True)
+
+    return df
+
+
+def _create_item_features_df(
+    interaction_df: pd.DataFrame, params
+) -> pd.DataFrame:
+    columns = params.daily.__dict__
+    usecols = list(columns.keys()) + ["video_id"]
+    item_daily_features_df = pd.read_csv(
+        "../data/item_daily_features.csv", usecols=usecols
+    )
+    item_daily_features_df = item_daily_features_df.groupby("video_id").first()
+    isin_video_ids = item_daily_features_df.index.isin(
+        interaction_df["video_id"]
+    )
+    item_daily_features_df = item_daily_features_df[isin_video_ids]
+    item_daily_features_df.rename_axis("index", inplace=True)
+    item_daily_features_df["video_id"] = item_daily_features_df.index.values
+    item_daily_features_df.reset_index(inplace=True, drop=True)
+
+    columns2 = params.category.__dict__
+    usecols = list(columns2.keys()) + ["video_id"]
+    item_categories_df = pd.read_csv(
+        "../data/item_categories.csv", usecols=usecols
+    )
+    isin_video_ids = item_categories_df["video_id"].isin(
+        interaction_df["video_id"]
+    )
+    item_categories_df = item_categories_df[isin_video_ids]
+    item_features_df = pd.merge(
+        item_daily_features_df, item_categories_df, on="video_id"
+    )
+    # 文字列から配列へ変換
+    item_features_df["feat"] = item_features_df["feat"].apply(
+        lambda x: literal_eval(x)
+    )
+    ##############################
+
+    columns = columns | columns2
+
+    usecols = [key for key, value in columns.items() if value == "multilabel"][
+        0
+    ]
+
+    item_tags = item_features_df[usecols].to_list()
+    # MultiLabelBinarizerを初期化
+    mlb = MultiLabelBinarizer()
+    # マルチワンホットエンコーディングを実行
+    multi_hot_tags = mlb.fit_transform(item_tags)
+    item_tags_df = pd.DataFrame(multi_hot_tags)
+    item_features_df = pd.concat([item_features_df, item_tags_df], axis=1)
+    item_features_df.drop(usecols, axis=1, inplace=True)
+
+    usecols = [
+        key for key, value in columns.items() if value in {"int", "float"}
+    ]
+    scaler = StandardScaler()
+    item_features_df[usecols] = scaler.fit_transform(item_features_df[usecols])
+    item_features_df[usecols].fillna(
+        item_features_df[usecols].mean(), inplace=True
+    )
+    item_features_df.drop(["video_id"], axis=1, inplace=True)
+    sparse_video_features = csr_matrix(item_features_df.values)
+
+    return sparse_video_features

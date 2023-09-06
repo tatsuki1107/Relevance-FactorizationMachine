@@ -1,0 +1,40 @@
+seed: 12345
+features:
+  interaction:
+    timestamp: "float"
+  user:
+    # feature name: data type
+    onehot_feat0: "label"
+    onehot_feat1: "label"
+    onehot_feat2: "label"
+    onehot_feat6: "label"
+    onehot_feat11: "label"
+    onehot_feat12: "label"
+    onehot_feat13: "label"
+    onehot_feat14: "label"
+    register_days: "int"
+
+  video:
+    daily:
+      play_progress: "float"
+      video_duration: "float"
+      like_cnt: "int"
+      share_user_num: "int"
+    category:
+      feat: "multilabel"
+
+mf:
+  n_epochs: 10
+  n_factors: 30
+  scale: 0.05
+  lr: 0.001
+  reg: 0.01
+  batch_size: 256
+
+fm:
+  n_epochs: 10
+  n_factors: 30
+  scale: 0.05
+  lr: 0.001
+  reg: 0.01
+  batch_size: 256
