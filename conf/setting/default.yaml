@@ -1,4 +1,6 @@
 seed: 12345
+exposure_bias: 0.5
+behavior_policy: "random"
 features:
   interaction:
     timestamp: "float"

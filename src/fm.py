@@ -48,6 +48,7 @@ class FactorizationMachine:
                 random_state=self.seed,
             )
             error = (batch_y / batch_pscores) - self.predict(batch_X)
+            # shape: (batch_size,)
 
             # update w0
             w0_grad = -np.sum(error)
@@ -58,20 +59,20 @@ class FactorizationMachine:
             self.w -= self.lr * w_grad
 
             # 事前に計算できる部分を計算
-            V_dot_X_T = self.V.T @ batch_X.T  # shape: (n_factors, n_samples)
-            X_square = batch_X.power(2)  # shape: (n_samples, n_features)
+            V_dot_X_T = self.V.T @ batch_X.T  # shape: (n_factors, batch_size)
+            X_square = batch_X.power(2)  # shape: (batch_size, n_features)
 
             # 各factorごとに計算
             for f in range(self.V.shape[1]):
                 # V[:,factor]@X.T * X[:,feature] の計算
                 term1_f = batch_X.multiply(
                     V_dot_X_T[f, :][:, np.newaxis]
-                )  # shape: (n_samples, n_features)
+                )  # shape: (batch_size, n_features)
 
                 # V[feature, factor]*X[:,feature]**2 の計算
                 term2_f = X_square.multiply(
                     self.V[:, f]
-                )  # shape: (n_samples, n_features)
+                )  # shape: (batch_size, n_features)
 
                 # error[:, np.newaxis] * (term1_f - term2_f) の計算
                 grad_V_f = -(
