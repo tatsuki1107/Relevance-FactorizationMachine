@@ -1,29 +1,38 @@
 seed: 12345
-exposure_bias: 0.5
-behavior_policy: "random"
-features:
+logdata_propensity:
+  exposure_bias: 0.5
+  behavior_policy: "random"
+tables:
   interaction:
-    timestamp: "float"
+    data_path: "./data/small_matrix.csv"
+    features:
+      timestamp: "float"
   user:
-    # feature name: data type
-    onehot_feat0: "label"
-    onehot_feat1: "label"
-    onehot_feat2: "label"
-    onehot_feat6: "label"
-    onehot_feat11: "label"
-    onehot_feat12: "label"
-    onehot_feat13: "label"
-    onehot_feat14: "label"
-    register_days: "int"
+    data_path: "./data/user_features.csv"
+    features:
+      # feature name: data type
+      onehot_feat0: "label"
+      onehot_feat1: "label"
+      onehot_feat2: "label"
+      onehot_feat6: "label"
+      onehot_feat11: "label"
+      onehot_feat12: "label"
+      onehot_feat13: "label"
+      onehot_feat14: "label"
+      register_days: "int"
 
   video:
     daily:
-      play_progress: "float"
-      video_duration: "float"
-      like_cnt: "int"
-      share_user_num: "int"
+      data_path: "./data/item_daily_features.csv"
+      features:
+        play_progress: "float"
+        video_duration: "float"
+        like_cnt: "int"
+        share_user_num: "int"
     category:
-      feat: "multilabel"
+      data_path: "./data/item_categories.csv"
+      features:
+        feat: "multilabel"
 
 mf:
   n_epochs: 10

@@ -5,3 +5,7 @@
 /src/__pycache__
 
 /utils/__pycache__
+
+/conf/setting/__pycache__
+
+/logs/

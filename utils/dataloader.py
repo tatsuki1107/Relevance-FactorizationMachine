@@ -1,5 +1,14 @@
 import pandas as pd
 import numpy as np
+from omegaconf import OmegaConf
+from conf.setting.default import (
+    ExperimentConfig,
+    UserTableConfig,
+    VideoDailyTableConfig,
+    LogDataPropensityConfig,
+    VideoCategoryTableConfig,
+    VideoTableConfig,
+)
 from collections import defaultdict
 from scipy.sparse import csr_matrix, hstack
 from ast import literal_eval
@@ -9,13 +18,15 @@ from sklearn.preprocessing import (
 )
 
 
-def dataloader(params):
-    interaction_df, basefeatures = _create_interaction_df()
+def dataloader(params: ExperimentConfig):
+    interaction_df, basefeatures = _create_interaction_df(params=params)
     user_features_df = _create_user_features_df(
-        existing_user_ids=interaction_df["user_id"], params=params
+        existing_user_ids=interaction_df["user_id"],
+        params=params.tables.user,
     )
     item_features_df = _create_item_features_df(
-        existing_video_ids=interaction_df["video_id"], params=params
+        existing_video_ids=interaction_df["video_id"],
+        params=params.tables.video,
     )
 
     dfs = {
@@ -23,14 +34,21 @@ def dataloader(params):
         "user": user_features_df,
         "video": item_features_df,
     }
+    tables_dict = OmegaConf.to_container(params.tables, resolve=True)
     features = [basefeatures]
     for df_name, df in dfs.items():
-        columns = params.features.__dict__[df_name]
+        tables = tables_dict[df_name]
+
         if df_name == "video":
-            columns = columns["daily"] | columns["category"]
+            columns = (
+                tables["daily"]["features"] | tables["category"]["features"]
+            )
+        else:
+            columns = tables["features"]
 
         converted_df = _feature_engineering(df=df, columns=columns)
         if df_name == "interaction":
+            columns = list(columns.keys())
             sparse_features = csr_matrix(converted_df[columns].values)
 
         else:
@@ -51,16 +69,17 @@ def dataloader(params):
     return interaction_df, features
 
 
-def _create_interaction_df(params) -> pd.DataFrame:
-    columns = params.features.interaction.__dict__
-    usecols = list(columns.keys()) + ["user_id", "video_id", "watch_ratio"]
-    interaction_df = pd.read_csv("../data/small_matrix.csv", usecols=usecols)
+def _create_interaction_df(params: ExperimentConfig) -> pd.DataFrame:
+    interaction = params.tables.interaction
+    columns = _get_features_columns(params=interaction.features)
+    usecols = columns + ["user_id", "video_id", "watch_ratio"]
+    interaction_df = pd.read_csv(interaction.data_path, usecols=usecols)
 
     # 自然に観測されたbig_matrix上でのアイテム,ユーザ-の相対的な露出傾向を使い人工的なクリックデータを生成
     exposure_probabilitys = _generate_exposure_probability_using_big_matrix(
         existing_video_ids=interaction_df["video_id"],
         existing_user_ids=interaction_df["user_id"],
-        params=params,
+        params=params.logdata_propensity,
     )
     interaction_df["exposure"] = exposure_probabilitys
 
@@ -71,7 +90,7 @@ def _create_interaction_df(params) -> pd.DataFrame:
 
     # 過去の推薦方策pi_bはランダムなポリシーとしてログデータを生成
     # ユーザの評価は時間に左右されないと仮定
-    if params.behavior_policy == "random":
+    if params.logdata_propensity.behavior_policy == "random":
         np.random.seed(params.seed)
         interaction_df = interaction_df.sample(frac=1).reset_index(drop=True)
         data_size = interaction_df.shape[0] // 20
@@ -111,6 +130,7 @@ def _create_interaction_df(params) -> pd.DataFrame:
     interaction_df["video_index"] = interaction_df["video_id"].apply(
         lambda x: video_id2_index[x]
     )
+    interaction_df.drop(["user_id", "video_id"], axis=1, inplace=True)
 
     sparse_user_indices = csr_matrix(
         pd.get_dummies(
@@ -127,14 +147,17 @@ def _create_interaction_df(params) -> pd.DataFrame:
     return interaction_df, basefeatures
 
 
+def _get_features_columns(params) -> list:
+    columns = OmegaConf.to_container(params, resolve=True)
+    return list(columns.keys())
+
+
 def _create_user_features_df(
-    existing_user_ids: pd.Series, params
+    existing_user_ids: pd.Series, params: UserTableConfig
 ) -> pd.DataFrame:
-    columns = params.user.__dict__
-    usecols = list(columns.keys()) + ["user_id"]
-    user_features_df = pd.read_csv(
-        "../data/user_features.csv", usecols=usecols
-    )
+    columns = _get_features_columns(params=params.features)
+    usecols = columns + ["user_id"]
+    user_features_df = pd.read_csv(params.data_path, usecols=usecols)
     isin_user_ids = user_features_df["user_id"].isin(existing_user_ids)
     user_features_df = user_features_df[isin_user_ids].reset_index(drop=True)
 
@@ -142,14 +165,14 @@ def _create_user_features_df(
 
 
 def _create_item_features_df(
-    existing_video_ids: pd.Series, params
+    existing_video_ids: pd.Series, params: VideoTableConfig
 ) -> pd.DataFrame:
     item_daily_features_df = _create_item_daily_features_df(
-        existing_video_ids=existing_video_ids, params=params
+        existing_video_ids=existing_video_ids, params=params.daily
     )
 
     item_categories_df = _create_item_categories_df(
-        existing_video_ids=existing_video_ids, params=params
+        existing_video_ids=existing_video_ids, params=params.category
     )
     item_features_df = pd.merge(
         item_daily_features_df, item_categories_df, on="video_id"
@@ -174,7 +197,7 @@ def _feature_engineering(df: pd.DataFrame, columns: dict) -> pd.DataFrame:
         scaler = StandardScaler()
         df[usecols] = scaler.fit_transform(df[usecols])
         # 欠損値はひとまず平均値で埋める
-        df[usecols].fillna(df[usecols].mean(), inplace=True)
+        df[usecols] = df[usecols].fillna(df[usecols].mean())
 
     if datatypes["multilabel"]:
         for col in datatypes["multilabel"]:
@@ -189,13 +212,11 @@ def _feature_engineering(df: pd.DataFrame, columns: dict) -> pd.DataFrame:
 
 
 def _create_item_daily_features_df(
-    existing_video_ids: pd.Series, params
+    existing_video_ids: pd.Series, params: VideoDailyTableConfig
 ) -> pd.DataFrame:
-    columns = params.daily.__dict__
-    usecols = list(columns.keys()) + ["video_id"]
-    item_daily_features_df = pd.read_csv(
-        "../data/item_daily_features.csv", usecols=usecols
-    )
+    columns = _get_features_columns(params=params.features)
+    usecols = columns + ["video_id"]
+    item_daily_features_df = pd.read_csv(params.data_path, usecols=usecols)
     item_daily_features_df = item_daily_features_df.groupby("video_id").first()
     isin_video_ids = item_daily_features_df.index.isin(existing_video_ids)
     item_daily_features_df = item_daily_features_df[isin_video_ids]
@@ -207,13 +228,11 @@ def _create_item_daily_features_df(
 
 
 def _create_item_categories_df(
-    existing_video_ids: pd.Series, params
+    existing_video_ids: pd.Series, params: VideoCategoryTableConfig
 ) -> pd.DataFrame:
-    columns = params.category.__dict__
-    usecols = list(columns.keys()) + ["video_id"]
-    item_categories_df = pd.read_csv(
-        "../data/item_categories.csv", usecols=usecols
-    )
+    columns = _get_features_columns(params=params.features)
+    usecols = columns + ["video_id"]
+    item_categories_df = pd.read_csv(params.data_path, usecols=usecols)
     isin_video_ids = item_categories_df["video_id"].isin(existing_video_ids)
     item_categories_df = item_categories_df[isin_video_ids].reset_index(
         drop=True
@@ -226,10 +245,12 @@ def _create_item_categories_df(
 
 
 def _generate_exposure_probability_using_big_matrix(
-    existing_video_ids: pd.Series, existing_user_ids: pd.Series, params
+    existing_video_ids: pd.Series,
+    existing_user_ids: pd.Series,
+    params: LogDataPropensityConfig,
 ) -> pd.Series:
-    use_cols = ["user_id", "video_id"]
-    obs_df = pd.read_csv("../data/big_matrix.csv", usecols=use_cols)
+    usecols = ["user_id", "video_id"]
+    obs_df = pd.read_csv("./data/big_matrix.csv", usecols=usecols)
 
     isin_video_ids = obs_df["video_id"].isin(existing_video_ids)
     video_expo_counts = obs_df[isin_video_ids]["video_id"].value_counts()
