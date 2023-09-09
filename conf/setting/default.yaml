@@ -1,14 +1,19 @@
 seed: 12345
 logdata_propensity:
+  train_val_test_ratio:
+    - 0.8
+    - 0.1
+    - 0.1
+  density: 0.05
   exposure_bias: 0.5
   behavior_policy: "random"
 tables:
   interaction:
-    data_path: "./data/small_matrix.csv"
+    data_path: "./data/kuairec/small_matrix.csv"
     features:
       timestamp: "float"
   user:
-    data_path: "./data/user_features.csv"
+    data_path: "./data/kuairec/user_features.csv"
     features:
       # feature name: data type
       onehot_feat0: "label"
@@ -23,14 +28,14 @@ tables:
 
   video:
     daily:
-      data_path: "./data/item_daily_features.csv"
+      data_path: "./data/kuairec/item_daily_features.csv"
       features:
         play_progress: "float"
         video_duration: "float"
         like_cnt: "int"
         share_user_num: "int"
     category:
-      data_path: "./data/item_categories.csv"
+      data_path: "./data/kuairec/item_categories.csv"
       features:
         feat: "multilabel"
 

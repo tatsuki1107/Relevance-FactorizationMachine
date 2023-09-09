@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Tuple
 
 
 @dataclass
@@ -71,6 +72,8 @@ class TableConfig:
 
 @dataclass
 class LogDataPropensityConfig:
+    train_val_test_ratio: Tuple[float, float, float]
+    density: float
     exposure_bias: float
     behavior_policy: str
 

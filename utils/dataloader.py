@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from utils.model import Dataset, Pscores
 from omegaconf import OmegaConf
 from conf.setting.default import (
     ExperimentConfig,
@@ -10,6 +11,7 @@ from conf.setting.default import (
     VideoTableConfig,
 )
 from collections import defaultdict
+from typing import Tuple
 from scipy.sparse import csr_matrix, hstack
 from ast import literal_eval
 from sklearn.preprocessing import (
@@ -65,11 +67,66 @@ def dataloader(params: ExperimentConfig):
         features.append(sparse_features)
 
     features = hstack(features)
+    interaction_df.drop(["user_id", "video_id"], axis=1, inplace=True)
 
-    return interaction_df, features
+    # split train, val, test
+    data_size = interaction_df.shape[0]
+    split_index = [
+        int(data_size * ratio)
+        for ratio in params.logdata_propensity.train_val_test_ratio[:2]
+    ]
+    split_index[1] += split_index[0]
+    train_indices = np.arange(split_index[0])
+    val_indices = np.arange(split_index[0], split_index[1])
+    test_indices = np.arange(split_index[1], data_size)
+
+    # prepare data for FM and PMF
+    indices = {
+        "train": train_indices,
+        "val": val_indices,
+        "test": test_indices,
+    }
+    datasets = defaultdict(list)
+    for _data, _indices in indices.items():
+        datasets[_data].append(features[_indices])
+
+    fm_datasets = Dataset(**datasets)
+
+    datasets = {}
+    for _data, _indices in indices.items():
+        columns = ["user_index", "video_index"]
+        datasets[_data] = interaction_df.iloc[_indices][columns].values
+
+    mf_datasets = Dataset(**datasets)
+
+    pscores, clicks = {}, defaultdict(dict)
+    for _data, _indices in indices.items():
+        if _data in {"train", "val"}:
+            pscores[_data] = interaction_df.iloc[_indices]["exposure"].values
+            clicks[_data]["biased"] = interaction_df.iloc[_indices][
+                "biased_click"
+            ].values
+
+        clicks[_data]["unbiased"] = interaction_df.iloc[_indices][
+            "unbiased_click"
+        ].values
+
+    n_users = interaction_df["user_index"].max() + 1
+    n_items = interaction_df["video_index"].max() + 1
+
+    pscores = Pscores(**pscores)
+    datasets = {
+        "FM": fm_datasets,
+        "PMF": mf_datasets,
+        "n_users": n_users,
+        "n_items": n_items,
+    }
+    return datasets, pscores, clicks
 
 
-def _create_interaction_df(params: ExperimentConfig) -> pd.DataFrame:
+def _create_interaction_df(
+    params: ExperimentConfig,
+) -> Tuple[pd.DataFrame, csr_matrix]:
     interaction = params.tables.interaction
     columns = _get_features_columns(params=interaction.features)
     usecols = columns + ["user_id", "video_id", "watch_ratio"]
@@ -93,7 +150,9 @@ def _create_interaction_df(params: ExperimentConfig) -> pd.DataFrame:
     if params.logdata_propensity.behavior_policy == "random":
         np.random.seed(params.seed)
         interaction_df = interaction_df.sample(frac=1).reset_index(drop=True)
-        data_size = interaction_df.shape[0] // 20
+        data_size = int(
+            interaction_df.shape[0] * params.logdata_propensity.density
+        )
         interaction_df = interaction_df.iloc[:data_size]
     else:
         raise ValueError("behavior_policy must be random")
@@ -130,7 +189,6 @@ def _create_interaction_df(params: ExperimentConfig) -> pd.DataFrame:
     interaction_df["video_index"] = interaction_df["video_id"].apply(
         lambda x: video_id2_index[x]
     )
-    interaction_df.drop(["user_id", "video_id"], axis=1, inplace=True)
 
     sparse_user_indices = csr_matrix(
         pd.get_dummies(
@@ -250,7 +308,7 @@ def _generate_exposure_probability_using_big_matrix(
     params: LogDataPropensityConfig,
 ) -> pd.Series:
     usecols = ["user_id", "video_id"]
-    obs_df = pd.read_csv("./data/big_matrix.csv", usecols=usecols)
+    obs_df = pd.read_csv("./data/kuairec/big_matrix.csv", usecols=usecols)
 
     isin_video_ids = obs_df["video_id"].isin(existing_video_ids)
     video_expo_counts = obs_df[isin_video_ids]["video_id"].value_counts()
