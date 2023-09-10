@@ -80,15 +80,23 @@ def dataloader(params: ExperimentConfig):
     val_indices = np.arange(split_index[0], split_index[1])
     test_indices = np.arange(split_index[1], data_size)
 
+    test_df = interaction_df.iloc[test_indices].reset_index(drop=True)
+    groups = test_df.sort_values(by=["user_index", "unbiased_click"]).groupby(
+        "user_index"
+    )
+    test_user2indices = []
+    for _, group in groups:
+        test_user2indices.append(group.index.tolist())
+
     # prepare data for FM and PMF
     indices = {
         "train": train_indices,
         "val": val_indices,
         "test": test_indices,
     }
-    datasets = defaultdict(list)
+    datasets = {}
     for _data, _indices in indices.items():
-        datasets[_data].append(features[_indices])
+        datasets[_data] = features[_indices]
 
     fm_datasets = Dataset(**datasets)
 
@@ -121,7 +129,8 @@ def dataloader(params: ExperimentConfig):
         "n_users": n_users,
         "n_items": n_items,
     }
-    return datasets, pscores, clicks
+
+    return datasets, pscores, clicks, test_user2indices
 
 
 def _create_interaction_df(

@@ -41,16 +41,15 @@ tables:
 
 mf:
   n_epochs: 10
-  n_factors: 30
-  scale: 0.05
-  lr: 0.001
-  reg: 0.01
+  n_factors: 200
+  scale: 0.1
+  lr: 0.04
+  reg: 0.1
   batch_size: 256
 
 fm:
-  n_epochs: 10
-  n_factors: 30
-  scale: 0.05
-  lr: 0.001
-  reg: 0.01
+  n_epochs: 2
+  n_factors: 100
+  scale: 0.001
+  lr: 0.003
   batch_size: 256

@@ -1,16 +1,14 @@
 from dataclasses import dataclass
 import numpy as np
-from typing import Union, List, TypeVar
+from typing import Union
 from scipy.sparse import csr_matrix
-
-MatrixType = TypeVar("MatrixType", csr_matrix, np.ndarray)
 
 
 @dataclass
 class Dataset:
-    train: Union[List[MatrixType], np.ndarray]
-    val: Union[List[MatrixType], np.ndarray]
-    test: Union[List[MatrixType], np.ndarray]
+    train: Union[csr_matrix, np.ndarray]
+    val: Union[csr_matrix, np.ndarray]
+    test: Union[csr_matrix, np.ndarray]
 
 
 @dataclass
