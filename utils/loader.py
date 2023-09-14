@@ -170,7 +170,6 @@ class DataLoader:
 
         # prepare test_user2indices
         test_user2indices = self._create_test_user2indices(
-            train_indices=train_indices,
             test_indices=test_indices,
         )
 
@@ -238,30 +237,18 @@ class DataLoader:
 
     def _create_test_user2indices(
         self,
-        train_indices: np.ndarray,
         test_indices: np.ndarray,
-        thetahold: int = 3,
+        thetahold: int = 0.3,
     ) -> dict:
         # all
         test_df = self.interaction_df.iloc[test_indices].reset_index(drop=True)
 
-        train_df = self.interaction_df.iloc[train_indices].reset_index(
-            drop=True
-        )
-        clicked_video_id2freqs = train_df[train_df["biased_click"] == 1][
-            "video_index"
-        ].value_counts()
-
+        filter = test_df["exposure"] <= thetahold
         # rare
-        filter = clicked_video_id2freqs <= thetahold
-        rare_video_ids = clicked_video_id2freqs[filter].index
-        rare_test_df = test_df[test_df["video_index"].isin(rare_video_ids)]
+        rare_test_df = test_df[filter]
 
         # popular
-        popular_video_ids = clicked_video_id2freqs[~filter].index
-        popular_test_df = test_df[
-            test_df["video_index"].isin(popular_video_ids)
-        ]
+        popular_test_df = test_df[~filter]
 
         dataframes = {
             "all": test_df,
@@ -279,7 +266,7 @@ class DataLoader:
 
             test_user2indices[frequency] = df_indices_per_user
 
-        del train_df, test_df, rare_test_df, popular_test_df
+        del test_df, rare_test_df, popular_test_df
 
         return test_user2indices
 
