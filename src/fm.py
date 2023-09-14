@@ -4,17 +4,12 @@ from typing import Tuple, Optional
 from tqdm import tqdm
 from sklearn.utils import resample
 from scipy.sparse import csr_matrix, diags
+from src.base import PointwiseBaseRecommender
 
 
 @dataclass
-class FactorizationMachine:
-    n_epochs: int
-    n_factors: int
+class FactorizationMachine(PointwiseBaseRecommender):
     n_features: int
-    scale: float
-    lr: float
-    seed: int
-    batch_size: int
 
     def __post_init__(self) -> None:
         np.random.seed(self.seed)
@@ -129,6 +124,3 @@ class FactorizationMachine:
             + (1 - (y / pscores)) * np.log(1 - y_hat)
         ) / len(y)
         return loss
-
-    def _sigmoid(self, x: np.ndarray) -> np.ndarray:
-        return 1 / (1 + np.exp(-x))

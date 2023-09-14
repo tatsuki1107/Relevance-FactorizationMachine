@@ -244,10 +244,10 @@ class DataLoader:
         test_df = self.interaction_df.iloc[test_indices].reset_index(drop=True)
 
         filter = test_df["exposure"] <= thetahold
-        # rare
+        # rare (low exposure)
         rare_test_df = test_df[filter]
 
-        # popular
+        # popular (high exposure)
         popular_test_df = test_df[~filter]
 
         dataframes = {

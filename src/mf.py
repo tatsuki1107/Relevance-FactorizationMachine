@@ -4,19 +4,14 @@ from dataclasses import dataclass
 from utils.optimizer import Adam
 from tqdm import tqdm
 from sklearn.utils import resample
+from src.base import PointwiseBaseRecommender
 
 
 @dataclass
-class ProbabilisticMatrixFactorization:
-    n_epochs: int
-    n_factors: int
+class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
     n_users: int
     n_items: int
-    scale: float
-    lr: float
     reg: float
-    seed: int
-    batch_size: int
 
     def __post_init__(self) -> None:
         np.random.seed(self.seed)
@@ -136,6 +131,3 @@ class ProbabilisticMatrixFactorization:
             + (1 - clicks / pscores) * np.log(1 - pred_scores)
         ) / len(clicks)
         return loss
-
-    def _sigmoid(self, x: np.ndarray) -> np.ndarray:
-        return 1 / (1 + np.exp(-x))
