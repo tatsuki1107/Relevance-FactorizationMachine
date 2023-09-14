@@ -1,17 +1,19 @@
 from dataclasses import dataclass
 import numpy as np
-from typing import Union
 from scipy.sparse import csr_matrix
 
 
 @dataclass
-class Dataset:
-    train: Union[csr_matrix, np.ndarray]
-    val: Union[csr_matrix, np.ndarray]
-    test: Union[csr_matrix, np.ndarray]
+class FMDataset:
+    train: csr_matrix
+    val: csr_matrix
+    test: csr_matrix
 
 
 @dataclass
-class Pscores:
+class PMFDataset:
     train: np.ndarray
     val: np.ndarray
+    test: np.ndarray
+    n_users: int
+    n_items: int

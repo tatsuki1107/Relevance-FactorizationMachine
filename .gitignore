@@ -6,6 +6,11 @@
 
 /utils/__pycache__
 
-/conf/setting/__pycache__
+/conf/__pycache__
 
 /logs/
+
+/test/__pycache__
+/test/.pytest_cache
+
+/.pytest_cache
