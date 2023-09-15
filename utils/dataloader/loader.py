@@ -12,8 +12,7 @@ class DataLoader:
         """半人工データを生成する"""
 
         # small_matrix.csvのインタラクションデータを研究に用いる
-        kuairec_loader = KuaiRecCSVLoader()
-        small_matrix_df = kuairec_loader.create_interaction_df(
+        small_matrix_df = KuaiRecCSVLoader.create_interaction_df(
             params=params.tables.interaction
         )
         # 自然に観測されたbig_matrix上でのユーザーとアイテムの相対的な露出を用いて、

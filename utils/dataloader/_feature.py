@@ -97,12 +97,11 @@ class FeatureGenerator:
         self,
         interaction_df,
     ) -> Dict[str, pd.DataFrame]:
-        kuairec_loader = KuaiRecCSVLoader()
-        user_features_df = kuairec_loader.create_user_features_df(
+        user_features_df = KuaiRecCSVLoader.create_user_features_df(
             existing_user_ids=interaction_df["user_id"],
             params=self.params.user,
         )
-        item_features_df = kuairec_loader.create_item_features_df(
+        item_features_df = KuaiRecCSVLoader.create_item_features_df(
             existing_video_ids=interaction_df["video_id"],
             params=self.params.video,
         )

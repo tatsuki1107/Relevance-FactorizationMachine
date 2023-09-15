@@ -8,24 +8,31 @@ from conf.config import (
     VideoTableConfig,
     VideoCategoryTableConfig,
     VideoDailyTableConfig,
+    LogDataPropensityConfig,
 )
 
 
 @dataclass
 class KuaiRecCSVLoader:
-    def create_interaction_df(
-        self, params: InteractionTableConfig
-    ) -> pd.DataFrame:
-        columns = self._get_features_columns(params=params.features)
+    @staticmethod
+    def create_interaction_df(params: InteractionTableConfig) -> pd.DataFrame:
+        columns = get_features_columns(params=params.features)
         usecols = columns + ["user_id", "video_id", "watch_ratio"]
         interaction_df = pd.read_csv(params.data_path, usecols=usecols)
 
         return interaction_df
 
+    @staticmethod
+    def create_big_matrix_df(params: LogDataPropensityConfig) -> pd.DataFrame:
+        usecols = ["user_id", "video_id"]
+        observation_df = pd.read_csv(params.data_path, usecols=usecols)
+        return observation_df
+
+    @staticmethod
     def create_user_features_df(
-        self, existing_user_ids: pd.Series, params: UserTableConfig
+        existing_user_ids: pd.Series, params: UserTableConfig
     ) -> pd.DataFrame:
-        columns = self._get_features_columns(params=params.features)
+        columns = get_features_columns(params=params.features)
         usecols = columns + ["user_id"]
         user_features_df = pd.read_csv(params.data_path, usecols=usecols)
         isin_user_ids = user_features_df["user_id"].isin(existing_user_ids)
@@ -35,14 +42,17 @@ class KuaiRecCSVLoader:
 
         return user_features_df
 
+    @staticmethod
     def create_item_features_df(
-        self, existing_video_ids: pd.Series, params: VideoTableConfig
+        existing_video_ids: pd.Series, params: VideoTableConfig
     ) -> pd.DataFrame:
-        item_daily_features_df = self._create_item_daily_features_df(
-            existing_video_ids=existing_video_ids, params=params.daily
+        item_daily_features_df = (
+            KuaiRecCSVLoader._create_item_daily_features_df(
+                existing_video_ids=existing_video_ids, params=params.daily
+            )
         )
 
-        item_categories_df = self._create_item_categories_df(
+        item_categories_df = KuaiRecCSVLoader._create_item_categories_df(
             existing_video_ids=existing_video_ids, params=params.category
         )
         item_features_df = pd.merge(
@@ -52,10 +62,11 @@ class KuaiRecCSVLoader:
 
         return item_features_df
 
+    @staticmethod
     def _create_item_daily_features_df(
-        self, existing_video_ids: pd.Series, params: VideoDailyTableConfig
+        existing_video_ids: pd.Series, params: VideoDailyTableConfig
     ) -> pd.DataFrame:
-        columns = self._get_features_columns(params=params.features)
+        columns = get_features_columns(params=params.features)
         usecols = columns + ["video_id"]
         item_daily_features_df = pd.read_csv(params.data_path, usecols=usecols)
         item_daily_features_df = item_daily_features_df.groupby(
@@ -71,10 +82,11 @@ class KuaiRecCSVLoader:
 
         return item_daily_features_df
 
+    @staticmethod
     def _create_item_categories_df(
-        self, existing_video_ids: pd.Series, params: VideoCategoryTableConfig
+        existing_video_ids: pd.Series, params: VideoCategoryTableConfig
     ) -> pd.DataFrame:
-        columns = self._get_features_columns(params=params.features)
+        columns = get_features_columns(params=params.features)
         usecols = columns + ["video_id"]
         item_categories_df = pd.read_csv(params.data_path, usecols=usecols)
         isin_video_ids = item_categories_df["video_id"].isin(
@@ -89,6 +101,7 @@ class KuaiRecCSVLoader:
         )
         return item_categories_df
 
-    def _get_features_columns(self, params: DictConfig) -> list:
-        columns = OmegaConf.to_container(params, resolve=True)
-        return list(columns.keys())
+
+def get_features_columns(params: DictConfig) -> list:
+    columns = OmegaConf.to_container(params, resolve=True)
+    return list(columns.keys())

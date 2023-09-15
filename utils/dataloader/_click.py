@@ -3,6 +3,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from conf.config import LogDataPropensityConfig
+from utils.dataloader._kuairec import KuaiRecCSVLoader
 
 
 @dataclass
@@ -66,8 +67,7 @@ class ClickDataGenerator:
     def _generate_exposure(
         self, interaction_df: pd.DataFrame, params: LogDataPropensityConfig
     ) -> pd.DataFrame:
-        usecols = ["user_id", "video_id"]
-        observation_df = pd.read_csv(params.data_path, usecols=usecols)
+        observation_df = KuaiRecCSVLoader.create_big_matrix_df(params=params)
 
         existing_video_ids = interaction_df["video_id"]
         isin_video_ids = observation_df["video_id"].isin(existing_video_ids)
