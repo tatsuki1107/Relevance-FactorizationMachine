@@ -1,5 +1,5 @@
 from hydra import initialize, compose
-from utils.loader import DataLoader
+from utils.dataloader.loader import DataLoader
 
 
 class TestDataLoader:
@@ -8,7 +8,7 @@ class TestDataLoader:
         self.cfg = compose(config_name="config")
 
     def test_dataloader(self):
-        loader = DataLoader(self.cfg)
+        loader = DataLoader()
         datasets = loader.load(self.cfg)
 
         assert isinstance(datasets, dict)

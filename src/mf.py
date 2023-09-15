@@ -62,17 +62,14 @@ class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
                 user_id, item_id, click = rows
                 err = (click / pscore) - self._predict_pair(user_id, item_id)
 
-                grad_P = -err * self.Q(item_id) + self.reg * self.P(user_id)
-                self.P.update(grad=grad_P, index=user_id)
-
-                grad_Q = -err * self.P(user_id) + self.reg * self.Q(item_id)
-                self.Q.update(grad=grad_Q, index=item_id)
-
-                grad_b_u = -err + self.reg * self.b_u(user_id)
-                self.b_u.update(grad=grad_b_u, index=user_id)
-
-                grad_b_i = -err + self.reg * self.b_i(item_id)
-                self.b_i.update(grad=grad_b_i, index=item_id)
+                # update user embeddings
+                self._update_P(user_id=user_id, item_id=item_id, err=err)
+                # update item embeddings
+                self._update_Q(user_id=user_id, item_id=item_id, err=err)
+                # update user bias
+                self._update_b_u(user_id=user_id, err=err)
+                # update item bias
+                self._update_b_i(item_id=item_id, err=err)
 
             trainloss = self._cross_entropy_loss(
                 user_ids=batch_train[:, 0],
@@ -131,3 +128,19 @@ class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
             + (1 - clicks / pscores) * np.log(1 - pred_scores)
         ) / len(clicks)
         return loss
+
+    def _update_P(self, user_id: int, item_id: int, err: float) -> None:
+        grad_P = -err * self.Q(item_id) + self.reg * self.P(user_id)
+        self.P.update(grad=grad_P, index=user_id)
+
+    def _update_Q(self, user_id: int, item_id: int, err: float) -> None:
+        grad_Q = -err * self.P(user_id) + self.reg * self.Q(item_id)
+        self.Q.update(grad=grad_Q, index=item_id)
+
+    def _update_b_u(self, user_id: int, err: float) -> None:
+        grad_b_u = -err + self.reg * self.b_u(user_id)
+        self.b_u.update(grad=grad_b_u, index=user_id)
+
+    def _update_b_i(self, item_id: int, err: float) -> None:
+        grad_b_i = -err + self.reg * self.b_i(item_id)
+        self.b_i.update(grad=grad_b_i, index=item_id)

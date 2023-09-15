@@ -46,40 +46,11 @@ class FactorizationMachine(PointwiseBaseRecommender):
             # shape: (batch_size,)
 
             # update w0
-            w0_grad = -np.sum(error)
-            self.w0 -= self.lr * w0_grad
-
+            self._update_w0(error)
             # update wi
-            w_grad = -(diags(error) @ batch_X).sum(axis=0).A.flatten()
-            self.w -= self.lr * w_grad
-
-            # 事前に計算できる部分を計算
-            V_dot_X_T = self.V.T @ batch_X.T  # shape: (n_factors, batch_size)
-            X_square = batch_X.power(2)  # shape: (batch_size, n_features)
-
-            # 各factorごとに計算
-            for f in range(self.V.shape[1]):
-                # V[:,factor]@X.T * X[:,feature] の計算
-                term1_f = batch_X.multiply(
-                    V_dot_X_T[f, :][:, np.newaxis]
-                )  # shape: (batch_size, n_features)
-
-                # V[feature, factor]*X[:,feature]**2 の計算
-                term2_f = X_square.multiply(
-                    self.V[:, f]
-                )  # shape: (batch_size, n_features)
-
-                # error[:, np.newaxis] * (term1_f - term2_f) の計算
-                grad_V_f = -(
-                    (term1_f - term2_f).multiply(error[:, None]).sum(axis=0)
-                )  # shape: (1, n_features)
-                # Vの該当する列（factor）を更新
-                non_zero_feature_indices = grad_V_f.nonzero()[1]
-
-                # update V
-                self.V[non_zero_feature_indices, f] -= (
-                    self.lr * grad_V_f[0, non_zero_feature_indices].A1
-                )
+            self._update_w(error, batch_X)
+            # update V
+            self._update_V(error, batch_X)
 
             trainloss = self._cross_entropy_loss(
                 X=batch_X, y=batch_y, pscores=batch_pscores
@@ -124,3 +95,43 @@ class FactorizationMachine(PointwiseBaseRecommender):
             + (1 - (y / pscores)) * np.log(1 - y_hat)
         ) / len(y)
         return loss
+
+    def _update_w0(self, error: np.ndarray) -> None:
+        """update w0"""
+        w0_grad = -np.sum(error)
+        self.w0 -= self.lr * w0_grad
+
+    def _update_w(self, error: np.ndarray, X: csr_matrix) -> None:
+        """update wi"""
+        w_grad = -(diags(error) @ X).sum(axis=0).A.flatten()
+        self.w -= self.lr * w_grad
+
+    def _update_V(self, error: np.ndarray, X: csr_matrix) -> None:
+        """update V"""
+        # 事前に計算できる部分を計算
+        V_dot_X_T = self.V.T @ X.T  # shape: (n_factors, batch_size)
+        X_square = X.power(2)  # shape: (batch_size, n_features)
+
+        # 各factorごとに計算
+        for f in range(self.V.shape[1]):
+            # V[:,factor]@X.T * X[:,feature] の計算
+            term1_f = X.multiply(
+                V_dot_X_T[f, :][:, np.newaxis]
+            )  # shape: (batch_size, n_features)
+
+            # V[feature, factor]*X[:,feature]**2 の計算
+            term2_f = X_square.multiply(
+                self.V[:, f]
+            )  # shape: (batch_size, n_features)
+
+            # error[:, np.newaxis] * (term1_f - term2_f) の計算
+            grad_V_f = -(
+                (term1_f - term2_f).multiply(error[:, None]).sum(axis=0)
+            )  # shape: (1, n_features)
+            # Vの該当する列（factor）を更新
+            non_zero_feature_indices = grad_V_f.nonzero()[1]
+
+            # update V
+            self.V[non_zero_feature_indices, f] -= (
+                self.lr * grad_V_f[0, non_zero_feature_indices].A1
+            )
