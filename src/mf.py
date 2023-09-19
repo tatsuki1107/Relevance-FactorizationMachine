@@ -60,6 +60,7 @@ class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
             )
             for rows, pscore in zip(batch_train, batch_pscores):
                 user_id, item_id, click = rows
+                user_id, item_id = int(user_id), int(item_id)
                 err = (click / pscore) - self._predict_pair(user_id, item_id)
 
                 # update user embeddings
@@ -72,16 +73,16 @@ class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
                 self._update_b_i(item_id=item_id, err=err)
 
             trainloss = self._cross_entropy_loss(
-                user_ids=batch_train[:, 0],
-                item_ids=batch_train[:, 1],
+                user_ids=batch_train[:, 0].astype(int),
+                item_ids=batch_train[:, 1].astype(int),
                 clicks=batch_train[:, 2],
                 pscores=batch_pscores,
             )
             train_loss.append(trainloss)
 
             valloss = self._cross_entropy_loss(
-                user_ids=val[:, 0],
-                item_ids=val[:, 1],
+                user_ids=val[:, 0].astype(int),
+                item_ids=val[:, 1].astype(int),
                 clicks=val[:, 2],
                 pscores=val_pscores,
             )

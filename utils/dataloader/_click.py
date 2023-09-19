@@ -82,14 +82,18 @@ class ClickDataGenerator:
         ].value_counts()
         del observation_df
 
-        video_expo_probs = (
-            video_expo_counts / video_expo_counts.max()
+        interaction_video_counts = video_expo_counts[
+            interaction_df["video_id"]
+        ].values
+
+        interaction_user_counts = user_expo_counts[
+            interaction_df["user_id"]
+        ].values
+
+        interaction_counts = interaction_user_counts + interaction_video_counts
+        exposure_probabilitys = (
+            interaction_counts / interaction_counts.sum()
         ) ** params.exposure_bias
-        user_expo_probs = (
-            user_expo_counts / user_expo_counts.max()
-        ) ** params.exposure_bias
-        exposure_probabilitys = video_expo_probs[existing_video_ids].values
-        exposure_probabilitys *= user_expo_probs[existing_user_ids].values
 
         return exposure_probabilitys
 

@@ -1,7 +1,9 @@
 from abc import ABC
+from collections import defaultdict
 from hydra import initialize, compose
 from conf.config import ExperimentConfig
-from utils.loader import DataLoader
+from utils.evaluate import Evaluator
+from utils.dataloader.loader import DataLoader
 from src.fm import FactorizationMachine as FM
 
 
@@ -32,15 +34,27 @@ class TestFM(ModelTestBase):
         self.tests = tuple([dataset.test, test_y])
 
         self.model = FM(
-            n_epochs=self.cfg.fm.n_epochs,
-            n_factors=self.cfg.fm.n_factors,
+            n_epochs=self.cfg.fm.n_epochs[0],
+            n_factors=self.cfg.fm.n_factors[0],
             n_features=dataset.train.shape[1],
-            scale=self.cfg.fm.scale,
-            lr=self.cfg.fm.lr,
-            batch_size=self.cfg.fm.batch_size,
+            scale=self.cfg.fm.scale[0],
+            lr=self.cfg.fm.lr[0],
+            batch_size=self.cfg.fm.batch_size[0],
             seed=self.cfg.seed,
+        )
+
+        self.evaluator = Evaluator(
+            X=dataset.test,
+            y_true=test_y,
+            indices_per_user=self.datasets["test_user2indices"]["all"],
+            used_metrics={"DCG", "Precision", "Recall"},
         )
 
     def test_fit(self):
         losses = self.model.fit(self.trains, self.vals, self.tests)
         assert isinstance(losses, tuple)
+
+        # evaluate
+        results = self.evaluator.evaluate(self.model)
+        print(results)
+        assert isinstance(results, defaultdict)

@@ -9,6 +9,8 @@ from collections import defaultdict
 from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
 from utils.dataloader._kuairec import KuaiRecCSVLoader
 
+error_base = "'{}' datatype is not supported. feature_name: '{}'"
+
 
 @dataclass
 class FeatureGenerator:
@@ -68,12 +70,14 @@ class FeatureGenerator:
     ) -> pd.DataFrame:
         datatypes = defaultdict(list)
         for feature_name, datatype in columns.items():
+            if datatype not in {"int", "float", "label", "multilabel"}:
+                error_message = error_base.format(datatype, feature_name)
+                raise ValueError(error_message)
+
             datatypes[datatype].append(feature_name)
 
         if datatypes["label"]:
-            df = pd.get_dummies(
-                df, columns=datatypes["label"], drop_first=True, dtype=int
-            )
+            df = pd.get_dummies(df, columns=datatypes["label"], dtype=int)
 
         if datatypes["int"] or datatypes["float"]:
             columns = datatypes["int"] + datatypes["float"]
@@ -139,14 +143,10 @@ class FeatureGenerator:
         )
 
         sparse_user_indices = csr_matrix(
-            pd.get_dummies(
-                interaction_df["user_index"], drop_first=True, dtype=int
-            ).values
+            pd.get_dummies(interaction_df["user_index"], dtype=int).values
         )
         sparse_video_indices = csr_matrix(
-            pd.get_dummies(
-                interaction_df["video_index"], drop_first=True, dtype=int
-            ).values
+            pd.get_dummies(interaction_df["video_index"], dtype=int).values
         )
         basefeatures = hstack([sparse_user_indices, sparse_video_indices])
         del sparse_user_indices, sparse_video_indices

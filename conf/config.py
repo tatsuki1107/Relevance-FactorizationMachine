@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, List
 
 
 @dataclass
@@ -81,21 +81,21 @@ class LogDataPropensityConfig:
 
 @dataclass
 class FactorizationMachineConfig:
-    n_epochs: int
-    n_factors: int
-    scale: float
-    lr: float
-    batch_size: int
+    n_epochs: List[int]
+    n_factors: List[int]
+    scale: List[float]
+    lr: List[float]
+    batch_size: List[int]
 
 
 @dataclass
 class ProbabilisticMatrixFactorizationConfig:
-    n_epochs: int
-    n_factors: int
-    scale: float
-    lr: float
-    reg: float
-    batch_size: int
+    n_epochs: List[int]
+    n_factors: List[int]
+    scale: List[float]
+    lr: List[float]
+    reg: List[float]
+    batch_size: List[int]
 
 
 @dataclass

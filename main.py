@@ -5,7 +5,7 @@ from hydra.core.config_store import ConfigStore
 from conf.config import ExperimentConfig
 import numpy as np
 import pandas as pd
-from utils.loader import DataLoader
+from utils.dataloader.loader import DataLoader
 from src.fm import FactorizationMachine as FM
 from src.mf import ProbabilisticMatrixFactorization as PMF
 from utils.evaluate import Evaluator

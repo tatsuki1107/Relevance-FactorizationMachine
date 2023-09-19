@@ -1,14 +1,10 @@
 import numpy as np
 from typing import Tuple, Union
+from collections import defaultdict
 from dataclasses import dataclass
 from src.mf import ProbabilisticMatrixFactorization as PMF
 from src.fm import FactorizationMachine as FM
-from utils.metrics import (
-    calc_precision_at_k,
-    calc_recall_at_k,
-    calc_dcg_at_k,
-    calc_roc_auc,
-)
+from utils.metrics import metrics
 
 
 @dataclass
@@ -16,32 +12,45 @@ class Evaluator:
     X: np.ndarray
     y_true: np.ndarray
     indices_per_user: np.ndarray
+    used_metrics: set
     K: Tuple[int] = (1, 3, 5)
 
-    def evaluate(self, model: Union[PMF, FM]):
-        recall_at_k, precision_at_k, dcg_at_k = [], [], []
+    def __post_init__(self) -> None:
+        for metric_name in set(metrics.keys()):
+            if metric_name not in self.used_metrics:
+                metrics.pop(metric_name)
+
+    def evaluate(self, model: Union[PMF, FM]) -> defaultdict:
+        results = defaultdict(list)
+        metric_per_user = defaultdict(lambda: defaultdict(list))
+        for indices in self.indices_per_user:
+            y_scores = self._predict(model, indices)
+            y_true = self.y_true[indices]
+
+            for k in self.K:
+                for metric_name, metric_func in metrics.items():
+                    if metric_name == "ROC_AUC":
+                        continue
+                    metric_per_user[metric_name][k].append(
+                        metric_func(y_true, y_scores, k)
+                    )
+
         for k in self.K:
-            recall_per_user, precision_per_user, dcg_per_user = [], [], []
-            for indices in self.indices_per_user:
-                y_scores = self._predict(model, indices)
-                y_true = self.y_true[indices]
-                recall_per_user.append(calc_recall_at_k(y_true, y_scores, k))
-                precision_per_user.append(
-                    calc_precision_at_k(y_true, y_scores, k)
+            for metric_name in metrics.keys():
+                results[metric_name].append(
+                    np.mean(metric_per_user[metric_name][k])
                 )
-                dcg_per_user.append(calc_dcg_at_k(y_true, y_scores, k))
 
-            recall_at_k.append(np.mean(recall_per_user))
-            precision_at_k.append(np.mean(precision_per_user))
-            dcg_at_k.append(np.mean(dcg_per_user))
+        if "ROC_AUC" in metrics:
+            metric_func = metrics["ROC_AUC"]
+            thetahold = np.arange(0, 1.0001, 0.0001)[::-1]
+            y_scores = self._predict(model)
 
-        thetahold = np.arange(0, 1.0001, 0.0001)[::-1]
-        y_scores = self._predict(model)
+            tpr, fpr, roc = metric_func(self.y_true, y_scores, thetahold)
+            auc = (fpr, tpr, roc)
+            results["ROC_AUC"].append(auc)
 
-        tpr, fpr, roc = calc_roc_auc(self.y_true, y_scores, thetahold)
-        auc = (fpr, tpr, roc)
-
-        return recall_at_k, precision_at_k, dcg_at_k, auc
+        return results
 
     def _predict(
         self, model: Union[PMF, FM], indices: list = None

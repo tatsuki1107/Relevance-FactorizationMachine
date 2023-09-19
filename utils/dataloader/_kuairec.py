@@ -18,14 +18,19 @@ class KuaiRecCSVLoader:
     def create_interaction_df(params: InteractionTableConfig) -> pd.DataFrame:
         columns = get_features_columns(params=params.features)
         usecols = columns + ["user_id", "video_id", "watch_ratio"]
-        interaction_df = pd.read_csv(params.data_path, usecols=usecols)
+        interaction_df = KuaiRecCSVLoader._load_csv(
+            data_path=params.data_path, usecols=usecols
+        )
 
         return interaction_df
 
     @staticmethod
     def create_big_matrix_df(params: LogDataPropensityConfig) -> pd.DataFrame:
         usecols = ["user_id", "video_id"]
-        observation_df = pd.read_csv(params.data_path, usecols=usecols)
+        observation_df = KuaiRecCSVLoader._load_csv(
+            data_path=params.data_path, usecols=usecols
+        )
+
         return observation_df
 
     @staticmethod
@@ -34,7 +39,9 @@ class KuaiRecCSVLoader:
     ) -> pd.DataFrame:
         columns = get_features_columns(params=params.features)
         usecols = columns + ["user_id"]
-        user_features_df = pd.read_csv(params.data_path, usecols=usecols)
+        user_features_df = KuaiRecCSVLoader._load_csv(
+            data_path=params.data_path, usecols=usecols
+        )
         isin_user_ids = user_features_df["user_id"].isin(existing_user_ids)
         user_features_df = user_features_df[isin_user_ids].reset_index(
             drop=True
@@ -68,7 +75,9 @@ class KuaiRecCSVLoader:
     ) -> pd.DataFrame:
         columns = get_features_columns(params=params.features)
         usecols = columns + ["video_id"]
-        item_daily_features_df = pd.read_csv(params.data_path, usecols=usecols)
+        item_daily_features_df = KuaiRecCSVLoader._load_csv(
+            data_path=params.data_path, usecols=usecols
+        )
         item_daily_features_df = item_daily_features_df.groupby(
             "video_id"
         ).first()
@@ -88,7 +97,9 @@ class KuaiRecCSVLoader:
     ) -> pd.DataFrame:
         columns = get_features_columns(params=params.features)
         usecols = columns + ["video_id"]
-        item_categories_df = pd.read_csv(params.data_path, usecols=usecols)
+        item_categories_df = KuaiRecCSVLoader._load_csv(
+            data_path=params.data_path, usecols=usecols
+        )
         isin_video_ids = item_categories_df["video_id"].isin(
             existing_video_ids
         )
@@ -100,6 +111,15 @@ class KuaiRecCSVLoader:
             lambda x: literal_eval(x)
         )
         return item_categories_df
+
+    @staticmethod
+    def _load_csv(data_path: str, usecols: list) -> pd.DataFrame:
+        try:
+            df = pd.read_csv(data_path, usecols=usecols)
+        except ValueError as e:
+            raise ValueError(f"{e} from {data_path}")
+
+        return df
 
 
 def get_features_columns(params: DictConfig) -> list:

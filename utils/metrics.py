@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Tuple
+from typing import Tuple, Callable, Dict
 
 
 def calc_precision_at_k(
@@ -61,3 +61,11 @@ def calc_roc_auc(
         roc += (tpr[i + 1] + tpr[i]) * (fpr[i + 1] - fpr[i]) / 2
 
     return tpr, fpr, roc
+
+
+metrics: Dict[str, Callable] = {
+    "Recall": calc_recall_at_k,
+    "Precision": calc_precision_at_k,
+    "DCG": calc_dcg_at_k,
+    "ROC_AUC": calc_roc_auc,
+}

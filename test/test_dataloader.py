@@ -8,7 +8,7 @@ class TestDataLoader:
         self.cfg = compose(config_name="config")
 
     def test_dataloader(self):
-        loader = DataLoader()
-        datasets = loader.load(self.cfg)
+        loader = DataLoader(self.cfg)
+        datasets = loader.load(model_name="FM", estimator="IPS")
 
-        assert isinstance(datasets, dict)
+        assert isinstance(datasets, tuple)

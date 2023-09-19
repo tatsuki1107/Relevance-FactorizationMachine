@@ -109,10 +109,13 @@ class DatasetPreparer:
                 clicks[_data]["biased"] = interaction_df.iloc[_indices][
                     "biased_click"
                 ].values
-
-            clicks[_data]["unbiased"] = interaction_df.iloc[_indices][
-                "unbiased_click"
-            ].values
+                clicks[_data]["unbiased"] = interaction_df.iloc[_indices][
+                    "relevance"
+                ].values
+            else:
+                clicks[_data]["unbiased"] = interaction_df.iloc[_indices][
+                    "unbiased_click"
+                ].values
 
         return pscores, clicks
 
