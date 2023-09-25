@@ -77,6 +77,7 @@ class LogDataPropensityConfig:
     density: float
     exposure_bias: float
     behavior_policy: str
+    n_positions: int
 
 
 @dataclass
@@ -86,6 +87,7 @@ class FactorizationMachineConfig:
     scale: List[float]
     lr: List[float]
     batch_size: List[int]
+    clipping: List[float]
 
 
 @dataclass
@@ -96,6 +98,13 @@ class ProbabilisticMatrixFactorizationConfig:
     lr: List[float]
     reg: List[float]
     batch_size: List[int]
+    clipping: List[float]
+
+
+@dataclass
+class ModelConfig:
+    FM: FactorizationMachineConfig
+    PMF: ProbabilisticMatrixFactorizationConfig
 
 
 @dataclass
@@ -103,5 +112,4 @@ class ExperimentConfig:
     seed: int
     logdata_propensity: LogDataPropensityConfig
     tables: TableConfig
-    fm: FactorizationMachineConfig
-    mf: ProbabilisticMatrixFactorizationConfig
+    model: ModelConfig

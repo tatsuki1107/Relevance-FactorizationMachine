@@ -1,16 +1,28 @@
 import numpy as np
 from typing import Tuple, Callable, Dict
 
+eps = 10e-3  # pscore clipping
+
 
 def calc_precision_at_k(
-    y_true: np.ndarray, y_scores: np.ndarray, k: int
+    y_true: np.ndarray,
+    y_scores: np.ndarray,
+    k: int,
+    pscores: np.ndarray,
 ) -> float:
     y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]][:k]
-    return np.mean(y_true_sorted_by_scores)
+
+    if np.all(pscores == 1):
+        return np.mean(y_true_sorted_by_scores)
+    else:
+        raise NotImplementedError("SNIPS用に実装し直して")
 
 
 def calc_recall_at_k(
-    y_true: np.ndarray, y_scores: np.ndarray, k: int
+    y_true: np.ndarray,
+    y_scores: np.ndarray,
+    k: int,
+    pscores: np.ndarray,
 ) -> float:
     y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]]
 
@@ -20,22 +32,39 @@ def calc_recall_at_k(
             y_true_sorted_by_scores
         )
 
-    return recall
+    if np.all(pscores == 1):
+        return recall
+
+    raise NotImplementedError("SNIPS用に実装し直して")
 
 
-def calc_dcg_at_k(y_true: np.ndarray, y_scores: np.ndarray, k: int) -> float:
+def calc_dcg_at_k(
+    y_true: np.ndarray,
+    y_scores: np.ndarray,
+    k: int,
+    pscores: np.ndarray,
+) -> float:
     y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]]
 
+    pscores_sorted_by_scores = pscores[y_scores.argsort()[::-1]]
+
     dcg_score = 0.0
-    if not np.sum(y_true_sorted_by_scores) == 0:
-        dcg_score += y_true_sorted_by_scores[0]
+    if np.sum(y_true_sorted_by_scores) == 0:
+        return np.nan
+    else:
+        dcg_score += y_true_sorted_by_scores[0] / pscores_sorted_by_scores[0]
 
         molecules = y_true_sorted_by_scores[1:k]
         indices = np.arange(1, molecules.shape[0] + 1)
-        denominator = np.log2(indices + 1)
+        denominator = pscores_sorted_by_scores[1:k] * np.log2(indices + 1)
         dcg_score += np.sum(molecules / denominator)
 
-    return dcg_score
+    if np.all(pscores == 1):
+        return dcg_score
+
+    return dcg_score / np.sum(
+        1.0 / pscores_sorted_by_scores[y_true_sorted_by_scores == 1]
+    )
 
 
 def calc_roc_auc(

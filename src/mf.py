@@ -12,6 +12,7 @@ class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
     n_users: int
     n_items: int
     reg: float
+    eps: float = 1e-8
 
     def __post_init__(self) -> None:
         np.random.seed(self.seed)
@@ -38,29 +39,29 @@ class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
 
     def fit(
         self,
-        trains: Tuple[np.ndarray, np.ndarray],
-        vals: Tuple[np.ndarray, np.ndarray],
-        test: np.ndarray,
+        train: Tuple[np.ndarray, np.ndarray, np.ndarray],
+        val: Tuple[np.ndarray, np.ndarray, np.ndarray],
     ) -> list:
-        train, train_pscores = trains
-        val, val_pscores = vals
+        train
+        train_X, train_y, train_pscores = train
+        val_X, val_y, val_pscores = val
 
-        test_pscores = np.ones(len(test))
+        self.b = np.mean(train_y)
 
-        self.b = np.mean(train[:, 2])
-
-        train_loss, val_loss, test_loss = [], [], []
+        train_loss, val_loss = [], []
         for _ in tqdm(range(self.n_epochs)):
-            batch_train, batch_pscores = resample(
-                train,
+            batch_X, batch_y, batch_pscores = resample(
+                train_X,
+                train_y,
                 train_pscores,
                 replace=True,
                 n_samples=self.batch_size,
                 random_state=self.seed,
             )
-            for rows, pscore in zip(batch_train, batch_pscores):
-                user_id, item_id, click = rows
-                user_id, item_id = int(user_id), int(item_id)
+            for features, click, pscore in zip(
+                batch_X, batch_y, batch_pscores
+            ):
+                user_id, item_id = features[0], features[1]
                 err = (click / pscore) - self._predict_pair(user_id, item_id)
 
                 # update user embeddings
@@ -73,30 +74,22 @@ class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
                 self._update_b_i(item_id=item_id, err=err)
 
             trainloss = self._cross_entropy_loss(
-                user_ids=batch_train[:, 0].astype(int),
-                item_ids=batch_train[:, 1].astype(int),
-                clicks=batch_train[:, 2],
+                user_ids=batch_X[:, 0],
+                item_ids=batch_X[:, 1],
+                clicks=batch_y,
                 pscores=batch_pscores,
             )
             train_loss.append(trainloss)
 
             valloss = self._cross_entropy_loss(
-                user_ids=val[:, 0].astype(int),
-                item_ids=val[:, 1].astype(int),
-                clicks=val[:, 2],
+                user_ids=val_X[:, 0],
+                item_ids=val_X[:, 1],
+                clicks=val_y,
                 pscores=val_pscores,
             )
             val_loss.append(valloss)
 
-            testloss = self._cross_entropy_loss(
-                user_ids=test[:, 0],
-                item_ids=test[:, 1],
-                clicks=test[:, 2],
-                pscores=test_pscores,
-            )
-            test_loss.append(testloss)
-
-        return train_loss, val_loss, test_loss
+        return train_loss, val_loss
 
     def predict(
         self, user_ids: np.ndarray, item_ids: np.ndarray
@@ -125,8 +118,8 @@ class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
     ) -> float:
         pred_scores = self.predict(user_ids, item_ids)
         loss = -np.sum(
-            (clicks / pscores) * np.log(pred_scores)
-            + (1 - clicks / pscores) * np.log(1 - pred_scores)
+            (clicks / pscores) * np.log(pred_scores + self.eps)
+            + (1 - (clicks / pscores)) * np.log(1 - pred_scores + self.eps)
         ) / len(clicks)
         return loss
 

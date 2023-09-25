@@ -8,15 +8,16 @@ from conf.config import TableConfig
 from collections import defaultdict
 from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
 from utils.dataloader._kuairec import KuaiRecCSVLoader
+from utils.dataloader.base import BaseLoader
 
 error_base = "'{}' datatype is not supported. feature_name: '{}'"
 
 
 @dataclass
-class FeatureGenerator:
+class FeatureGenerator(BaseLoader):
     params: TableConfig
 
-    def generate(
+    def load(
         self,
         interaction_df: pd.DataFrame,
     ) -> Tuple[csr_matrix, pd.DataFrame]:
@@ -66,7 +67,7 @@ class FeatureGenerator:
         return features, interaction_df
 
     def _feature_engineering(
-        self, df: pd.DataFrame, columns: dict
+        self, df: pd.DataFrame, columns: Dict[str, str]
     ) -> pd.DataFrame:
         datatypes = defaultdict(list)
         for feature_name, datatype in columns.items():
@@ -99,7 +100,7 @@ class FeatureGenerator:
 
     def _create_basedict(
         self,
-        interaction_df,
+        interaction_df: pd.DataFrame,
     ) -> Dict[str, pd.DataFrame]:
         user_features_df = KuaiRecCSVLoader.create_user_features_df(
             existing_user_ids=interaction_df["user_id"],

@@ -11,8 +11,7 @@ class ModelTestBase(ABC):
     def setup_method(self):
         initialize(config_path="../conf", version_base="1.3")
         self.cfg: ExperimentConfig = compose(config_name="config")
-        loader = DataLoader()
-        self.datasets = loader.load(self.cfg)
+        self.loader = DataLoader(self.cfg)
 
 
 class TestFM(ModelTestBase):
@@ -20,41 +19,33 @@ class TestFM(ModelTestBase):
         super().setup_method()
 
         # prepare data for IPS estimator
-        dataset = self.datasets["FM"]
-
-        train_y = self.datasets["clicks"]["train"]["biased"]
-        val_y = self.datasets["clicks"]["val"]["biased"]
-        test_y = self.datasets["clicks"]["test"]["unbiased"]
-
-        train_pscores = self.datasets["pscores"]["train"]
-        val_pscores = self.datasets["pscores"]["val"]
-
-        self.trains = tuple([dataset.train, train_y, train_pscores])
-        self.vals = tuple([dataset.val, val_y, val_pscores])
-        self.tests = tuple([dataset.test, test_y])
+        self.train, self.val, self.test = self.loader.load(
+            model_name="FM", estimator="IPS"
+        )
 
         self.model = FM(
-            n_epochs=self.cfg.fm.n_epochs[0],
-            n_factors=self.cfg.fm.n_factors[0],
-            n_features=dataset.train.shape[1],
-            scale=self.cfg.fm.scale[0],
-            lr=self.cfg.fm.lr[0],
-            batch_size=self.cfg.fm.batch_size[0],
+            n_epochs=self.cfg.model.FM.n_epochs[0],
+            n_factors=self.cfg.model.FM.n_factors[0],
+            n_features=self.train[0].shape[1],
+            scale=self.cfg.model.FM.scale[0],
+            lr=self.cfg.model.FM.lr[0],
+            batch_size=self.cfg.model.FM.batch_size[0],
             seed=self.cfg.seed,
         )
 
+        user2data_indices = self.loader.test_user2data_indices["all"]
+
         self.evaluator = Evaluator(
-            X=dataset.test,
-            y_true=test_y,
-            indices_per_user=self.datasets["test_user2indices"]["all"],
+            X=self.test[0],
+            y_true=self.test[1],
+            indices_per_user=user2data_indices,
             used_metrics={"DCG", "Precision", "Recall"},
         )
 
     def test_fit(self):
-        losses = self.model.fit(self.trains, self.vals, self.tests)
+        losses = self.model.fit(self.train, self.val)
         assert isinstance(losses, tuple)
 
         # evaluate
         results = self.evaluator.evaluate(self.model)
-        print(results)
         assert isinstance(results, defaultdict)

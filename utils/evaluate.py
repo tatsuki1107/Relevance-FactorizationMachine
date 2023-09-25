@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 from collections import defaultdict
 from dataclasses import dataclass
 from src.mf import ProbabilisticMatrixFactorization as PMF
@@ -20,25 +20,31 @@ class Evaluator:
             if metric_name not in self.used_metrics:
                 metrics.pop(metric_name)
 
-    def evaluate(self, model: Union[PMF, FM]) -> defaultdict:
+    def evaluate(
+        self, model: Union[PMF, FM], pscores: Optional[np.ndarray] = None
+    ) -> defaultdict:
+        if pscores is None:
+            pscores = np.ones_like(self.y_true)
+
         results = defaultdict(list)
         metric_per_user = defaultdict(lambda: defaultdict(list))
         for indices in self.indices_per_user:
             y_scores = self._predict(model, indices)
             y_true = self.y_true[indices]
+            user_pscores = pscores[indices]
 
             for k in self.K:
                 for metric_name, metric_func in metrics.items():
                     if metric_name == "ROC_AUC":
                         continue
                     metric_per_user[metric_name][k].append(
-                        metric_func(y_true, y_scores, k)
+                        metric_func(y_true, y_scores, k, user_pscores)
                     )
 
         for k in self.K:
             for metric_name in metrics.keys():
                 results[metric_name].append(
-                    np.mean(metric_per_user[metric_name][k])
+                    np.nanmean(metric_per_user[metric_name][k])
                 )
 
         if "ROC_AUC" in metrics:
@@ -53,7 +59,9 @@ class Evaluator:
         return results
 
     def _predict(
-        self, model: Union[PMF, FM], indices: list = None
+        self,
+        model: Union[PMF, FM],
+        indices: list = None,
     ) -> np.ndarray:
         if indices is None:
             indices = np.arange(len(self.y_true))
@@ -63,5 +71,7 @@ class Evaluator:
         elif model.__class__ == PMF:
             user_ids, item_ids = self.X[indices][:, 0], self.X[indices][:, 1]
             y_scores = model.predict(user_ids, item_ids)
+        else:
+            y_scores = np.random.randint(0, 2, len(indices))
 
         return y_scores

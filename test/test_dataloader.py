@@ -12,3 +12,5 @@ class TestDataLoader:
         datasets = loader.load(model_name="FM", estimator="IPS")
 
         assert isinstance(datasets, tuple)
+        assert isinstance(loader.test_user2data_indices, dict)
+        assert isinstance(loader.val_user2data_indices, list)

@@ -1,14 +1,15 @@
 import numpy as np
 from dataclasses import dataclass
 from conf.config import ExperimentConfig
-from utils.dataloader._click import ClickDataGenerator
+from utils.dataloader._click import SemiSyntheticLogDataGenerator
 from utils.dataloader._feature import FeatureGenerator
 from utils.dataloader._kuairec import KuaiRecCSVLoader
 from utils.dataloader._preparer import DatasetPreparer
+from utils.dataloader.base import BaseLoader
 
 
 @dataclass
-class DataLoader:
+class DataLoader(BaseLoader):
     params: ExperimentConfig
 
     def __post_init__(self) -> None:
@@ -20,28 +21,30 @@ class DataLoader:
         )
         # 自然に観測されたbig_matrix上でのユーザーとアイテムの相対的な露出を用いて、
         # クリックデータを生成する
-        click_generator = ClickDataGenerator(seed=self.params.seed)
-        interaction_df = click_generator.generate_logdata_using_observed_data(
-            interaction_df=small_matrix_df,
+        logdata_generator = SemiSyntheticLogDataGenerator(
+            seed=self.params.seed,
             params=self.params.logdata_propensity,
         )
+        interaction_df = logdata_generator.load(
+            interaction_df=small_matrix_df,
+        )
+
         del small_matrix_df
         # interaction_dfに存在するユーザーとアイテムの特徴量を生成する
         feature_generator = FeatureGenerator(params=self.params.tables)
-        features, interaction_df = feature_generator.generate(
+        features, interaction_df = feature_generator.load(
             interaction_df=interaction_df
         )
 
         # FMとPMFを用いて学習、評価できるようにデータを整形する
-        train_val_test_ratio = (
-            self.params.logdata_propensity.train_val_test_ratio
-        )
-        preparer = DatasetPreparer()
-        self.datasets = preparer.prepare_dataset(
+        preparer = DatasetPreparer(seed=self.params.seed)
+        self.datasets = preparer.load(
             interaction_df=interaction_df,
             features=features,
-            train_val_test_ratio=train_val_test_ratio,
         )
+
+        self.n_users = self.datasets["PMF"].n_users
+        self.n_items = self.datasets["PMF"].n_items
 
     def load(self, model_name: str, estimator: str) -> tuple:
         """モデルと推定量ごとのtrain, val, testデータを返す"""
@@ -59,40 +62,35 @@ class DataLoader:
         # features
         features = self.datasets[model_name]
 
-        # clicks
-        clicks = self.datasets["clicks"]
+        # target variable
         if estimator == "Ideal":
-            train_y = clicks["train"]["unbiased"]
-            val_y = clicks["val"]["unbiased"]
+            train_y = self.datasets["relevances"]["train"]
+            val_y = self.datasets["relevances"]["val"]
         else:
-            train_y = clicks["train"]["biased"]
-            val_y = clicks["val"]["biased"]
+            train_y = self.datasets["clicks"]["train"]
+            val_y = self.datasets["clicks"]["val"]
 
-        test_y = clicks["test"]["unbiased"]
+        test_y = self.datasets["clicks"]["test"]
 
-        # exposure
-        pscores = self.datasets["pscores"]
+        # estimated exposure
         if estimator == "IPS":
-            train_pscores = pscores["train"]
-            val_pscores = pscores["val"]
+            train_pscores = self.datasets["pscores"]["train"]
+            val_pscores = self.datasets["pscores"]["val"]
         else:
-            train_pscores = np.ones_like(pscores["train"])
-            val_pscores = np.ones_like(pscores["val"])
+            train_pscores = np.ones_like(train_y)
+            val_pscores = np.ones_like(val_y)
 
         # train val test
-        if model_name == "FM":
-            train = tuple([features.train, train_y, train_pscores])
-            val = tuple([features.val, val_y, val_pscores])
-            test = tuple([features.test, test_y])
-        elif model_name == "PMF":
-            _train = np.concatenate([features.train, train_y[:, None]], axis=1)
-            _val = np.concatenate([features.val, val_y[:, None]], axis=1)
-            test = np.concatenate([features.test, test_y[:, None]], axis=1)
+        train = [features.train, train_y, train_pscores]
+        val = [features.val, val_y, val_pscores]
+        test = [features.test, test_y]
 
-            train = tuple([_train, train_pscores])
-            val = tuple([_val, val_pscores])
+        return train, val, test
 
-        # test_user2indices
-        test_user2indices = self.datasets["test_user2indices"]
+    @property
+    def val_user2data_indices(self) -> dict:
+        return self.datasets["user2data_indices"]["val"]["all"]
 
-        return train, val, test, test_user2indices
+    @property
+    def test_user2data_indices(self) -> dict:
+        return self.datasets["user2data_indices"]["test"]

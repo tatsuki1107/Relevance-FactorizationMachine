@@ -13,7 +13,7 @@ class PointwiseBaseRecommender(ABC):
     seed: int
 
     @abstractmethod
-    def fit(self, train, val, test) -> tuple:
+    def fit(self, train, val) -> tuple:
         pass
 
     @abstractmethod
@@ -25,4 +25,5 @@ class PointwiseBaseRecommender(ABC):
         pass
 
     def _sigmoid(self, x: np.ndarray) -> np.ndarray:
+        x = np.clip(x, -700, 700)
         return 1 / (1 + np.exp(-x))

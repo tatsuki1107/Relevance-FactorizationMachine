@@ -10,6 +10,7 @@ from src.base import PointwiseBaseRecommender
 @dataclass
 class FactorizationMachine(PointwiseBaseRecommender):
     n_features: int
+    eps: float = 1e-8
 
     def __post_init__(self) -> None:
         np.random.seed(self.seed)
@@ -26,13 +27,11 @@ class FactorizationMachine(PointwiseBaseRecommender):
         self,
         train: Tuple[csr_matrix, np.ndarray, np.ndarray],
         val: Tuple[csr_matrix, np.ndarray, np.ndarray],
-        test: Tuple[csr_matrix, np.ndarray],
     ) -> list:
         train_X, train_y, train_pscores = train
         val_X, val_y, val_pscores = val
-        test_X, test_y = test
 
-        train_loss, val_loss, test_loss = [], [], []
+        train_loss, val_loss = [], []
         for _ in tqdm(range(self.n_epochs)):
             batch_X, batch_y, batch_pscores = resample(
                 train_X,
@@ -62,12 +61,7 @@ class FactorizationMachine(PointwiseBaseRecommender):
             )
             val_loss.append(valloss)
 
-            testloss = self._cross_entropy_loss(
-                X=test_X, y=test_y, pscores=None
-            )
-            test_loss.append(testloss)
-
-        return train_loss, val_loss, test_loss
+        return train_loss, val_loss
 
     def predict(self, X: csr_matrix) -> np.ndarray:
         # 2項目
@@ -91,8 +85,8 @@ class FactorizationMachine(PointwiseBaseRecommender):
 
         y_hat = self.predict(X)
         loss = -np.sum(
-            (y / pscores) * np.log(y_hat)
-            + (1 - (y / pscores)) * np.log(1 - y_hat)
+            (y / pscores) * np.log(y_hat + self.eps)
+            + (1 - (y / pscores)) * np.log(1 - y_hat + self.eps)
         ) / len(y)
         return loss
 
