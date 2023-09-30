@@ -11,7 +11,7 @@ class FMDataset:
 
 
 @dataclass
-class PMFDataset:
+class MFDataset:
     train: np.ndarray
     val: np.ndarray
     test: np.ndarray

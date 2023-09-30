@@ -75,9 +75,8 @@ class LogDataPropensityConfig:
     data_path: str
     train_val_test_ratio: Tuple[float, float, float]
     density: float
-    exposure_bias: float
     behavior_policy: str
-    n_positions: int
+    exposure_bias: float
 
 
 @dataclass

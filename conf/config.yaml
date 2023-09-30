@@ -6,9 +6,8 @@ logdata_propensity:
     - 0.1
     - 0.1
   density: 0.05
-  exposure_bias: 1.0
-  n_positions: 20
   behavior_policy: "random"
+  exposure_bias: 1.0
 tables:
   interaction:
     data_path: "./data/kuairec/small_matrix.csv"
@@ -20,9 +19,13 @@ tables:
       # feature name: data type
       onehot_feat0: "label"
       onehot_feat1: "label"
+      onehot_feat2: "label"
       user_active_degree: "label"
       onehot_feat6: "label"
       onehot_feat11: "label"
+      onehot_feat13: "label"
+      onehot_feat14: "label"
+      onehot_feat15: "label"
 
   video:
     daily:
@@ -32,6 +35,9 @@ tables:
         video_duration: "float"
         like_cnt: "int"
         cancel_like_cnt: "int"
+        share_cnt: "int"
+        double_click_cnt: "int"
+        download_cnt: "int"
 
     category:
       data_path: "./data/kuairec/item_categories.csv"
@@ -44,10 +50,10 @@ model:
       # start
       - 10
       # end
-      - 30
+      - 80
     n_factors:
       - 100
-      - 500
+      - 200
     scale:
       - 0.5
       - 0.1

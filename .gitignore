@@ -16,4 +16,5 @@
 
 /.pytest_cache
 
-/main_search_params.py
+_main_search_params.py
+paper.md

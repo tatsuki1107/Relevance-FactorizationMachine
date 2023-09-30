@@ -1,41 +1,52 @@
 import numpy as np
 from typing import Tuple
 from dataclasses import dataclass
-from utils.optimizer import Adam
+from utils.optimizer import SGD
 from tqdm import tqdm
 from sklearn.utils import resample
 from src.base import PointwiseBaseRecommender
 
 
 @dataclass
-class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
+class LogisticMatrixFactorization(PointwiseBaseRecommender):
     n_users: int
     n_items: int
     reg: float
+    alpha: float = 2
     eps: float = 1e-8
 
     def __post_init__(self) -> None:
         np.random.seed(self.seed)
 
         # init user embeddings
-        P = np.random.normal(
-            scale=self.scale, size=(self.n_users, self.n_factors)
+        # P ~ N(0, scale^2)
+        # P = np.random.normal(scale=0.2, size=(self.n_users, self.#n_factors))
+        # self.P = SGD(params=P, lr=self.lr)
+
+        limit = self.alpha * np.sqrt(6 / self.n_factors)
+        # P ~ U(-limit, limit)
+        P = np.random.uniform(
+            low=-limit, high=limit, size=(self.n_users, self.n_factors)
         )
-        self.P = Adam(params=P, lr=self.lr)
+        self.P = SGD(params=P, lr=self.lr)
 
         # init item embeddings
-        Q = np.random.normal(
-            scale=self.scale, size=(self.n_items, self.n_factors)
+        # Q = np.random.normal(scale=0.2, size=(self.n_items, self.#n_factors))
+        # Q ~ U(-limit, limit)
+        Q = np.random.uniform(
+            low=-limit, high=limit, size=(self.n_items, self.n_factors)
         )
-        self.Q = Adam(params=Q, lr=self.lr)
+        self.Q = SGD(params=Q, lr=self.lr)
 
         # init user bias
-        b_u = np.zeros(self.n_users)
-        self.b_u = Adam(params=b_u, lr=self.lr)
+        # b_u ~ N(0, 0.01)
+        b_u = np.random.normal(scale=0.001, size=self.n_users)
+        self.b_u = SGD(params=b_u, lr=self.lr)
 
         # init item bias
-        b_i = np.zeros(self.n_items)
-        self.b_i = Adam(params=b_i, lr=self.lr)
+        # b_i ~ N(0, 0.01)
+        b_i = np.random.normal(scale=0.001, size=self.n_items)
+        self.b_i = SGD(params=b_i, lr=self.lr)
 
     def fit(
         self,
@@ -46,6 +57,7 @@ class ProbabilisticMatrixFactorization(PointwiseBaseRecommender):
         train_X, train_y, train_pscores = train
         val_X, val_y, val_pscores = val
 
+        # init global bias
         self.b = np.mean(train_y)
 
         train_loss, val_loss = [], []

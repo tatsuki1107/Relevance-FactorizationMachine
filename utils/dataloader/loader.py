@@ -43,24 +43,21 @@ class DataLoader(BaseLoader):
             features=features,
         )
 
-        self.n_users = self.datasets["PMF"].n_users
-        self.n_items = self.datasets["PMF"].n_items
+        self.n_users = self.datasets["MF"].n_users
+        self.n_items = self.datasets["MF"].n_items
 
     def load(self, model_name: str, estimator: str) -> tuple:
         """モデルと推定量ごとのtrain, val, testデータを返す"""
         # params validation
-        if model_name not in {"FM", "PMF"}:
+        if model_name not in {"FM", "MF"}:
             raise ValueError(
-                "model_name must be FM or PMF. " + f"model_name: {model_name}"
+                "model_name must be FM or MF. " + f"model_name: {model_name}"
             )
         if estimator not in {"Ideal", "IPS", "Naive"}:
             raise ValueError(
                 "estimator must be Ideal, IPS or Naive."
                 + f" estimator: {estimator}"
             )
-
-        # features
-        features = self.datasets[model_name]
 
         # target variable
         if estimator == "Ideal":
@@ -71,6 +68,9 @@ class DataLoader(BaseLoader):
             val_y = self.datasets["clicks"]["val"]
 
         test_y = self.datasets["clicks"]["test"]
+
+        # features
+        features = self.datasets[model_name]
 
         # estimated exposure
         if estimator == "IPS":
@@ -94,3 +94,7 @@ class DataLoader(BaseLoader):
     @property
     def test_user2data_indices(self) -> dict:
         return self.datasets["user2data_indices"]["test"]
+
+    @property
+    def test_y(self) -> np.ndarray:
+        return self.datasets["clicks"]["test"]

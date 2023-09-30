@@ -18,6 +18,28 @@ def calc_precision_at_k(
         raise NotImplementedError("SNIPS用に実装し直して")
 
 
+def calc_average_precision_at_k(
+    y_true: np.ndarray,
+    y_scores: np.ndarray,
+    k: int,
+    pscores: np.ndarray,
+) -> float:
+    y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]]
+
+    average_precision = 0.0
+    if not np.sum(y_true_sorted_by_scores) == 0:
+        for i in range(min(k, len(y_true_sorted_by_scores))):
+            if y_true_sorted_by_scores[i] == 1:
+                average_precision += np.sum(
+                    y_true_sorted_by_scores[: i + 1]
+                ) / (i + 1)
+
+    if np.all(pscores == 1):
+        return average_precision
+
+    raise NotImplementedError("SNIPS用に実装し直して")
+
+
 def calc_recall_at_k(
     y_true: np.ndarray,
     y_scores: np.ndarray,
@@ -68,8 +90,9 @@ def calc_dcg_at_k(
 
 
 def calc_roc_auc(
-    y_true: np.ndarray, y_scores: np.ndarray, thetahold: np.ndarray
+    y_true: np.ndarray, y_scores: np.ndarray
 ) -> Tuple[list, list, float]:
+    thetahold = np.arange(0, 1.0001, 0.0001)[::-1]
     tpr, fpr = [], []
     for theta in thetahold:
         y_pred = (y_scores >= theta).astype(int)
@@ -95,6 +118,6 @@ def calc_roc_auc(
 metrics: Dict[str, Callable] = {
     "Recall": calc_recall_at_k,
     "Precision": calc_precision_at_k,
+    "MAP": calc_average_precision_at_k,
     "DCG": calc_dcg_at_k,
-    "ROC_AUC": calc_roc_auc,
 }

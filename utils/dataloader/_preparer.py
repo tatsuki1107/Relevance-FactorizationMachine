@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
 from typing import Tuple, Dict
-from utils.model import FMDataset, PMFDataset
+from utils.model import FMDataset, MFDataset
 from utils.dataloader.base import BaseLoader
 
 
@@ -27,7 +27,7 @@ class DatasetPreparer(BaseLoader):
 
         # prepare pmf_datasets
         usecols = ["user_index", "video_index"]
-        pmf_datasets = self._prarpare_pmf_datasets(
+        mf_datasets = self._prarpare_mf_datasets(
             df=interaction_df[usecols], df_indices=dataset_indices
         )
 
@@ -56,7 +56,7 @@ class DatasetPreparer(BaseLoader):
 
         datasets = {
             "FM": fm_datasets,
-            "PMF": pmf_datasets,
+            "MF": mf_datasets,
             "relevances": relevances,
             "clicks": clicks,
             "pscores": pscores,
@@ -79,7 +79,7 @@ class DatasetPreparer(BaseLoader):
         return res
 
     def _negative_sample(
-        self, df: pd.DataFrame, negative_multiple: int = 3
+        self, df: pd.DataFrame, negative_multiple: int = 2
     ) -> np.ndarray:
         # negative sample
         positive_filter = df["biased_click"] == 1
@@ -105,11 +105,11 @@ class DatasetPreparer(BaseLoader):
 
         return FMDataset(**datasets)
 
-    def _prarpare_pmf_datasets(
+    def _prarpare_mf_datasets(
         self,
         df: pd.DataFrame,
         df_indices: Dict[str, np.ndarray],
-    ) -> PMFDataset:
+    ) -> MFDataset:
         datasets = {}
         for datatype, indices in df_indices.items():
             datasets[datatype] = df.iloc[indices].values
@@ -119,7 +119,7 @@ class DatasetPreparer(BaseLoader):
         datasets["n_users"] = n_users
         datasets["n_items"] = n_items
 
-        return PMFDataset(**datasets)
+        return MFDataset(**datasets)
 
     def _prepare_pscores_and_clicks_rel(
         self,
@@ -144,7 +144,7 @@ class DatasetPreparer(BaseLoader):
         interaction_df: pd.DataFrame,
         df_indices: np.ndarray,
         frequency: set,
-        thetahold: int = 0.7,
+        thetahold: int = 0.75,
     ) -> Dict[str, list]:
         data_df = interaction_df.iloc[df_indices].reset_index(drop=True)
         dataframe_dict = {}

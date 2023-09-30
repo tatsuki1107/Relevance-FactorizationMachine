@@ -3,12 +3,12 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from conf.config import LogDataPropensityConfig
-
+from utils.dataloader.base import BaseLoader
 from utils.dataloader._kuairec import KuaiRecCSVLoader
 
 
 @dataclass
-class SemiSyntheticLogDataGenerator:
+class SemiSyntheticLogDataGenerator(BaseLoader):
     seed: int
     params: LogDataPropensityConfig
 
@@ -106,7 +106,7 @@ class SemiSyntheticLogDataGenerator:
         video_exposures = video_expo_counts.apply(_sigmoid)
         exposure_probabilitys = video_exposures[existing_video_ids].values
 
-        return exposure_probabilitys
+        return exposure_probabilitys**self.params.exposure_bias
 
     def _generate_clicks(
         self,
@@ -130,5 +130,6 @@ class SemiSyntheticLogDataGenerator:
         return biased_click, relevance_labels
 
 
-def _sigmoid(x: float, a: float = 2.0, b: float = -2.0) -> float:
+# best param のときはa=2.0,b=-2.0 (high bias)
+def _sigmoid(x: float, a: float = 3.0, b: float = -0) -> float:
     return 1 / (1 + np.exp(-(a * x + b)))
