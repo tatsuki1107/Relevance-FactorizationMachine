@@ -1,4 +1,7 @@
-/data
+/data/best_params
+/data/uniform_init_best_params
+/data/result
+/data/kuairec
 
 /notebooks
 
@@ -17,4 +20,3 @@
 /.pytest_cache
 
 _main_search_params.py
-paper.md
