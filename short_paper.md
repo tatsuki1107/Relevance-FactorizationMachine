@@ -7,7 +7,7 @@
 
 
 # 導入
-近年、推薦システムにおけるバイアスの問題が急浮上してきた[?]。このバイアスは、フィードバックループを通じて収集されるデータに多種多様に潜んでいる。例として、過去の推薦方策やアイテムの露出頻度、さらにはアイテムの表示位置といった要因によって生じるバイアスが考えられる。これらのバイアスを見過ごすと、ユーザ間の均質化やアイテム間の格差の増大など[?]、多くの課題が生じる可能性がある。そのため、推薦システムを持続的に効果的に運用するためには、これらのバイアス問題の取り組みは避けられない。
+近年、推薦システムにおけるバイアスの問題が急浮上してきた[2]。このバイアスは、フィードバックループを通じて収集されるデータに多種多様に潜んでいる。例として、過去の推薦方策やアイテムの露出頻度、さらにはアイテムの表示位置といった要因によって生じるバイアスが考えられる。これらのバイアスを見過ごすと、ユーザ間の均質化やアイテム間の格差の増大など[3]、多くの課題が生じる可能性がある。そのため、推薦システムを持続的に効果的に運用するためには、これらのバイアス問題の取り組みは避けられない。
 
 # 表記と問題の定式化
 ## 表記
@@ -30,10 +30,10 @@ P(Y_{u,i} = 1) &= P(R_{u,i} = 1)\cdot P(O_{u,i} = 1) \\
 \end{aligned}
 $$
 
-Position Based Model[?]に従えば、クリックの発生は関連度と露出の積によってモデル化される。このモデルに基づくと、ユーザー $u$ がアイテム $i$ を好むと同時に認知している場合、クリックが発生する。このようにクリック発生メカニズムを仮定することで、露出バイアスを考慮した推定量の導出が可能となる。
+Position Based Model[4]に従えば、クリックの発生は関連度と露出の積によってモデル化される。このモデルに基づくと、ユーザー $u$ がアイテム $i$ を好むと同時に認知している場合、クリックが発生する。このようにクリック発生メカニズムを仮定することで、露出バイアスを考慮した推定量の導出が可能となる。
 
 ## 定式化
-最終的な目的は、サービス内のログデータを基に、ユーザーに好みのアイテムを推薦することである。しかし、手元にあるのはクリックデータのようなImplicitフィードバックのみであり、そのようなデータには露出バイアス $O_{u,i}$ も影響している。安易にクリックデータを教師データとして利用すると、アイテム間の格差の拡大など[?]の問題が生じる可能性がある。したがって、嗜好度 $R_{u,i}$ を基に学習することで、より良い推薦が期待できる。しかしそのような明示的なフィードバックは手元にはないため、この嗜好度 $R_{u,i}$ を基にした損失関数が、理想的には解きたい問題となる。  
+最終的な目的は、サービス内のログデータを基に、ユーザーに好みのアイテムを推薦することである。しかし、手元にあるのはクリックデータのようなImplicitフィードバックのみであり、そのようなデータには露出バイアス $O_{u,i}$ も影響している。安易にクリックデータを教師データとして利用すると、アイテム間の格差の拡大など[3]の問題が生じる可能性がある。したがって、嗜好度 $R_{u,i}$ を基に学習することで、より良い推薦が期待できる。しかしそのような明示的なフィードバックは手元にはないため、この嗜好度 $R_{u,i}$ を基にした損失関数が、理想的には解きたい問題となる。  
 
 ```math
 L_{Ideal}(\hat{R}_{u,i})　　= -\frac{1}{|D|}\sum_{(u,i) \in D} [\gamma_{u,i} \log(\hat{R}_{u,i}) + (1 - \gamma_{u,i})\log(1 - \hat{R}_{u,i})] 
@@ -84,7 +84,7 @@ IPSは、Inversed Propensity Scoreの略で、因果推論の文脈で頻繁に�
 \end{aligned} 
 ```
 
-IPS推定量の期待値が$`L_{Ideal}`$と等しいことから、この推定量が不偏であることが確認された。[1]の研究によれば、IPS推定量は$`L_{Ideal}`$の性能を近似できることが示され、Naive推定量と比較しても優れた性能を発揮することが確認された。これらの推定量の性質については、[1],[2]にて詳しく解説されている。
+IPS推定量の期待値が$`L_{Ideal}`$と等しいことから、この推定量が不偏であることが確認された。[1]の研究によれば、IPS推定量は$`L_{Ideal}`$の性能を近似できることが示され、Naive推定量と比較しても優れた性能を発揮することが確認された。これらの推定量の性質については、[1],[5]にて詳しく解説されている。
 
 # 既存研究の問題点
 [1]における性能実験では、機械学習モデル$`\hat{R}_{u,i}`$としてLogistic Matrix Factorizationが採用された。
@@ -96,13 +96,13 @@ IPS推定量の期待値が$`L_{Ideal}`$と等しいことから、この推定�
 \end{aligned}
 ```
 
-Matrix Factorizationは行列分解手法としてスケーラブルで高性能であるため、ベースラインとして広く採用されている[?]。しかしながら、嗜好度合い$`R_{u,i}`$が確率モデルとなる場合、データの不確実性が増す。評価データやクリックデータだけでの予測には限界があると言える。その結果、IPS推定量とNaive推定量の性能の間に大きな差異が生まれず、ビジネス上のインパクトも低いと考えられる。この背景から、$`L_{Ideal}`$の性能が不十分であると考えられ、それを近似したIPS推定量も結果としてNaive推定量と同程度の性能になると推測される。解決策としては、以下の２つが考えられる。  
+Matrix Factorizationは行列分解手法としてスケーラブルで高性能であるため、ベースラインとして広く採用されている[6]。しかしながら、嗜好度合い$`R_{u,i}`$が確率モデルとなる場合、データの不確実性が増す。評価データやクリックデータだけでの予測には限界があると言える。その結果、IPS推定量とNaive推定量の性能の間に大きな差異が生まれず、ビジネス上のインパクトも低いと考えられる。この背景から、$`L_{Ideal}`$の性能が不十分であると考えられ、それを近似したIPS推定量も結果としてNaive推定量と同程度の性能になると推測される。解決策としては、以下の２つが考えられる。  
 1. 真の関連度合い$`\gamma_{u,i}`$が観測できる理想的なデータ環境でのモデル性能を向上させる。  
 2. 観測データのみを用いてその性能を近似したIPS推定量を開発する。  
 
 この2つを達成することで、pointwise損失におけるIPS推定量が実用的に役立つものとなる。
 
-そこで私は、$`\hat{R}_{u,i}`$にFactorization Machine [?]を用いることでこの課題を解決する。
+そこで私は、$`\hat{R}_{u,i}`$にFactorization Machines [7]を用いることでこの課題を解決する。
 ```math
 \begin{aligned}
 \hat{y}(\mathbf{x}) &= w_0 + \sum_{i=1}^{n}w_ix_i+\sum_{i=1}^{n}\sum_{j=i+1}^{n}<\mathbf{v}_{i},\mathbf{v}_{j}>x_ix_j\\
@@ -118,7 +118,7 @@ IPS推定量は観測データのみを用いて$`L_{Ideal}`$を統計的に近�
 
 
 ## 高性能なアルゴリズムを取り入れる際の注意点
-バイアスのかかった観測データを使用すると、$`\hat{L}_{Naive}`$に高度なモデルを組み込む際の問題が浮き彫りとなる。特に、露出確率$`P(O_{u,i} = 1)`$が高いデータに対する予測精度が増加することで、既存のバイアスが一層強まる可能性がある。一部の研究[?]では、オフライン評価とオンライン評価の間に相関が見られないという結果が示されている。単純にアルゴリズムの精度を追求するだけでなく、実際の環境でのバイアスの影響も考慮する必要がある。そうしないと、機械学習の導入によるビジネス価値が減少してしまう恐れがある。この背景を踏まえ、実際の環境とのギャップを考慮した不偏推定量を用いたモデルの性能評価が求められる。本研究では、Factorization MachineとMatrix Factorizationの2つのモデルを用いて、IPS推定量の基準での性能評価を行い、実環境での性能差を検証する。
+バイアスのかかった観測データを使用すると、$`\hat{L}_{Naive}`$に高度なモデルを組み込む際の問題が浮き彫りとなる。特に、露出確率$`P(O_{u,i} = 1)`$が高いデータに対する予測精度が増加することで、既存のバイアスが一層強まる可能性がある。一部の研究[8]では、オフライン評価とオンライン評価の間に相関が見られないという結果が示されている。単純にアルゴリズムの精度を追求するだけでなく、実際の環境でのバイアスの影響も考慮する必要がある。そうしないと、機械学習の導入によるビジネス価値が減少してしまう恐れがある。この背景を踏まえ、実際の環境とのギャップを考慮した不偏推定量を用いたモデルの性能評価が求められる。本研究では、Factorization MachineとMatrix Factorizationの2つのモデルを用いて、IPS推定量の基準での性能評価を行い、実環境での性能差を検証する。
 
 
 # 半合成データを用いた性能実験
@@ -128,7 +128,7 @@ IPS推定量は観測データのみを用いて$`L_{Ideal}`$を統計的に近�
 * RQ3: バイアスがかかった検証データを使用して、モデル間の性能を評価することは可能か？  
 
 ## データセット
-本実験においては、KuaiRecデータセット[?]を基に性能実験を行う。このデータセットは、中国の動画プラットフォームである快手(kuaishou)における動画のフィードバックデータを含んでいる。KuaiRecデータセットを選択した背景として以下の理由が挙げられる。
+本実験においては、KuaiRecデータセット[9]を基に性能実験を行う。このデータセットは、中国の動画プラットフォームである快手(kuaishou)における動画のフィードバックデータを含んでいる。KuaiRecデータセットを選択した背景として以下の理由が挙げられる。
 
 1. 「small_matrix.csv」には、ユーザー1411人とアイテム3327個のフィードバックデータがほぼ100%含まれている。これにより、このフィードバックを真の嗜好度合い$`\gamma_{u,i}`$と見なして実験することができる。
 2. データセットには、豊富なユーザーとアイテムの特徴量が含まれている。「user_features.csv」には匿名化されたユーザー特徴、「item_category.csv」および「item_daily_features.csv」にはアイテムの特徴量が記載されており、これらの情報はFactorization Machineの実装に非常に役立つ。
@@ -139,7 +139,7 @@ IPS推定量は観測データのみを用いて$`L_{Ideal}`$を統計的に近�
 ## 実験設定
 
 ### 1. ログデータの生成
-「small_matrix.csv」から人工的なログデータを生成する。このデータの評価値行列の密度はほぼ100%となっている。本実験では、ログデータのバイアスは露出格差によるものだけであると仮定し、ランダム推薦を行って評価値行列の5%のデータでログデータ$`D`$を生成する。
+「small_matrix.csv」から人工的なログデータを生成する。このデータの評価値行列の値は実験的に集められたため、密度はほぼ100%となっている。本実験では、ログデータのバイアスは露出格差によるものだけであると仮定し、ランダム推薦を行って評価値行列の5%のデータでログデータ$`D`$を生成する。
 
 
 ### 2. 真の嗜好度合い$`\gamma_{u,i}`$の生成
@@ -188,7 +188,7 @@ Y_{u,i} = O_{u,i} \cdot R_{u,i}, \quad \forall (u,i) \in D
 | $`\hat{L}_{IPS}`$   | $`\hat{R}_{SNIPS}(\hat{Z}_{u,i}) = \frac{1}{\|U\|}\sum_{u \in U}\frac{1}{\sum_{i \in I^{val}_u} \frac{Y_{u,i}}{\theta_{u,i}}}\sum_{i \in I^{val}_u}\frac{Y_{u,i}}{\theta_{u,i}}\cdot \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$ |
 | $`\hat{L}_{Naive}`$ | $`\hat{R}_{Naive}(\hat{Z}_{u,i})=\frac{1}{\|U\|}\sum_{u \in U} \sum_{i \in I^{val}_u:Y_{u,i}=1} \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$                                                                                      |
 
-具体的には、$`L_{Ideal}`$および$`\hat{L}_{Naive}`$では、検証データにおいてDCG@3を最大化するパラメータを探索する。一方、$`\hat{L}_{IPS}`$では、検証データとテストデータ間の分布の乖離を考慮しながら、DCG@3を最大化する必要がある。この目的のため、DCG@3の自己正規化逆傾向スコア(SNIPS)推定量[?]を利用してパラメータチューニングを行う。
+具体的には、$`L_{Ideal}`$および$`\hat{L}_{Naive}`$では、検証データにおいてDCG@3を最大化するパラメータを探索する。一方、$`\hat{L}_{IPS}`$では、検証データとテストデータ間の分布の乖離を考慮しながら、DCG@3を最大化する必要がある。この目的のため、DCG@3の自己正規化逆傾向スコア(SNIPS)推定量[10][11]を利用してパラメータチューニングを行う。
 
 
 ### 評価
@@ -250,5 +250,14 @@ SNIPS推定量の結果によれば、FMの性能がMFよりも優れている�
 
 
 # 参考文献
-[1] Unbiased Recommender Learning from Missing-Not-At-Random Implicit Feedback  
-[2] 施策デザインのための機械学習入門
+[1] Yuta Saito, Suguru Yaginuma, Yuta Nishino, Hayato Sakata, and Kazuhide Nakata. 2020. Unbiased recommender learning from missing-not-at-random implicit feedback. In Proceedings of the 13th International Conference on Web Search and Data Mining. 501–509
+[2] Jiawei Chen, Hande Dong, Xiang Wang, Fuli Feng, Meng Wang, and Xiangnan He. 2023. Bias and debias in recommender system: A survey and future directions. ACM Transactions on Information Systems 41, 3 (2023), 1–39.
+[3] Allison J. B. Chaney, Brandon M. Stewart, and Barbara E. Engelhardt. 2018. How algorithmic confounding in recommendation systems increases homogeneity and decreases utility. In Proceedings of the 12th ACM Conference on Recommender Systems. ACM, 224–232.
+[4] Dawen Liang, Laurent Charlin, James McInerney, and David M Blei. 2016. Modeling user exposure in recommendation. In Proceedings of the 25th International Conference on World Wide Web. International World Wide Web Conferences Steering Committee, 951–961.
+[5] 齋藤優太, 安井翔太. 2021. 施策デザインのための機械学習入門 : データ分析技術のビジネス活用における正しい考え方. 技術評論社. 
+[6] Yehuda Koren, Robert Bell, and Chris Volinsky. 2009. Matrix factorization techniques for recommender systems. Computer 8 (2009), 30–37.
+[7]  Steffen Rendle. 2010. Factorization machines. In ICDM’10. 995–1000
+[8] Lucas Bernardi, Themistoklis Mavridis, and Pablo Estevez. 2019. 150 successful machine learning models: 6 lessons learned at Booking.com. In Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 1743–1751.
+[9] Chongming Gao, Shijun Li, Wenqiang Lei, Jiawei Chen, Biao Li, Peng Jiang, Xiangnan He, Jiaxin Mao, and Tat-Seng Chua. 2022. KuaiRec: A Fully-observed Dataset and Insights for Evaluating Recommender Systems. arXiv preprint arXiv:2202.10842 (2022).
+[10] Longqi Yang, Yin Cui, Yuan Xuan, Chenyang Wang, Serge Belongie, and Deborah Estrin. 2018. Unbiased Offline Recommender Evaluation for Missingnot-at-random Implicit Feedback. In Proceedings of the 12th ACM Conference on Recommender Systems (RecSys ’18). ACM, New York, NY, USA, 279–287
+[11] Adith Swaminathan and Thorsten Joachims. 2015. The self-normalized estimator for counterfactual learning. In Advances in Neural Information Processing Systems. 3231–3239.
