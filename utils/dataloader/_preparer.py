@@ -16,8 +16,8 @@ class DatasetPreparer(BaseLoader):
         interaction_df: pd.DataFrame,
         features: csr_matrix,
     ) -> dict:
-        usecols = ["datatype", "biased_click"]
         # split train, val, test
+        usecols = ["datatype", "biased_click"]
         dataset_indices = self._split_datasets(df=interaction_df[usecols])
 
         # prepare fm_datasets

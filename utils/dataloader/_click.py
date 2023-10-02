@@ -125,11 +125,10 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         relevance_labels = np.random.binomial(n=1, p=relevance_probabilitys)
 
         # P(Y = 1) = P(R = 1) * P(O = 1)
-        biased_click = exposure_labels * relevance_labels
+        biased_clicks = exposure_labels * relevance_labels
 
-        return biased_click, relevance_labels
+        return biased_clicks, relevance_labels
 
 
-# best param のときはa=2.0,b=-2.0 (high bias)
 def _sigmoid(x: float, a: float = 3.0, b: float = -0) -> float:
     return 1 / (1 + np.exp(-(a * x + b)))

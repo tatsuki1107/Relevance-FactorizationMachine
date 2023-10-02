@@ -2,8 +2,6 @@ from logging import getLogger
 from pathlib import Path
 import json
 import hydra
-
-# import joblib
 from hydra.core.config_store import ConfigStore
 from conf.config import ExperimentConfig
 import pandas as pd
@@ -22,15 +20,18 @@ logger = getLogger(__name__)
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: ExperimentConfig) -> None:
+    """実験を実行する関数
+        FM, MFモデルにそれぞれの損失(Ideal, IPS, Naive)を適用させ、testデータでのランキング性能を評価する
+    Args:
+        cfg (ExperimentConfig): 実験設定のパラメータ
+    """
+
     log_path = Path("./data/sample_result")
     log_path.mkdir(exist_ok=True, parents=True)
 
     params_path = Path("./data/uniform_init_best_params")
 
     logger.info("start data loading...")
-    # data_path = Path("./data/best_params")
-    # with open(data_path / "dataloader.pkl", "rb") as f:
-    #    dataloader = joblib.load(f)
     dataloader = DataLoader(cfg)
     user2data_indices = dataloader.test_user2data_indices
 
