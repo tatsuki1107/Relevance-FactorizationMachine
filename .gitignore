@@ -1,5 +1,4 @@
-/data/best_params
-/data/uniform_init_best_params
+/data/sample_result
 /data/result
 /data/kuairec
 
@@ -11,8 +10,6 @@
 /utils/dataloader/__pycache__
 
 /conf/__pycache__
-
-/logs/
 
 /test/__pycache__
 /test/.pytest_cache

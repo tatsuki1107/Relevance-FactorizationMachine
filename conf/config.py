@@ -2,18 +2,18 @@ from dataclasses import dataclass
 from typing import Tuple, List
 
 
-@dataclass
+@dataclass(frozen=True)
 class InteractionFeatureConfig:
     timestamp: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class InteractionTableConfig:
     data_path: str
     features: InteractionFeatureConfig
 
 
-@dataclass
+@dataclass(frozen=True)
 class UserFeatureConfig:
     onehot_feat0: str
     onehot_feat1: str
@@ -26,13 +26,13 @@ class UserFeatureConfig:
     register_days: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class UserTableConfig:
     data_path: str
     features: UserFeatureConfig
 
 
-@dataclass
+@dataclass(frozen=True)
 class VideoDailyFeatureConfig:
     play_progress: str
     video_duration: str
@@ -40,37 +40,37 @@ class VideoDailyFeatureConfig:
     share_user_num: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class VideoDailyTableConfig:
     data_path: str
     features: VideoDailyFeatureConfig
 
 
-@dataclass
+@dataclass(frozen=True)
 class VideoCategoryFeatureConfig:
     feat: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class VideoCategoryTableConfig:
     data_path: str
     features: VideoCategoryFeatureConfig
 
 
-@dataclass
+@dataclass(frozen=True)
 class VideoTableConfig:
     daily: VideoDailyTableConfig
     category: VideoCategoryTableConfig
 
 
-@dataclass
+@dataclass(frozen=True)
 class TableConfig:
     interaction: InteractionTableConfig
     user: UserTableConfig
     video: VideoTableConfig
 
 
-@dataclass
+@dataclass(frozen=True)
 class LogDataPropensityConfig:
     data_path: str
     train_val_test_ratio: Tuple[float, float, float]
@@ -79,36 +79,35 @@ class LogDataPropensityConfig:
     exposure_bias: float
 
 
-@dataclass
+@dataclass(frozen=True)
 class FactorizationMachineConfig:
     n_epochs: List[int]
     n_factors: List[int]
-    scale: List[float]
     lr: List[float]
     batch_size: List[int]
     clipping: List[float]
 
 
-@dataclass
+@dataclass(frozen=True)
 class ProbabilisticMatrixFactorizationConfig:
     n_epochs: List[int]
     n_factors: List[int]
-    scale: List[float]
     lr: List[float]
     reg: List[float]
     batch_size: List[int]
     clipping: List[float]
 
 
-@dataclass
+@dataclass(frozen=True)
 class ModelConfig:
     FM: FactorizationMachineConfig
     PMF: ProbabilisticMatrixFactorizationConfig
 
 
-@dataclass
+@dataclass(frozen=True)
 class ExperimentConfig:
     seed: int
     logdata_propensity: LogDataPropensityConfig
     tables: TableConfig
+    is_search_params: bool
     model: ModelConfig

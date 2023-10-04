@@ -18,7 +18,7 @@ class FactorizationMachine(PointwiseBaseRecommender):
 
         w0 = np.array([0.0])
         self.w0 = SGD(params=w0, lr=self.lr)
-        # self.w0 = SGD(params=w0, lr=self.lr)
+
         limit = np.sqrt(6 / self.n_features)
         # w ~ U(-limit, limit)
         w = np.random.uniform(low=-limit, high=limit, size=self.n_features)
@@ -131,10 +131,10 @@ class FactorizationMachine(PointwiseBaseRecommender):
             grad_V_f = -(
                 (term1_f - term2_f).multiply(error[:, None]).sum(axis=0)
             )  # shape: (1, n_features)
-            # Vの該当する列（factor）を更新
-            non_zero_feature_indices = grad_V_f.nonzero()[1]
 
             # update V
+            # Vの該当する列（factor）を更新
+            non_zero_feature_indices = grad_V_f.nonzero()[1]
             self.V.update(
                 grad=grad_V_f[0, non_zero_feature_indices].A1,
                 index=(non_zero_feature_indices, f),

@@ -9,7 +9,7 @@ from utils.dataloader.base import BaseLoader
 
 @dataclass
 class DatasetPreparer(BaseLoader):
-    seed: int
+    _seed: int
 
     def load(
         self,
@@ -86,7 +86,7 @@ class DatasetPreparer(BaseLoader):
         positive_indices = df[positive_filter].index.values
         negative_indices = df[~positive_filter].index.values
 
-        np.random.seed(self.seed)
+        np.random.seed(self._seed)
         negative_indices = np.random.permutation(negative_indices)[
             : len(positive_indices) * negative_multiple
         ]

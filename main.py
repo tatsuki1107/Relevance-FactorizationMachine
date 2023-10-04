@@ -6,11 +6,12 @@ from hydra.core.config_store import ConfigStore
 from conf.config import ExperimentConfig
 import pandas as pd
 import numpy as np
-
+from utils.search_params import random_search
 from utils.dataloader.loader import DataLoader
 from src.fm import FactorizationMachine as FM
 from src.mf import LogisticMatrixFactorization as MF
 from utils.evaluate import Evaluator
+from utils.plot import Visualizer
 
 cs = ConfigStore.instance()
 cs.store(name="setting", node=ExperimentConfig)
@@ -26,20 +27,30 @@ def main(cfg: ExperimentConfig) -> None:
         cfg (ExperimentConfig): 実験設定のパラメータ
     """
 
-    log_path = Path("./data/sample_result")
+    log_path = Path("./logs/result")
     log_path.mkdir(exist_ok=True, parents=True)
 
-    params_path = Path("./data/uniform_init_best_params")
+    params_path = Path("./data/best_params")
 
     logger.info("start data loading...")
     dataloader = DataLoader(cfg)
     user2data_indices = dataloader.test_user2data_indices
 
     logger.info("data loading is done.")
+
+    if cfg.is_search_params:
+        random_search(
+            model_config=cfg.model,
+            seed=cfg.seed,
+            dataloader=dataloader,
+            logger=logger,
+        )
+
     K = [i for i in range(1, 11)]
     metric_df = pd.DataFrame()
     logloss_df = pd.DataFrame()
     used_metrics = {"DCG", "Recall", "MAP"}
+
     for model_name in ["FM", "MF"]:
         for estimator in ["Ideal", "IPS", "Naive"]:
             base_name = f"{model_name}_{estimator}"
@@ -64,7 +75,6 @@ def main(cfg: ExperimentConfig) -> None:
                     n_epochs=model_params["n_epochs"],
                     n_factors=model_params["n_factors"],
                     n_features=train[0].shape[1],
-                    scale=model_params["scale"],
                     lr=model_params["lr"],
                     batch_size=model_params["batch_size"],
                     seed=cfg.seed,
@@ -85,7 +95,6 @@ def main(cfg: ExperimentConfig) -> None:
                     n_factors=model_params["n_factors"],
                     n_users=dataloader.n_users,
                     n_items=dataloader.n_items,
-                    scale=model_params["scale"],
                     lr=model_params["lr"],
                     reg=model_params["reg"],
                     batch_size=model_params["batch_size"],
@@ -147,6 +156,12 @@ def main(cfg: ExperimentConfig) -> None:
 
     metric_df.to_csv(log_path / "metric.csv", index=False)
     logloss_df.to_csv(log_path / "logloss.csv", index=False)
+
+    Visualizer(
+        result_df=metric_df,
+        K=K,
+        metrics=used_metrics,
+    )
 
 
 if __name__ == "__main__":

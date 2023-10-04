@@ -44,6 +44,7 @@ tables:
       features:
         feat: "multilabel"
 
+is_search_params: False
 model:
   PMF:
     n_epochs:
@@ -54,9 +55,6 @@ model:
     n_factors:
       - 100
       - 200
-    scale:
-      - 0.5
-      - 0.1
     lr:
       - 0.00005
       - 0.0001
@@ -68,7 +66,7 @@ model:
       - 512
     clipping:
       - 0.001
-      - 0.1
+      - 0.01
   FM:
     n_epochs:
       # start
@@ -78,9 +76,6 @@ model:
     n_factors:
       - 100
       - 150
-    scale:
-      - 0.5
-      - 0.1
     lr:
       - 0.00005
       - 0.0001

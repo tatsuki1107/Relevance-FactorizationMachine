@@ -19,10 +19,6 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         np.random.seed(self.seed)
 
         # init user embeddings
-        # P ~ N(0, scale^2)
-        # P = np.random.normal(scale=0.2, size=(self.n_users, self.#n_factors))
-        # self.P = SGD(params=P, lr=self.lr)
-
         limit = self.alpha * np.sqrt(6 / self.n_factors)
         # P ~ U(-limit, limit)
         P = np.random.uniform(
@@ -31,7 +27,6 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         self.P = SGD(params=P, lr=self.lr)
 
         # init item embeddings
-        # Q = np.random.normal(scale=0.2, size=(self.n_items, self.#n_factors))
         # Q ~ U(-limit, limit)
         Q = np.random.uniform(
             low=-limit, high=limit, size=(self.n_items, self.n_factors)
@@ -39,12 +34,12 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         self.Q = SGD(params=Q, lr=self.lr)
 
         # init user bias
-        # b_u ~ N(0, 0.01)
+        # b_u ~ N(0, 0.001^2)
         b_u = np.random.normal(scale=0.001, size=self.n_users)
         self.b_u = SGD(params=b_u, lr=self.lr)
 
         # init item bias
-        # b_i ~ N(0, 0.01)
+        # b_i ~ N(0, 0.001^2)
         b_i = np.random.normal(scale=0.001, size=self.n_items)
         self.b_i = SGD(params=b_i, lr=self.lr)
 

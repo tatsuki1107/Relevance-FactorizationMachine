@@ -17,7 +17,6 @@ class PointwiseBaseRecommender(ABC):
 
     n_epochs: int
     n_factors: int
-    scale: float
     lr: float
     batch_size: int
     seed: int

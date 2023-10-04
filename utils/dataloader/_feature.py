@@ -15,7 +15,7 @@ error_base = "'{}' datatype is not supported. feature_name: '{}'"
 
 @dataclass
 class FeatureGenerator(BaseLoader):
-    params: TableConfig
+    _params: TableConfig
 
     def load(
         self,
@@ -27,7 +27,7 @@ class FeatureGenerator(BaseLoader):
         basefeatures, interaction_df = self._create_basefeature(
             interaction_df=interaction_df
         )
-        tables_dict = OmegaConf.to_container(self.params, resolve=True)
+        tables_dict = OmegaConf.to_container(self._params, resolve=True)
 
         features = [basefeatures]
         for df_name, df in dataframes_dict.items():
@@ -104,11 +104,11 @@ class FeatureGenerator(BaseLoader):
     ) -> Dict[str, pd.DataFrame]:
         user_features_df = KuaiRecCSVLoader.create_user_features_df(
             existing_user_ids=interaction_df["user_id"],
-            params=self.params.user,
+            _params=self._params.user,
         )
         item_features_df = KuaiRecCSVLoader.create_item_features_df(
             existing_video_ids=interaction_df["video_id"],
-            params=self.params.video,
+            _params=self._params.video,
         )
 
         dataframes_dict = {

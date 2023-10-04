@@ -9,8 +9,8 @@ from utils.dataloader._kuairec import KuaiRecCSVLoader
 
 @dataclass
 class SemiSyntheticLogDataGenerator(BaseLoader):
-    seed: int
-    params: LogDataPropensityConfig
+    _seed: int
+    _params: LogDataPropensityConfig
 
     def load(
         self,
@@ -49,12 +49,12 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
     ) -> pd.DataFrame:
         # 過去の推薦方策pi_bはランダムなポリシーとしてログデータを生成
         # ユーザの評価は時間に左右されないと仮定
-        if self.params.behavior_policy == "random":
-            np.random.seed(self.seed)
+        if self._params.behavior_policy == "random":
+            np.random.seed(self._seed)
             interaction_df = interaction_df.sample(frac=1).reset_index(
                 drop=True
             )
-            data_size = int(interaction_df.shape[0] * self.params.density)
+            data_size = int(interaction_df.shape[0] * self._params.density)
             interaction_df = interaction_df.iloc[:data_size]
         else:
             raise ValueError("behavior_policy must be random")
@@ -62,7 +62,7 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         return interaction_df
 
     def _generate_datatype(self, data_size: int) -> list:
-        train_val_test_ratio = self.params.train_val_test_ratio
+        train_val_test_ratio = self._params.train_val_test_ratio
         datatypes = ["train", "val"]
 
         res = []
@@ -90,7 +90,7 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         existing_video_ids: pd.Series,
     ) -> pd.DataFrame:
         observation_df = KuaiRecCSVLoader.create_big_matrix_df(
-            params=self.params
+            _params=self._params
         )
 
         isin_video_ids = observation_df["video_id"].isin(existing_video_ids)
@@ -106,7 +106,7 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         video_exposures = video_expo_counts.apply(_sigmoid)
         exposure_probabilitys = video_exposures[existing_video_ids].values
 
-        return exposure_probabilitys**self.params.exposure_bias
+        return exposure_probabilitys**self._params.exposure_bias
 
     def _generate_clicks(
         self,
@@ -114,7 +114,7 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         relevance_probabilitys: pd.Series,
     ) -> Tuple[np.ndarray, np.ndarray]:
         # generate clicks
-        np.random.seed(self.seed)
+        np.random.seed(self._seed)
         # P(O = 1)
         exposure_labels = np.random.binomial(
             n=1,

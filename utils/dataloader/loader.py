@@ -10,20 +10,20 @@ from utils.dataloader.base import BaseLoader
 
 @dataclass
 class DataLoader(BaseLoader):
-    params: ExperimentConfig
+    _params: ExperimentConfig
 
     def __post_init__(self) -> None:
         """半人工データを生成する"""
 
         # small_matrix.csvのインタラクションデータを研究に用いる
         small_matrix_df = KuaiRecCSVLoader.create_interaction_df(
-            params=self.params.tables.interaction
+            _params=self._params.tables.interaction
         )
         # 自然に観測されたbig_matrix上でのユーザーとアイテムの相対的な露出を用いて、
         # クリックデータを生成する
         logdata_generator = SemiSyntheticLogDataGenerator(
-            seed=self.params.seed,
-            params=self.params.logdata_propensity,
+            _seed=self._params.seed,
+            _params=self._params.logdata_propensity,
         )
         interaction_df = logdata_generator.load(
             interaction_df=small_matrix_df,
@@ -31,13 +31,13 @@ class DataLoader(BaseLoader):
 
         del small_matrix_df
         # interaction_dfに存在するユーザーとアイテムの特徴量を生成する
-        feature_generator = FeatureGenerator(params=self.params.tables)
+        feature_generator = FeatureGenerator(_params=self._params.tables)
         features, interaction_df = feature_generator.load(
             interaction_df=interaction_df
         )
 
         # FMとPMFを用いて学習、評価できるようにデータを整形する
-        preparer = DatasetPreparer(seed=self.params.seed)
+        preparer = DatasetPreparer(_seed=self._params.seed)
         self.datasets = preparer.load(
             interaction_df=interaction_df,
             features=features,
