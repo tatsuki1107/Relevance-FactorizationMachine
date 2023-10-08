@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Tuple, Callable, Dict
 
-eps = 10e-3  # pscore clipping
+NOT_IMPLEMENTED_ERROR_MESSAGE = "Re-implement if for SNIPS estimator"
 
 
 def calc_precision_at_k(
@@ -15,7 +15,7 @@ def calc_precision_at_k(
     if np.all(pscores == 1):
         return np.mean(y_true_sorted_by_scores)
     else:
-        raise NotImplementedError("SNIPS用に実装し直して")
+        raise NotImplementedError(NOT_IMPLEMENTED_ERROR_MESSAGE)
 
 
 def calc_average_precision_at_k(
@@ -37,7 +37,7 @@ def calc_average_precision_at_k(
     if np.all(pscores == 1):
         return average_precision
 
-    raise NotImplementedError("SNIPS用に実装し直して")
+    raise NotImplementedError(NOT_IMPLEMENTED_ERROR_MESSAGE)
 
 
 def calc_recall_at_k(
@@ -57,7 +57,7 @@ def calc_recall_at_k(
     if np.all(pscores == 1):
         return recall
 
-    raise NotImplementedError("SNIPS用に実装し直して")
+    raise NotImplementedError(NOT_IMPLEMENTED_ERROR_MESSAGE)
 
 
 def calc_dcg_at_k(
@@ -90,9 +90,9 @@ def calc_dcg_at_k(
 
 
 def calc_roc_auc(
-    y_true: np.ndarray, y_scores: np.ndarray
+    y_true: np.ndarray, y_scores: np.ndarray, interval: float = 0.0001
 ) -> Tuple[list, list, float]:
-    thetahold = np.arange(0, 1.0001, 0.0001)[::-1]
+    thetahold = np.arange(0, 1 + interval, interval)[::-1]
     tpr, fpr = [], []
     for theta in thetahold:
         y_pred = (y_scores >= theta).astype(int)
@@ -115,7 +115,7 @@ def calc_roc_auc(
     return tpr, fpr, roc
 
 
-metrics: Dict[str, Callable] = {
+metric_candidates: Dict[str, Callable] = {
     "Recall": calc_recall_at_k,
     "Precision": calc_precision_at_k,
     "MAP": calc_average_precision_at_k,

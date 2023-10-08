@@ -13,7 +13,6 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
     n_items: int
     reg: float
     alpha: float = 2
-    eps: float = 1e-8
 
     def __post_init__(self) -> None:
         np.random.seed(self.seed)
@@ -80,27 +79,26 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
                 # update item bias
                 self._update_b_i(item_id=item_id, err=err)
 
+            pred_scores = self.predict(batch_X)
             trainloss = self._cross_entropy_loss(
-                user_ids=batch_X[:, 0],
-                item_ids=batch_X[:, 1],
-                clicks=batch_y,
+                y_trues=batch_y,
+                y_scores=pred_scores,
                 pscores=batch_pscores,
             )
             train_loss.append(trainloss)
 
+            pred_scores = self.predict(val_X)
             valloss = self._cross_entropy_loss(
-                user_ids=val_X[:, 0],
-                item_ids=val_X[:, 1],
-                clicks=val_y,
+                y_trues=val_y,
+                y_scores=pred_scores,
                 pscores=val_pscores,
             )
             val_loss.append(valloss)
 
         return train_loss, val_loss
 
-    def predict(
-        self, user_ids: np.ndarray, item_ids: np.ndarray
-    ) -> np.ndarray:
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        user_ids, item_ids = X[:, 0], X[:, 1]
         return np.array(
             [
                 self._predict_pair(user_id, item_id)
@@ -115,20 +113,6 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
             + self.b_i(item_id)
             + self.b
         )
-
-    def _cross_entropy_loss(
-        self,
-        user_ids: np.ndarray,
-        item_ids: np.ndarray,
-        clicks: np.ndarray,
-        pscores: np.ndarray,
-    ) -> float:
-        pred_scores = self.predict(user_ids, item_ids)
-        loss = -np.sum(
-            (clicks / pscores) * np.log(pred_scores + self.eps)
-            + (1 - (clicks / pscores)) * np.log(1 - pred_scores + self.eps)
-        ) / len(clicks)
-        return loss
 
     def _update_P(self, user_id: int, item_id: int, err: float) -> None:
         grad_P = -err * self.Q(item_id) + self.reg * self.P(user_id)

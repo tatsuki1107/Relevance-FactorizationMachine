@@ -42,14 +42,24 @@ class PointwiseBaseRecommender(ABC):
         """
         pass
 
-    @abstractmethod
-    def _cross_entropy_loss(self, **kwargs) -> float:
+    def _cross_entropy_loss(
+        self,
+        y_trues: np.ndarray,
+        y_scores: np.ndarray,
+        pscores: np.ndarray,
+        eps: float = 1e-8,
+    ) -> float:
         """与えられたデータを元にクロスエントロピー損失を計算する
 
         Returns:
             float: クロスエントロピー損失
         """
-        pass
+        logloss = -np.sum(
+            (y_trues / pscores) * np.log(y_scores + eps)
+            + (1 - y_trues / pscores) * np.log(1 - y_scores + eps)
+        ) / len(y_trues)
+
+        return logloss
 
     def _sigmoid(self, x: np.ndarray) -> np.ndarray:
         """シグモイド関数。予測値に対してシグモイド関数を適用することで確率に変換する。オーバーフローを防ぐためにクリッピングを行う。

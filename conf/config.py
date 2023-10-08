@@ -10,11 +10,12 @@ class InteractionFeatureConfig:
 @dataclass(frozen=True)
 class InteractionTableConfig:
     data_path: str
-    features: InteractionFeatureConfig
+    used_features: InteractionFeatureConfig
 
 
 @dataclass(frozen=True)
 class UserFeatureConfig:
+    user_active_degree: str
     onehot_feat0: str
     onehot_feat1: str
     onehot_feat2: str
@@ -23,13 +24,13 @@ class UserFeatureConfig:
     onehot_feat12: str
     onehot_feat13: str
     onehot_feat14: str
-    register_days: str
+    onehot_feat15: str
 
 
 @dataclass(frozen=True)
 class UserTableConfig:
     data_path: str
-    features: UserFeatureConfig
+    used_features: UserFeatureConfig
 
 
 @dataclass(frozen=True)
@@ -37,13 +38,16 @@ class VideoDailyFeatureConfig:
     play_progress: str
     video_duration: str
     like_cnt: str
-    share_user_num: str
+    cancel_like_cnt: str
+    share_cnt: str
+    double_click_cnt: str
+    download_cnt: str
 
 
 @dataclass(frozen=True)
 class VideoDailyTableConfig:
     data_path: str
-    features: VideoDailyFeatureConfig
+    used_features: VideoDailyFeatureConfig
 
 
 @dataclass(frozen=True)
@@ -54,7 +58,7 @@ class VideoCategoryFeatureConfig:
 @dataclass(frozen=True)
 class VideoCategoryTableConfig:
     data_path: str
-    features: VideoCategoryFeatureConfig
+    used_features: VideoCategoryFeatureConfig
 
 
 @dataclass(frozen=True)
@@ -89,7 +93,7 @@ class FactorizationMachineConfig:
 
 
 @dataclass(frozen=True)
-class ProbabilisticMatrixFactorizationConfig:
+class LogisticMatrixFactorizationConfig:
     n_epochs: List[int]
     n_factors: List[int]
     lr: List[float]
@@ -101,7 +105,7 @@ class ProbabilisticMatrixFactorizationConfig:
 @dataclass(frozen=True)
 class ModelConfig:
     FM: FactorizationMachineConfig
-    PMF: ProbabilisticMatrixFactorizationConfig
+    MF: LogisticMatrixFactorizationConfig
 
 
 @dataclass(frozen=True)

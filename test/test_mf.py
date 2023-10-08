@@ -1,22 +1,21 @@
 from test.test_fm import ModelTestBase
-from src.mf import ProbabilisticMatrixFactorization as PMF
+from src.mf import LogisticMatrixFactorization as MF
 
 
-class TestPMF(ModelTestBase):
+class TestMF(ModelTestBase):
     def setup_method(self):
         super().setup_method()
 
         # prepare data for IPS estimator
-        self.train, self.val, _, _ = self.loader.load(
-            model_name="PMF", estimator="IPS"
+        self.train, self.val, _ = self.loader.load(
+            model_name="MF", estimator="IPS"
         )
 
-        self.model = PMF(
+        self.model = MF(
             n_epochs=self.cfg.model.PMF.n_epochs[0],
             n_factors=self.cfg.model.PMF.n_factors[0],
             n_users=self.loader.n_users,
             n_items=self.loader.n_items,
-            scale=self.cfg.model.PMF.scale[0],
             lr=self.cfg.model.PMF.lr[0],
             reg=self.cfg.model.PMF.reg[0],
             batch_size=self.cfg.model.PMF.batch_size[0],

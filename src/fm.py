@@ -1,6 +1,6 @@
 import numpy as np
 from dataclasses import dataclass
-from typing import Tuple, Optional
+from typing import Tuple
 from tqdm import tqdm
 from sklearn.utils import resample
 from scipy.sparse import csr_matrix, diags
@@ -11,7 +11,6 @@ from utils.optimizer import SGD
 @dataclass
 class FactorizationMachine(PointwiseBaseRecommender):
     n_features: int
-    eps: float = 1e-8
 
     def __post_init__(self) -> None:
         np.random.seed(self.seed)
@@ -59,13 +58,15 @@ class FactorizationMachine(PointwiseBaseRecommender):
             # update V
             self._update_V(error, batch_X)
 
+            pred_scores = self.predict(batch_X)
             trainloss = self._cross_entropy_loss(
-                X=batch_X, y=batch_y, pscores=batch_pscores
+                y_trues=batch_y, y_scores=pred_scores, pscores=batch_pscores
             )
             train_loss.append(trainloss)
 
+            pred_scores = self.predict(val_X)
             valloss = self._cross_entropy_loss(
-                X=val_X, y=val_y, pscores=val_pscores
+                y_trues=val_y, y_scores=pred_scores, pscores=val_pscores
             )
             val_loss.append(valloss)
 
@@ -82,22 +83,6 @@ class FactorizationMachine(PointwiseBaseRecommender):
 
         pred_y = self._sigmoid(self.w0(0) + linear_out + factor_out)
         return pred_y
-
-    def _cross_entropy_loss(
-        self,
-        X: csr_matrix,
-        y: np.ndarray,
-        pscores: Optional[np.ndarray] = None,
-    ) -> float:
-        if pscores is None:
-            pscores = np.ones_like(y)
-
-        y_hat = self.predict(X)
-        loss = -np.sum(
-            (y / pscores) * np.log(y_hat + self.eps)
-            + (1 - (y / pscores)) * np.log(1 - y_hat + self.eps)
-        ) / len(y)
-        return loss
 
     def _update_w0(self, error: np.ndarray) -> None:
         """update w0"""

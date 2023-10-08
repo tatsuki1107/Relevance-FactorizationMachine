@@ -1,4 +1,5 @@
 from abc import ABC
+from logging import getLogger
 from collections import defaultdict
 from hydra import initialize, compose
 from conf.config import ExperimentConfig
@@ -9,9 +10,10 @@ from src.fm import FactorizationMachine as FM
 
 class ModelTestBase(ABC):
     def setup_method(self):
+        logger = getLogger(__name__)
         initialize(config_path="../conf", version_base="1.3")
         self.cfg: ExperimentConfig = compose(config_name="config")
-        self.loader = DataLoader(self.cfg)
+        self.loader = DataLoader(self.cfg, logger)
 
 
 class TestFM(ModelTestBase):
@@ -27,7 +29,6 @@ class TestFM(ModelTestBase):
             n_epochs=self.cfg.model.FM.n_epochs[0],
             n_factors=self.cfg.model.FM.n_factors[0],
             n_features=self.train[0].shape[1],
-            scale=self.cfg.model.FM.scale[0],
             lr=self.cfg.model.FM.lr[0],
             batch_size=self.cfg.model.FM.batch_size[0],
             seed=self.cfg.seed,

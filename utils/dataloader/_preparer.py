@@ -9,6 +9,12 @@ from utils.dataloader.base import BaseLoader
 
 @dataclass
 class DatasetPreparer(BaseLoader):
+    """FMとMFで学習できるようにデータを準備する
+
+    Args:
+        _seed: 乱数のシード値 (read only)
+    """
+
     _seed: int
 
     def load(
@@ -16,6 +22,16 @@ class DatasetPreparer(BaseLoader):
         interaction_df: pd.DataFrame,
         features: csr_matrix,
     ) -> dict:
+        """FMとMFで学習できるようにデータを準備するメソッド
+
+        Args:
+            interaction_df: ランダムポリシーで生成したログデータ
+            features: FMで用いる特徴量。csr_matrix
+
+        Returns:
+            datasets: 準備されたデータセット辞書
+        """
+
         # split train, val, test
         usecols = ["datatype", "biased_click"]
         dataset_indices = self._split_datasets(df=interaction_df[usecols])
@@ -37,7 +53,7 @@ class DatasetPreparer(BaseLoader):
             df=interaction_df[usecols], df_indices=dataset_indices
         )
 
-        # prepare test_user2indices
+        # prepare user2data_indices
         usecols = ["user_index", "exposure"]
         val_user2data_indices = self._create_user2data_indices(
             interaction_df=interaction_df[usecols],
@@ -66,6 +82,16 @@ class DatasetPreparer(BaseLoader):
         return datasets
 
     def _split_datasets(self, df: pd.DataFrame) -> Dict[str, np.ndarray]:
+        """interaction_dfをtrain, val, testデータに分割して、
+        それぞれのデータのインデックスを取得する。
+
+        Args:
+            df (pd.DataFrame): インタラクションのデータフレーム
+
+        Returns:
+            Dict[str, np.ndarray]: train, val, testデータのインデックス
+        """
+
         datatypes = ["train", "val", "test"]
         res = {}
         for datatype in datatypes:
@@ -81,6 +107,16 @@ class DatasetPreparer(BaseLoader):
     def _negative_sample(
         self, df: pd.DataFrame, negative_multiple: int = 2
     ) -> np.ndarray:
+        """train, valデータに対するnegative sampleを行う
+
+        Args:
+            df: インタラクションのデータフレーム
+            negative_multiple: ネガティブサンプルの倍数
+
+        Returns:
+            np.ndarray: ネガティブサンプル後のデータのインデックス
+        """
+
         # negative sample
         positive_filter = df["biased_click"] == 1
         positive_indices = df[positive_filter].index.values
@@ -99,6 +135,15 @@ class DatasetPreparer(BaseLoader):
         features: csr_matrix,
         feature_indices: Dict[str, np.ndarray],
     ) -> FMDataset:
+        """FMで用いるデータセットを準備する
+
+        Args:
+            features: FMで用いる特徴量
+            feature_indices: train, val, testデータのインデックス
+
+        Returns:
+            FMDataset: FMで用いるデータセット
+        """
         datasets = {}
         for datatype, indices in feature_indices.items():
             datasets[datatype] = features[indices]
@@ -110,6 +155,15 @@ class DatasetPreparer(BaseLoader):
         df: pd.DataFrame,
         df_indices: Dict[str, np.ndarray],
     ) -> MFDataset:
+        """MFで用いるデータセットを準備する
+
+        Args:
+            df: インタラクションのデータフレーム
+            df_indices: train, val, testデータのインデックス
+
+        Returns:
+            MFDataset: MFで用いるデータセット
+        """
         datasets = {}
         for datatype, indices in df_indices.items():
             datasets[datatype] = df.iloc[indices].values
@@ -126,6 +180,16 @@ class DatasetPreparer(BaseLoader):
         df: pd.DataFrame,
         df_indices: Dict[str, np.ndarray],
     ) -> Tuple[dict]:
+        """傾向スコアとクリック、真の関連度を準備する
+
+        Args:
+            df: インタラクションのデータフレーム
+            df_indices: train, val, testデータのインデックス
+
+        Returns:
+            Tuple[dict]: 傾向スコアとクリック、真の関連度
+        """
+
         relevances, pscores, clicks = {}, {}, {}
         for datatype, indices in df_indices.items():
             data_df = df.iloc[indices]
@@ -146,6 +210,18 @@ class DatasetPreparer(BaseLoader):
         frequency: set,
         thetahold: int = 0.75,
     ) -> Dict[str, list]:
+        """ユーザごとのランク性能を評価するために、ユーザー毎の
+        データのインデックスを準備する
+
+        Args:
+            interaction_df: インタラクションのデータフレーム
+            df_indices: train, val, testデータのインデックス
+            frequency (set): データの出現頻度
+            thetahold: popularとrareアイテムの境界値
+
+        Returns:
+            Dict[str, list]: ユーザごとのデータのインデックス
+        """
         data_df = interaction_df.iloc[df_indices].reset_index(drop=True)
         dataframe_dict = {}
         for freq in frequency:

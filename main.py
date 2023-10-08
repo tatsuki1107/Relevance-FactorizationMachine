@@ -33,7 +33,7 @@ def main(cfg: ExperimentConfig) -> None:
     params_path = Path("./data/best_params")
 
     logger.info("start data loading...")
-    dataloader = DataLoader(cfg)
+    dataloader = DataLoader(cfg, logger)
     user2data_indices = dataloader.test_user2data_indices
 
     logger.info("data loading is done.")
@@ -45,6 +45,8 @@ def main(cfg: ExperimentConfig) -> None:
             dataloader=dataloader,
             logger=logger,
         )
+
+    logger.info("start experiment...")
 
     K = [i for i in range(1, 11)]
     metric_df = pd.DataFrame()
@@ -79,15 +81,6 @@ def main(cfg: ExperimentConfig) -> None:
                     batch_size=model_params["batch_size"],
                     seed=cfg.seed,
                 )
-                _, _ = model.fit(train, val)
-
-                logloss = model._cross_entropy_loss(
-                    X=test[0],
-                    y=test[1],
-                    pscores=np.ones_like(test[1]),
-                )
-                logloss_df[base_name] = [logloss]
-                pred_y = model.predict(test[0])
 
             elif model_name == "MF":
                 model = MF(
@@ -101,20 +94,20 @@ def main(cfg: ExperimentConfig) -> None:
                     seed=cfg.seed,
                 )
 
-                _, _ = model.fit(train, val)
+            _, _ = model.fit(train, val)
 
-                logloss = model._cross_entropy_loss(
-                    user_ids=test[0][:, 0],
-                    item_ids=test[0][:, 1],
-                    clicks=test[1],
-                    pscores=np.ones_like(test[1]),
-                )
-                logloss_df[base_name] = [logloss]
-                pred_y = model.predict(test[0][:, 0], test[0][:, 1])
+            pred_scores = model.predict(test[0])
+            logloss = model._cross_entropy_loss(
+                y_trues=test[1],
+                y_scores=pred_scores,
+                pscores=np.ones_like(test[1]),
+            )
+            logloss_df[base_name] = [logloss]
+
             print(
-                f"{base_name}: min: {pred_y.min()},"
-                + f"max: {pred_y.max()}, mean: {pred_y.mean()}"
-                + f"std: {pred_y.std()}"
+                f"{base_name}: min: {pred_scores.min()},"
+                + f"max: {pred_scores.max()}, mean: {pred_scores.mean()}"
+                + f"std: {pred_scores.std()}"
             )
 
             for frequency, user2indices in user2data_indices.items():

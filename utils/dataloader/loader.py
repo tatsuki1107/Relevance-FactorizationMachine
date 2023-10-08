@@ -1,4 +1,5 @@
 import numpy as np
+from logging import Logger
 from dataclasses import dataclass
 from conf.config import ExperimentConfig
 from utils.dataloader._click import SemiSyntheticLogDataGenerator
@@ -7,57 +8,85 @@ from utils.dataloader._kuairec import KuaiRecCSVLoader
 from utils.dataloader._preparer import DatasetPreparer
 from utils.dataloader.base import BaseLoader
 
+MODEL_NAME_ERROR_MESSAGE = "model_name must be FM or MF. model_name: '{}'"
+ESTIMATOR_NAME_ERROR_MESSAGE = (
+    "estimator must be Ideal, IPS or Naive. estimator: '{}'"
+)
+
 
 @dataclass
 class DataLoader(BaseLoader):
+    """学習、評価に用いるデータを生成する
+
+    Args:
+        _params: 実験設定のパラメータ(read only)
+        logger: ロギングのインスタンス
+    """
+
     _params: ExperimentConfig
+    logger: Logger
 
     def __post_init__(self) -> None:
         """半人工データを生成する"""
 
         # small_matrix.csvのインタラクションデータを研究に用いる
         small_matrix_df = KuaiRecCSVLoader.create_interaction_df(
-            _params=self._params.tables.interaction
+            _params=self._params.tables.interaction,
+            logger=self.logger,
         )
-        # 自然に観測されたbig_matrix上でのユーザーとアイテムの相対的な露出を用いて、
-        # クリックデータを生成する
+        self.logger.info("created small_matrix_df")
+
+        # 半人工ログデータを生成する
         logdata_generator = SemiSyntheticLogDataGenerator(
             _seed=self._params.seed,
             _params=self._params.logdata_propensity,
+            logger=self.logger,
         )
         interaction_df = logdata_generator.load(
             interaction_df=small_matrix_df,
         )
+        self.logger.info("created interaction_df")
 
         del small_matrix_df
         # interaction_dfに存在するユーザーとアイテムの特徴量を生成する
-        feature_generator = FeatureGenerator(_params=self._params.tables)
+        feature_generator = FeatureGenerator(
+            _params=self._params.tables,
+            logger=self.logger,
+        )
         features, interaction_df = feature_generator.load(
             interaction_df=interaction_df
         )
+        self.logger.info("created features")
 
-        # FMとPMFを用いて学習、評価できるようにデータを整形する
+        # FMとMFを用いて学習、評価できるようにデータを整形する
         preparer = DatasetPreparer(_seed=self._params.seed)
         self.datasets = preparer.load(
             interaction_df=interaction_df,
             features=features,
         )
+        self.logger.info("prepared train and evaluation datasets")
 
         self.n_users = self.datasets["MF"].n_users
         self.n_items = self.datasets["MF"].n_items
 
     def load(self, model_name: str, estimator: str) -> tuple:
-        """モデルと推定量ごとのtrain, val, testデータを返す"""
+        """モデルと推定量ごとのtrain, val, testデータを返す
+
+        Args:
+            model_name: モデルの名前。FMまたは、MF
+            estimator: 推定量の名前。Ideal, IPSまたは、Naive
+
+        Returns:
+            tuple: train, val, testデータ
+        """
+
         # params validation
         if model_name not in {"FM", "MF"}:
-            raise ValueError(
-                "model_name must be FM or MF. " + f"model_name: {model_name}"
-            )
+            self.logger.error(MODEL_NAME_ERROR_MESSAGE.format(model_name))
+            raise ValueError(MODEL_NAME_ERROR_MESSAGE.format(model_name))
         if estimator not in {"Ideal", "IPS", "Naive"}:
-            raise ValueError(
-                "estimator must be Ideal, IPS or Naive."
-                + f" estimator: {estimator}"
-            )
+            self.logger.error(ESTIMATOR_NAME_ERROR_MESSAGE.format(estimator))
+            raise ValueError(ESTIMATOR_NAME_ERROR_MESSAGE.format(estimator))
 
         # target variable
         if estimator == "Ideal":

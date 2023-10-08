@@ -1,4 +1,5 @@
 from hydra import initialize, compose
+from logging import getLogger
 from utils.dataloader.loader import DataLoader
 
 
@@ -8,7 +9,8 @@ class TestDataLoader:
         self.cfg = compose(config_name="config")
 
     def test_dataloader(self):
-        loader = DataLoader(self.cfg)
+        logger = getLogger(__name__)
+        loader = DataLoader(self.cfg, logger)
         datasets = loader.load(model_name="FM", estimator="IPS")
 
         assert isinstance(datasets, tuple)

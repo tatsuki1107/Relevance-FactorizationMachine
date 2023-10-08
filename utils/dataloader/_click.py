@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from logging import Logger
 from typing import Tuple
 import numpy as np
 import pandas as pd
@@ -11,6 +12,7 @@ from utils.dataloader._kuairec import KuaiRecCSVLoader
 class SemiSyntheticLogDataGenerator(BaseLoader):
     _seed: int
     _params: LogDataPropensityConfig
+    logger: Logger
 
     def load(
         self,
@@ -29,11 +31,15 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         )
         interaction_df["relevance"] = relevance_probabilitys
         interaction_df.drop("watch_ratio", axis=1, inplace=True)
+        self.logger.info(f"mean of relevance: {relevance_probabilitys.mean()}")
+        self.logger.info(f"std of relevance: {relevance_probabilitys.std()}")
 
         exposure_probabilitys = self._generate_exposure(
             existing_video_ids=interaction_df["video_id"]
         )
         interaction_df["exposure"] = exposure_probabilitys
+        self.logger.info(f"mean of exposure: {exposure_probabilitys.mean()}")
+        self.logger.info(f"std of exposure: {exposure_probabilitys.std()}")
 
         biased_clicks, unbiased_clicks = self._generate_clicks(
             exposure_probabilitys=interaction_df["exposure"],
@@ -41,6 +47,10 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         )
         interaction_df["biased_click"] = biased_clicks
         interaction_df["unbiased_click"] = unbiased_clicks
+        self.logger.info(f"biased click through rate: {biased_clicks.mean()}")
+        self.logger.info(
+            f"unbiased click through rate: {unbiased_clicks.mean()}"
+        )
 
         return interaction_df
 
@@ -90,7 +100,8 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         existing_video_ids: pd.Series,
     ) -> pd.DataFrame:
         observation_df = KuaiRecCSVLoader.create_big_matrix_df(
-            _params=self._params
+            _params=self._params,
+            logger=self.logger,
         )
 
         isin_video_ids = observation_df["video_id"].isin(existing_video_ids)

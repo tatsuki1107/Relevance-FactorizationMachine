@@ -1,25 +1,9 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import seaborn as sns
 import pandas as pd
 from typing import Set, List
 from pathlib import Path
 from dataclasses import dataclass, field
-
-
-def plot_heatmap(matrix: np.ndarray) -> None:
-    """評価値matrixをヒートマップで可視化
-    args:
-        matrix: 評価値行列
-    """
-    fig, ax = plt.subplots(figsize=(20, 5))
-
-    my_cmap = plt.cm.get_cmap("Reds")
-    heatmap = plt.pcolormesh(matrix.T, cmap=my_cmap)
-    plt.colorbar(heatmap)
-    ax.grid()
-    plt.tight_layout()
-    plt.show()
 
 
 @dataclass

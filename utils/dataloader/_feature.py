@@ -1,6 +1,7 @@
 from omegaconf import OmegaConf
 from dataclasses import dataclass
 from typing import Dict, Tuple
+from logging import Logger
 import pandas as pd
 import numpy as np
 from scipy.sparse import csr_matrix, hstack
@@ -10,12 +11,13 @@ from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
 from utils.dataloader._kuairec import KuaiRecCSVLoader
 from utils.dataloader.base import BaseLoader
 
-error_base = "'{}' datatype is not supported. feature_name: '{}'"
+VALUE_ERROR_MESSAGE = "'{}' datatype is not supported. feature_name: '{}'"
 
 
 @dataclass
 class FeatureGenerator(BaseLoader):
     _params: TableConfig
+    logger: Logger
 
     def load(
         self,
@@ -35,11 +37,11 @@ class FeatureGenerator(BaseLoader):
 
             if df_name == "video":
                 columns = (
-                    tables["daily"]["features"]
-                    | tables["category"]["features"]
+                    tables["daily"]["used_features"]
+                    | tables["category"]["used_features"]
                 )
             else:
-                columns = tables["features"]
+                columns = tables["used_features"]
 
             converted_df = self._feature_engineering(df=df, columns=columns)
             if df_name == "interaction":
@@ -72,7 +74,10 @@ class FeatureGenerator(BaseLoader):
         datatypes = defaultdict(list)
         for feature_name, datatype in columns.items():
             if datatype not in {"int", "float", "label", "multilabel"}:
-                error_message = error_base.format(datatype, feature_name)
+                error_message = VALUE_ERROR_MESSAGE.format(
+                    datatype, feature_name
+                )
+                self.logger.error(error_message)
                 raise ValueError(error_message)
 
             datatypes[datatype].append(feature_name)
@@ -105,10 +110,12 @@ class FeatureGenerator(BaseLoader):
         user_features_df = KuaiRecCSVLoader.create_user_features_df(
             existing_user_ids=interaction_df["user_id"],
             _params=self._params.user,
+            logger=self.logger,
         )
         item_features_df = KuaiRecCSVLoader.create_item_features_df(
             existing_video_ids=interaction_df["video_id"],
             _params=self._params.video,
+            logger=self.logger,
         )
 
         dataframes_dict = {
