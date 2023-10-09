@@ -23,6 +23,18 @@
 
 アルゴリズムへの深い理解と実装スキルの向上を目指しているため、コードは主にNumpyとSciPyを使用したオリジナルの実装となっています。
 
+# 使用するデータセット
+本研究での実験には、<a href="https://kuairec.com/">KuaiRecデータセット</a>を使用します。使用する背景の詳細は、<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">`short_paper.md`</a>の`半合成データを用いた性能実験`の項目を参照してください。
+
+## 扱うcsvファイルの詳細
+実験には以下の5つのcsvファイルを使用します。(*実験スクリプトを実行する際は、これらのファイルを/data/kuairec/ディレクトリに格納する必要があります。)
+
+- `small_matrix.csv`: 実験的に収集された、ユーザー数1411人、動画数3327本のフィードバックデータ。評価値行列の密度は約99.6%。
+- `big_matrix.csv`: 自然に観測された、ユーザー数7176人、動画数10728本のフィードバックデータ。
+- `item_categories.csv`: 各動画のカテゴリ情報。
+- `item_daily_features.csv`: 日毎の動画特徴量。
+- `user_features.csv`: 匿名化されたユーザー特徴量。
+
 # ディレクトリ構成
 
 - `conf`: 実験設定関連
