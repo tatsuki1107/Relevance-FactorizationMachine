@@ -12,13 +12,13 @@ class TestMF(ModelTestBase):
         )
 
         self.model = MF(
-            n_epochs=self.cfg.model.PMF.n_epochs[0],
-            n_factors=self.cfg.model.PMF.n_factors[0],
+            n_epochs=self.cfg.model.MF.n_epochs[0],
+            n_factors=self.cfg.model.MF.n_factors[0],
             n_users=self.loader.n_users,
             n_items=self.loader.n_items,
-            lr=self.cfg.model.PMF.lr[0],
-            reg=self.cfg.model.PMF.reg[0],
-            batch_size=self.cfg.model.PMF.batch_size[0],
+            lr=self.cfg.model.MF.lr[0],
+            reg=self.cfg.model.MF.reg[0],
+            batch_size=self.cfg.model.MF.batch_size[0],
             seed=self.cfg.seed,
         )
 

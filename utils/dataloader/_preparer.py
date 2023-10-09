@@ -12,7 +12,7 @@ class DatasetPreparer(BaseLoader):
     """FMとMFで学習できるようにデータを準備する
 
     Args:
-        _seed: 乱数のシード値 (read only)
+    - _seed: 乱数のシード値 (read only)
     """
 
     _seed: int
@@ -25,16 +25,19 @@ class DatasetPreparer(BaseLoader):
         """FMとMFで学習できるようにデータを準備するメソッド
 
         Args:
-            interaction_df: ランダムポリシーで生成したログデータ
-            features: FMで用いる特徴量。csr_matrix
+        - interaction_df (pd.DataFrame): SemiSyntheticLogDataGeneratorクラスで
+        抽出されたログデータ
+        - features (csr_matrix): FMで用いる特徴量。
 
         Returns:
-            datasets: 準備されたデータセット辞書
+        - datasets (dict): 準備されたデータセット辞書
         """
 
         # split train, val, test
         usecols = ["datatype", "biased_click"]
-        dataset_indices = self._split_datasets(df=interaction_df[usecols])
+        dataset_indices = self._split_datasets(
+            interaction_df=interaction_df[usecols]
+        )
 
         # prepare fm_datasets
         fm_datasets = self._prepare_fm_datasets(
@@ -44,13 +47,13 @@ class DatasetPreparer(BaseLoader):
         # prepare pmf_datasets
         usecols = ["user_index", "video_index"]
         mf_datasets = self._prarpare_mf_datasets(
-            df=interaction_df[usecols], df_indices=dataset_indices
+            interaction_df=interaction_df[usecols], df_indices=dataset_indices
         )
 
         # prepare pscores and clicks
         usecols = ["exposure", "biased_click", "relevance", "unbiased_click"]
         relevances, pscores, clicks = self._prepare_pscores_and_clicks_rel(
-            df=interaction_df[usecols], df_indices=dataset_indices
+            interaction_df=interaction_df[usecols], df_indices=dataset_indices
         )
 
         # prepare user2data_indices
@@ -81,25 +84,29 @@ class DatasetPreparer(BaseLoader):
 
         return datasets
 
-    def _split_datasets(self, df: pd.DataFrame) -> Dict[str, np.ndarray]:
+    def _split_datasets(
+        self, interaction_df: pd.DataFrame
+    ) -> Dict[str, np.ndarray]:
         """interaction_dfをtrain, val, testデータに分割して、
         それぞれのデータのインデックスを取得する。
 
         Args:
-            df (pd.DataFrame): インタラクションのデータフレーム
+        - interaction_df (pd.DataFrame): インタラクションのデータフレーム
 
         Returns:
-            Dict[str, np.ndarray]: train, val, testデータのインデックス
+        - (Dict[str, np.ndarray]): train, val, testデータのインデックス
         """
 
         datatypes = ["train", "val", "test"]
         res = {}
         for datatype in datatypes:
-            data_filter = df["datatype"] == datatype
+            data_filter = interaction_df["datatype"] == datatype
             if datatype in {"train", "val"}:
-                data_indices = self._negative_sample(df=df[data_filter])
+                data_indices = self._negative_sample(
+                    df=interaction_df[data_filter]
+                )
             else:
-                data_indices = df[data_filter].index.values
+                data_indices = interaction_df[data_filter].index.values
             res[datatype] = data_indices
 
         return res
@@ -110,11 +117,11 @@ class DatasetPreparer(BaseLoader):
         """train, valデータに対するnegative sampleを行う
 
         Args:
-            df: インタラクションのデータフレーム
-            negative_multiple: ネガティブサンプルの倍数
+        - df (pd.DataFrame): インタラクションのデータフレーム
+        - negative_multiple (int): ネガティブサンプルの倍数
 
         Returns:
-            np.ndarray: ネガティブサンプル後のデータのインデックス
+        - data_indices (np.ndarray): ネガティブサンプル後のデータのインデックス
         """
 
         # negative sample
@@ -138,12 +145,14 @@ class DatasetPreparer(BaseLoader):
         """FMで用いるデータセットを準備する
 
         Args:
-            features: FMで用いる特徴量
-            feature_indices: train, val, testデータのインデックス
+        - features (csr_matrix): FMで用いる特徴量
+        - feature_indices (Dict[str, np.ndarray]): train, val, testデータの
+        インデックス
 
         Returns:
-            FMDataset: FMで用いるデータセット
+        - (FMDataset): FMで用いるデータセット
         """
+
         datasets = {}
         for datatype, indices in feature_indices.items():
             datasets[datatype] = features[indices]
@@ -152,24 +161,25 @@ class DatasetPreparer(BaseLoader):
 
     def _prarpare_mf_datasets(
         self,
-        df: pd.DataFrame,
+        interaction_df: pd.DataFrame,
         df_indices: Dict[str, np.ndarray],
     ) -> MFDataset:
         """MFで用いるデータセットを準備する
 
         Args:
-            df: インタラクションのデータフレーム
-            df_indices: train, val, testデータのインデックス
+        - interaction_df: インタラクションのデータフレーム
+        - df_indices: train, val, testデータのインデックス
 
         Returns:
-            MFDataset: MFで用いるデータセット
+        - MFDataset: MFで用いるデータセット
         """
+
         datasets = {}
         for datatype, indices in df_indices.items():
-            datasets[datatype] = df.iloc[indices].values
+            datasets[datatype] = interaction_df.iloc[indices].values
 
-        n_users = df["user_index"].max() + 1
-        n_items = df["video_index"].max() + 1
+        n_users = interaction_df["user_index"].max() + 1
+        n_items = interaction_df["video_index"].max() + 1
         datasets["n_users"] = n_users
         datasets["n_items"] = n_items
 
@@ -177,22 +187,22 @@ class DatasetPreparer(BaseLoader):
 
     def _prepare_pscores_and_clicks_rel(
         self,
-        df: pd.DataFrame,
+        interaction_df: pd.DataFrame,
         df_indices: Dict[str, np.ndarray],
     ) -> Tuple[dict]:
         """傾向スコアとクリック、真の関連度を準備する
 
         Args:
-            df: インタラクションのデータフレーム
-            df_indices: train, val, testデータのインデックス
+        - interaction_df: インタラクションのデータフレーム
+        - df_indices: train, val, testデータのインデックス
 
         Returns:
-            Tuple[dict]: 傾向スコアとクリック、真の関連度
+        - (Tuple[dict]): 傾向スコアとクリック、真の関連度
         """
 
         relevances, pscores, clicks = {}, {}, {}
         for datatype, indices in df_indices.items():
-            data_df = df.iloc[indices]
+            data_df = interaction_df.iloc[indices]
 
             if datatype in {"train", "val"}:
                 pscores[datatype] = data_df["exposure"].values
@@ -214,13 +224,13 @@ class DatasetPreparer(BaseLoader):
         データのインデックスを準備する
 
         Args:
-            interaction_df: インタラクションのデータフレーム
-            df_indices: train, val, testデータのインデックス
-            frequency (set): データの出現頻度
-            thetahold: popularとrareアイテムの境界値
+        - interaction_df: インタラクションのデータフレーム
+        - df_indices: train, val, testデータのインデックス
+        - frequency (set): データの出現頻度
+        - thetahold: popularとrareアイテムの境界値
 
         Returns:
-            Dict[str, list]: ユーザごとのデータのインデックス
+        - (Dict[str, list]): ユーザごとのデータのインデックス
         """
         data_df = interaction_df.iloc[df_indices].reset_index(drop=True)
         dataframe_dict = {}
@@ -245,6 +255,15 @@ class DatasetPreparer(BaseLoader):
     def _get_data_indices(
         self, dataframe_dict: Dict[str, pd.DataFrame]
     ) -> Dict[str, list]:
+        """データフレームのユーザーごとのインデックスを取得する
+
+        Args:
+        - dataframe_dict (Dict[str, pd.DataFrame]): 露出頻度ごとのデータフレーム辞書
+
+        Returns:
+        - Dict[str, list]: 露出頻度とユーザーごとのデータのインデックス
+        """
+
         user2data_indices = {}
         for frequency, df in dataframe_dict.items():
             groups = df.groupby(["user_index"])

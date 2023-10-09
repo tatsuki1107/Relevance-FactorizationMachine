@@ -1,6 +1,6 @@
 from omegaconf import OmegaConf
 from utils.dataloader.loader import DataLoader
-from src.fm import FactorizationMachine as FM
+from src.fm import FactorizationMachines as FM
 from src.mf import LogisticMatrixFactorization as MF
 from utils.evaluate import Evaluator
 from conf.config import ModelConfig
@@ -10,8 +10,31 @@ import numpy as np
 from time import time
 import json
 
+VALUE_ERROR_MESSAGE = (
+    "value_range must be tuple of int or float."
+    + "param_name: {}, value_range: {}"
+    + "You need to rewrite conf/config.yaml"
+)
 
-def _get_params(model_config: dict) -> dict:
+LOGGER_INFO_MESSAGE = (
+    "model: {}, estimator: {}, epoch: {}, params: {}," + "{}@{}: {}"
+)
+
+
+def _get_params(model_config: dict, logger: Logger) -> dict:
+    """パラメータ探索範囲からランダムにパラメータをサンプリングする関数
+
+    Args:
+    - model_config (dict): モデルごとのパラメータ探索範囲の設定
+    - logger (Logger): Loggerクラスのインスタンス
+
+    Raises:
+        ValueError: パラメータがintかfloatの範囲でない場合
+
+    Returns:
+        dict: パラメータの辞書
+    """
+
     dynamic_seed = int(time())
     np.random.seed(dynamic_seed)
     params = {}
@@ -25,7 +48,10 @@ def _get_params(model_config: dict) -> dict:
                 value_range[0], value_range[1]
             )
         else:
-            raise ValueError("value_range must be tuple of int or float.")
+            logger.error(VALUE_ERROR_MESSAGE.format(param_name, value_range))
+            raise ValueError(
+                VALUE_ERROR_MESSAGE.format(param_name, value_range)
+            )
     return params
 
 
@@ -38,6 +64,18 @@ def random_search(
     K: int = 3,
     used_metrics: str = "DCG",
 ) -> None:
+    """ランダムサーチを実行する関数
+
+    Args:
+    - model_config (ModelConfig): モデルごとのパラメータ探索範囲の設定
+    - seed (int): 乱数シード (read only)
+    - dataloader (DataLoader): DataLoaderクラスのインスタンス
+    - logger (Logger): Loggerクラスのインスタンス
+    - n_epochs (int, optional): パラメータをサーチするエポック数. デフォルトは10.
+    - K (int, optional):  最適化するランキング位置. デフォルトは3.
+    - used_metrics (str, optional): 最適化する評価指標. デフォルトは"DCG".
+    """
+
     model_config = OmegaConf.to_container(model_config, resolve=True)
     user2data_indices = dataloader.val_user2data_indices
 
@@ -65,7 +103,9 @@ def random_search(
 
             results = []
             for epoch in range(n_epochs):
-                model_params = _get_params(model_config[model_name])
+                model_params = _get_params(
+                    model_config=model_config[model_name], logger=logger
+                )
 
                 if estimator == "IPS":
                     # pscore clipping
@@ -101,10 +141,17 @@ def random_search(
                 results.append((model_params, metrics[used_metrics][0]))
 
                 logger.info(
-                    f"model: {model_name}, estimator: {estimator},"
-                    + f"epoch: {epoch}, params: {model_params},"
-                    + f"{used_metrics}@{K}: {metrics[used_metrics][0]},"
+                    LOGGER_INFO_MESSAGE.format(
+                        model_name,
+                        estimator,
+                        epoch,
+                        model_params,
+                        used_metrics,
+                        K,
+                        metrics[used_metrics][0],
+                    )
                 )
+
             if estimator == "IPS":
                 is_reverse = False
             else:

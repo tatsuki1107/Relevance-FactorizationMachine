@@ -10,6 +10,20 @@ def calc_precision_at_k(
     k: int,
     pscores: np.ndarray,
 ) -> float:
+    """Precision@kを計算する
+
+    Args:
+    - y_true (np.ndarray): 正解ラベルの配列
+    - y_scores (np.ndarray): 予測確率の配列
+    - k (int): 上位k件のみを対象とする
+    - pscores (np.ndarray): 傾向スコアの配列
+
+    Raises:
+    - NotImplementedError: pscoresが全て1の場合のみ実装済み
+
+    Returns:
+    - (float): Precision@kの値
+    """
     y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]][:k]
 
     if np.all(pscores == 1):
@@ -24,6 +38,21 @@ def calc_average_precision_at_k(
     k: int,
     pscores: np.ndarray,
 ) -> float:
+    """Average Precision@kを計算する
+
+    Args:
+    - y_true (np.ndarray): 正解ラベルの配列
+    - y_scores (np.ndarray): 予測確率の配列
+    - k (int): 上位k件のみを対象とする
+    - pscores (np.ndarray): 傾向スコアの配列
+
+    Raises:
+    - NotImplementedError: pscoresが全て1の場合のみ実装済み
+
+    Returns:
+    - (float): Average Precision@kの値
+    """
+
     y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]]
 
     average_precision = 0.0
@@ -46,6 +75,20 @@ def calc_recall_at_k(
     k: int,
     pscores: np.ndarray,
 ) -> float:
+    """Recall@kを計算する
+
+    Args:
+    - y_true (np.ndarray): 正解ラベルの配列
+    - y_scores (np.ndarray): 予測確率の配列
+    - k (int): 上位k件のみを対象とする
+    - pscores (np.ndarray): 傾向スコアの配列
+
+    Raises:
+    - NotImplementedError: pscoresが全て1の場合のみ実装済み
+
+    Returns:
+    - (float): Recall@kの値
+    """
     y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]]
 
     recall = 0.0
@@ -66,6 +109,19 @@ def calc_dcg_at_k(
     k: int,
     pscores: np.ndarray,
 ) -> float:
+    """DCG@kを計算する
+
+    Args:
+    - y_true (np.ndarray): 正解ラベルの配列
+    - y_scores (np.ndarray): 予測確率の配列
+    - k (int): 上位k件のみを対象とする
+    - pscores (np.ndarray): 傾向スコアの配列
+
+    Returns:
+    - float: DCG@kの値。pscoresがすべて1ではない場合は、DCG@KのSNIPS推定量を返す。
+    すなわち、バイアスのかかったvalデータからIPS推定量を評価する。
+    """
+
     y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]]
 
     pscores_sorted_by_scores = pscores[y_scores.argsort()[::-1]]

@@ -5,7 +5,7 @@ from hydra import initialize, compose
 from conf.config import ExperimentConfig
 from utils.evaluate import Evaluator
 from utils.dataloader.loader import DataLoader
-from src.fm import FactorizationMachine as FM
+from src.fm import FactorizationMachines as FM
 
 
 class ModelTestBase(ABC):

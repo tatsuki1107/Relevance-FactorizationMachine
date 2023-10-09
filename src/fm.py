@@ -9,10 +9,21 @@ from utils.optimizer import SGD
 
 
 @dataclass
-class FactorizationMachine(PointwiseBaseRecommender):
+class FactorizationMachines(PointwiseBaseRecommender):
+    """Factorization Machines for recommendation.
+
+    Args:
+    - n_features (int): 特徴量の次元数
+    """
+
     n_features: int
 
     def __post_init__(self) -> None:
+        """モデルのパラメータを初期化
+        - w0: バイアス項
+        - w: 線形項の重み
+        - V: 交互作用項の重み
+        """
         np.random.seed(self.seed)
 
         w0 = np.array([0.0])
@@ -35,6 +46,16 @@ class FactorizationMachine(PointwiseBaseRecommender):
         train: Tuple[csr_matrix, np.ndarray, np.ndarray],
         val: Tuple[csr_matrix, np.ndarray, np.ndarray],
     ) -> list:
+        """モデルの学習を実行するメソッド
+
+        Args:
+        - train (Tuple[特徴量(スパース行列), ラベル, 傾向スコア]): 学習データ.
+        - val (tuple[特徴量(スパース行列), ラベル, 傾向スコア]): 検証データ.
+
+        Returns:
+        - list: 学習データと検証データのエポック毎の損失.
+        """
+
         train_X, train_y, train_pscores = train
         val_X, val_y, val_pscores = val
 
@@ -59,20 +80,29 @@ class FactorizationMachine(PointwiseBaseRecommender):
             self._update_V(error, batch_X)
 
             pred_scores = self.predict(batch_X)
-            trainloss = self._cross_entropy_loss(
+            train_logloss = self._cross_entropy_loss(
                 y_trues=batch_y, y_scores=pred_scores, pscores=batch_pscores
             )
-            train_loss.append(trainloss)
+            train_loss.append(train_logloss)
 
             pred_scores = self.predict(val_X)
-            valloss = self._cross_entropy_loss(
+            val_logloss = self._cross_entropy_loss(
                 y_trues=val_y, y_scores=pred_scores, pscores=val_pscores
             )
-            val_loss.append(valloss)
+            val_loss.append(val_logloss)
 
         return train_loss, val_loss
 
     def predict(self, X: csr_matrix) -> np.ndarray:
+        """特徴量から予測確率を計算する
+
+        Args:
+        - X (csr_matrix): 特徴量(スパース行列)の配列
+
+        Returns:
+        - pred_y (np.ndarray): 予測確率の配列
+        """
+
         # 2項目
         linear_out = X.dot(self.w())
 
@@ -85,17 +115,34 @@ class FactorizationMachine(PointwiseBaseRecommender):
         return pred_y
 
     def _update_w0(self, error: np.ndarray) -> None:
-        """update w0"""
+        """w0 (バイアス項) を更新する. 更新の詳細は、README.mdを参照
+
+        Args:
+        - error (np.ndarray): 予測値と正解ラベルの残差の配列
+        """
+
         w0_grad = -np.sum(error)
         self.w0.update(grad=w0_grad, index=None)
 
     def _update_w(self, error: np.ndarray, X: csr_matrix) -> None:
-        """update wi"""
+        """w (線形項の重み) を更新する. 更新の詳細は、README.mdを参照
+
+        Args:
+        - error (np.ndarray): 予測値と正解ラベルの残差の配列
+        - X (csr_matrix): 特徴量(スパース行列)の配列
+        """
+
         w_grad = -(diags(error) @ X).sum(axis=0).A.flatten()
         self.w.update(grad=w_grad, index=None)
 
     def _update_V(self, error: np.ndarray, X: csr_matrix) -> None:
-        """update V"""
+        """V (交互作用項の重み) を更新する. 更新の詳細は、README.mdを参照
+
+        Args:
+        - error (np.ndarray): 予測値と正解ラベルの残差の配列
+        - X (csr_matrix): 特徴量(スパース行列)の配列
+        """
+
         # 事前に計算できる部分を計算
         V_dot_X_T = self.V().T @ X.T  # shape: (n_factors, batch_size)
         X_square = X.power(2)  # shape: (batch_size, n_features)

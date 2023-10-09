@@ -18,3 +18,23 @@
 [2023-10-08 06:12:32,568][__main__][INFO] - MF_IPS is done.
 [2023-10-08 06:12:36,309][__main__][INFO] - MF_Naive is done.
 [2023-10-08 06:12:37,406][__main__][INFO] - Random is done.
+[2023-10-09 04:52:29,231][__main__][INFO] - start data loading...
+[2023-10-09 04:52:31,681][__main__][INFO] - created small_matrix_df
+[2023-10-09 04:52:31,955][__main__][INFO] - mean of relevance: 0.4149662423709277
+[2023-10-09 04:52:31,958][__main__][INFO] - std of relevance: 0.2507729286422716
+[2023-10-09 04:52:37,537][__main__][INFO] - mean of exposure: 0.46022244447642285
+[2023-10-09 04:52:37,540][__main__][INFO] - std of exposure: 0.3575756547215601
+[2023-10-09 04:52:37,570][__main__][INFO] - biased click through rate: 0.18901927912824812
+[2023-10-09 04:52:37,572][__main__][INFO] - unbiased click through rate: 0.4154378432009853
+[2023-10-09 04:52:37,575][__main__][INFO] - created interaction_df
+[2023-10-09 04:52:51,559][__main__][INFO] - created features
+[2023-10-09 04:52:51,662][__main__][INFO] - prepared train and evaluation datasets
+[2023-10-09 04:52:51,682][__main__][INFO] - data loading is done.
+[2023-10-09 04:52:51,684][__main__][INFO] - start experiment...
+[2023-10-09 04:52:59,786][__main__][INFO] - FM_Ideal is done.
+[2023-10-09 04:53:05,983][__main__][INFO] - FM_IPS is done.
+[2023-10-09 04:53:13,365][__main__][INFO] - FM_Naive is done.
+[2023-10-09 04:53:16,054][__main__][INFO] - MF_Ideal is done.
+[2023-10-09 04:53:22,470][__main__][INFO] - MF_IPS is done.
+[2023-10-09 04:53:26,337][__main__][INFO] - MF_Naive is done.
+[2023-10-09 04:53:27,389][__main__][INFO] - Random is done.

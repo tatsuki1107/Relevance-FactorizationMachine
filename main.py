@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from utils.search_params import random_search
 from utils.dataloader.loader import DataLoader
-from src.fm import FactorizationMachine as FM
+from src.fm import FactorizationMachines as FM
 from src.mf import LogisticMatrixFactorization as MF
 from utils.evaluate import Evaluator
 from utils.plot import Visualizer
@@ -21,10 +21,10 @@ logger = getLogger(__name__)
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: ExperimentConfig) -> None:
-    """実験を実行する関数
+    """実験を実行する関数. 実験の詳細は、short_paper.mdを参照
         FM, MFモデルにそれぞれの損失(Ideal, IPS, Naive)を適用させ、testデータでのランキング性能を評価する
     Args:
-        cfg (ExperimentConfig): 実験設定のパラメータ
+    - cfg (ExperimentConfig): 実験設定のパラメータ
     """
 
     log_path = Path("./logs/result")

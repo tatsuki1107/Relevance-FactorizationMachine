@@ -8,8 +8,19 @@ from utils.dataloader.base import BaseLoader
 from utils.dataloader._kuairec import KuaiRecCSVLoader
 
 
+BEHAVIOR_POLICY_NAME_ERROR_MESSAGE = "behavior_policy must be random."
+
+
 @dataclass
 class SemiSyntheticLogDataGenerator(BaseLoader):
+    """半人工的にログデータを生成する
+
+    Args:
+    - _seed (int): 乱数シード (read only)
+    - _params (LogDataPropensityConfig): 半人工データ生成のパラメータ (read only)
+    - logger (Logger): Loggerクラスのインスタンス
+    """
+
     _seed: int
     _params: LogDataPropensityConfig
     logger: Logger
@@ -18,6 +29,16 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         self,
         interaction_df: pd.DataFrame,
     ) -> pd.DataFrame:
+        """半人工データの生成を実行するメソッド
+
+        Args:
+        - interaction_df (pd.DataFrame): kuairec/small_matrix.csvの
+        インタラクションデータ. 評価値行列の密度は100%
+
+        Returns:
+        - interaction_df (pd.DataFrame): ランダムポリシーによって生成された半人工データ
+        """
+
         interaction_df = self._exract_data_by_policy(
             interaction_df=interaction_df
         )
@@ -26,24 +47,26 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         )
         interaction_df["datatype"] = datatypes
 
-        relevance_probabilitys = self._generate_relevance(
+        relevance_probabilities = self._generate_relevance(
             watch_ratio=interaction_df["watch_ratio"]
         )
-        interaction_df["relevance"] = relevance_probabilitys
+        interaction_df["relevance"] = relevance_probabilities
         interaction_df.drop("watch_ratio", axis=1, inplace=True)
-        self.logger.info(f"mean of relevance: {relevance_probabilitys.mean()}")
-        self.logger.info(f"std of relevance: {relevance_probabilitys.std()}")
+        self.logger.info(
+            f"mean of relevance: {relevance_probabilities.mean()}"
+        )
+        self.logger.info(f"std of relevance: {relevance_probabilities.std()}")
 
-        exposure_probabilitys = self._generate_exposure(
+        exposure_probabilities = self._generate_exposure(
             existing_video_ids=interaction_df["video_id"]
         )
-        interaction_df["exposure"] = exposure_probabilitys
-        self.logger.info(f"mean of exposure: {exposure_probabilitys.mean()}")
-        self.logger.info(f"std of exposure: {exposure_probabilitys.std()}")
+        interaction_df["exposure"] = exposure_probabilities
+        self.logger.info(f"mean of exposure: {exposure_probabilities.mean()}")
+        self.logger.info(f"std of exposure: {exposure_probabilities.std()}")
 
         biased_clicks, unbiased_clicks = self._generate_clicks(
-            exposure_probabilitys=interaction_df["exposure"],
-            relevance_probabilitys=interaction_df["relevance"],
+            exposure_probabilities=interaction_df["exposure"],
+            relevance_probabilities=interaction_df["relevance"],
         )
         interaction_df["biased_click"] = biased_clicks
         interaction_df["unbiased_click"] = unbiased_clicks
@@ -57,8 +80,20 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
     def _exract_data_by_policy(
         self, interaction_df: pd.DataFrame
     ) -> pd.DataFrame:
-        # 過去の推薦方策pi_bはランダムなポリシーとしてログデータを生成
-        # ユーザの評価は時間に左右されないと仮定
+        """ランダムポリシーによってログデータを抽出する
+
+        Args:
+        - interaction_df (pd.DataFrame): kuairec/small_matrix.csvの
+        インタラクションデータ. 評価値行列の密度は100%
+
+        Raises:
+            ValueError: behavior_policyがrandomでない場合
+
+        Returns:
+        - interaction_df (pd.DataFrame): ランダムポリシーによって生成された
+        半人工データ。指定したデータの密度になるようにサンプリングされる。
+        """
+
         if self._params.behavior_policy == "random":
             np.random.seed(self._seed)
             interaction_df = interaction_df.sample(frac=1).reset_index(
@@ -67,11 +102,20 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
             data_size = int(interaction_df.shape[0] * self._params.density)
             interaction_df = interaction_df.iloc[:data_size]
         else:
-            raise ValueError("behavior_policy must be random")
+            self.logger.error(BEHAVIOR_POLICY_NAME_ERROR_MESSAGE)
+            raise ValueError(BEHAVIOR_POLICY_NAME_ERROR_MESSAGE)
 
         return interaction_df
 
     def _generate_datatype(self, data_size: int) -> list:
+        """データの分割設定を元にデータのタイプを生成する
+
+        Args:
+        - data_size (int): 抽出したログデータのサイズ
+
+        Returns:
+        - (list): ""train", "val", "test"の文字列の配列
+        """
         train_val_test_ratio = self._params.train_val_test_ratio
         datatypes = ["train", "val"]
 
@@ -81,7 +125,7 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
 
         res += (data_size - len(res)) * ["test"]
 
-        return res
+        return res  # shape: (data_size,)
 
     def _generate_relevance(
         self,
@@ -89,16 +133,37 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         relevance_clip: float = 2.0,
         normalized_clip: tuple = (0, 1),
     ) -> np.ndarray:
-        # watch ratio >= 2を1とした基準で関連度を生成
-        relevance_probabilitys = np.clip(
+        """半人工的なユーザーとアイテムの関連度を生成する
+
+        Args:
+        - watch_ratio (pd.Series): kuairec/small_matrix.csvのインタラクションデータ
+        のwatch_ratio. watch_ratio = 動画の視聴時間 / 動画の長さ
+        - relevance_clip (float, optional): relevanceの範囲を[0,1]へクリッピングす
+        るためのwatch_ratioの閾値. デフォルトは2.0.
+        - normalized_clip (tuple, optional): 正規化するための変数.
+
+        Returns:
+        - relevance_probabilities  (np.ndarray): 関連度の確率の配列
+        """
+
+        relevance_probabilities = np.clip(
             watch_ratio / relevance_clip, *normalized_clip
         )
-        return relevance_probabilitys
+        return relevance_probabilities
 
     def _generate_exposure(
         self,
         existing_video_ids: pd.Series,
-    ) -> pd.DataFrame:
+    ) -> np.ndarray:
+        """半人工的なユーザーとアイテムの露出度を生成する。kuairec/big_matrix.csvのインタラクションデータのvideo_idの出現頻度を元に生成する。詳細は、short_paper.mdを参照
+
+        Args:
+        - existing_video_ids (pd.Series): 抽出したログデータに存在するvideo_id
+
+        Returns:
+        - (np.ndarray): 露出度の確率の配列
+        """
+
         observation_df = KuaiRecCSVLoader.create_big_matrix_df(
             _params=self._params,
             logger=self.logger,
@@ -121,25 +186,44 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
 
     def _generate_clicks(
         self,
-        exposure_probabilitys: pd.Series,
-        relevance_probabilitys: pd.Series,
+        exposure_probabilities: pd.Series,
+        relevance_probabilities: pd.Series,
     ) -> Tuple[np.ndarray, np.ndarray]:
+        """半人工的なクリックデータを生成する
+
+        Args:
+        - exposure_probabilities (pd.Series): 露出確率のSeries
+        - relevance_probabilities (pd.Series): 関連度のSeries
+
+        Returns:
+        - biased_clicks (np.ndarray): 露出の影響を被ったクリックデータ
+        - relevance_labels (np.ndarray): 露出の影響を被っていないクリックデータ
+        """
+
         # generate clicks
         np.random.seed(self._seed)
-        # P(O = 1)
+        # exposure label ~ Be(P(O = 1))
         exposure_labels = np.random.binomial(
             n=1,
-            p=exposure_probabilitys,
+            p=exposure_probabilities,
         )
 
-        # P(R = 1)
-        relevance_labels = np.random.binomial(n=1, p=relevance_probabilitys)
+        # relevance label ~ Be(P(R = 1))
+        relevance_labels = np.random.binomial(n=1, p=relevance_probabilities)
 
-        # P(Y = 1) = P(R = 1) * P(O = 1)
+        # Y = R * O
         biased_clicks = exposure_labels * relevance_labels
 
         return biased_clicks, relevance_labels
 
 
 def _sigmoid(x: float, a: float = 3.0, b: float = -0) -> float:
+    """kuairec/big_matrix.csvでのアイテムの出現頻度を確率に変換するためのシグモイド関数
+
+    Args:
+        x (float): 標準化されたアイテムの出現頻度
+
+    Returns:
+        float: 露出確率
+    """
     return 1 / (1 + np.exp(-(a * x + b)))

@@ -11,11 +11,11 @@ logdata_propensity:
 tables:
   interaction:
     data_path: ./data/kuairec/small_matrix.csv
-    features:
+    used_features:
       timestamp: float
   user:
     data_path: ./data/kuairec/user_features.csv
-    features:
+    used_features:
       onehot_feat0: label
       onehot_feat1: label
       onehot_feat2: label
@@ -28,7 +28,7 @@ tables:
   video:
     daily:
       data_path: ./data/kuairec/item_daily_features.csv
-      features:
+      used_features:
         play_progress: float
         video_duration: float
         like_cnt: int
@@ -38,11 +38,11 @@ tables:
         download_cnt: int
     category:
       data_path: ./data/kuairec/item_categories.csv
-      features:
+      used_features:
         feat: multilabel
 is_search_params: false
 model:
-  PMF:
+  MF:
     n_epochs:
     - 10
     - 80

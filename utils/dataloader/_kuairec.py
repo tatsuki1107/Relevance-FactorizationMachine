@@ -27,34 +27,58 @@ VALUE_ERROR_MESSAGE = (
 
 @dataclass
 class KuaiRecCSVLoader:
+    """KuaiRecのCSVファイルを読み込むクラス.
+    こちらのデータの詳細は, https://kuairec.com/ ,またはREADME.mdを参照してください.
+    """
+
     @staticmethod
-    def create_interaction_df(
+    def create_small_matrix_df(
         _params: InteractionTableConfig,
         logger: Logger,
     ) -> pd.DataFrame:
-        columns = get_features_columns(_params=_params.used_features)
-        usecols = columns + ["user_id", "video_id", "watch_ratio"]
-        interaction_df = KuaiRecCSVLoader._load_csv(
+        """small_matrix.csvを読み込むメソッド
+
+        Args:
+        - _params (InteractionTableConfig): インタラクションの設定パラメータ (read only)
+        - logger (Logger): Loggerクラスのインスタンス
+
+        Returns:
+        - small_matrix_df (pd.DataFrame): small_matrix.csvのデータ
+        """
+
+        feature_names = get_feature_names(_params=_params.used_features)
+        usecols = feature_names + ["user_id", "video_id", "watch_ratio"]
+        small_matrix_df = KuaiRecCSVLoader._load_csv(
             data_path=_params.data_path,
             usecols=usecols,
             logger=logger,
         )
 
-        return interaction_df
+        return small_matrix_df
 
     @staticmethod
     def create_big_matrix_df(
         _params: LogDataPropensityConfig,
         logger: Logger,
     ) -> pd.DataFrame:
+        """big_matrix.csvを読み込むメソッド
+
+        Args:
+        - _params (LogDataPropensityConfig): 半人工データ生成の設定パラメータ (read only)
+        - logger (Logger): Loggerクラスのインスタンス
+
+        Returns:
+        - big_matrix_df (pd.DataFrame): big_matrix.csvのデータ
+        """
+
         usecols = ["user_id", "video_id"]
-        observation_df = KuaiRecCSVLoader._load_csv(
+        big_matrix_df = KuaiRecCSVLoader._load_csv(
             data_path=_params.data_path,
             usecols=usecols,
             logger=logger,
         )
 
-        return observation_df
+        return big_matrix_df
 
     @staticmethod
     def create_user_features_df(
@@ -62,8 +86,18 @@ class KuaiRecCSVLoader:
         _params: UserTableConfig,
         logger: Logger,
     ) -> pd.DataFrame:
-        columns = get_features_columns(_params=_params.used_features)
-        usecols = columns + ["user_id"]
+        """user_features.csvを読み込むメソッド.FeatureGeneratorクラスで抽出したログデータに存在するユーザーの特徴量のみを抽出する.
+
+        Args:
+        - existing_user_ids (pd.Series): 抽出したログデータに存在するユーザーID
+        - _params (UserTableConfig): ユーザーの特徴量の設定パラメータ (read only)
+        - logger (Logger): Loggerクラスのインスタンス
+
+        Returns:
+        - user_features_df (pd.DataFrame): user_features.csvのデータ
+        """
+        feature_names = get_feature_names(_params=_params.used_features)
+        usecols = feature_names + ["user_id"]
         user_features_df = KuaiRecCSVLoader._load_csv(
             data_path=_params.data_path,
             usecols=usecols,
@@ -82,6 +116,18 @@ class KuaiRecCSVLoader:
         _params: VideoTableConfig,
         logger: Logger,
     ) -> pd.DataFrame:
+        """item_category.csvとitem_daily_features.csvを統合したcsvファイルを読み込むメソッド.
+
+        Args:
+        - existing_video_ids (pd.Series): 抽出したログデータに存在する動画ID
+        - _params (VideoTableConfig): 動画の特徴量の設定パラメータ (read only)
+        - logger (Logger): Loggerクラスのインスタンス
+
+        Returns:
+        - item_features_df (pd.DataFrame): item_category.csvと
+        item_daily_features.csvを統合したデータ
+        """
+
         item_daily_features_df = (
             KuaiRecCSVLoader._create_item_daily_features_df(
                 existing_video_ids=existing_video_ids,
@@ -108,8 +154,19 @@ class KuaiRecCSVLoader:
         _params: VideoDailyTableConfig,
         logger: Logger,
     ) -> pd.DataFrame:
-        columns = get_features_columns(_params=_params.used_features)
-        usecols = columns + ["video_id"]
+        """item_daily_features.csvを読み込むメソッド.FeatureGeneratorクラスで抽出したログデータに存在する動画の特徴量のみを抽出する.動画ごとにtimestampで降順ソートし、最初の行のみを抽出する.
+
+        Args:
+        - existing_video_ids (pd.Series): 抽出したログデータに存在する動画ID
+        - _params (VideoDailyTableConfig): dailyの動画特徴量の設定パラメータ (read only)
+        - logger (Logger): Loggerクラスのインスタンス
+
+        Returns:
+        - item_daily_features_df (pd.DataFrame): item_daily_features.csvのデータ
+        """
+
+        feature_names = get_feature_names(_params=_params.used_features)
+        usecols = feature_names + ["video_id"]
         item_daily_features_df = KuaiRecCSVLoader._load_csv(
             data_path=_params.data_path,
             usecols=usecols,
@@ -134,8 +191,19 @@ class KuaiRecCSVLoader:
         _params: VideoCategoryTableConfig,
         logger: Logger,
     ) -> pd.DataFrame:
-        columns = get_features_columns(_params=_params.used_features)
-        usecols = columns + ["video_id"]
+        """item_category.csvを読み込むメソッド.FeatureGeneratorクラスで抽出したログデータに存在する動画の特徴量のみを抽出する.
+
+        Args:
+        - existing_video_ids (pd.Series): 抽出したログデータに存在する動画ID
+        - _params (VideoCategoryTableConfig): categoryの動画特徴量の
+        設定パラメータ (read only)
+        - logger (Logger): Loggerクラスのインスタンス
+
+        Returns:
+        - item_categories_df (pd.DataFrame): item_category.csvのデータ
+        """
+        feature_names = get_feature_names(_params=_params.used_features)
+        usecols = feature_names + ["video_id"]
         item_categories_df = KuaiRecCSVLoader._load_csv(
             data_path=_params.data_path,
             usecols=usecols,
@@ -157,6 +225,20 @@ class KuaiRecCSVLoader:
     def _load_csv(
         data_path: str, usecols: list, logger: Logger
     ) -> pd.DataFrame:
+        """CSVファイルを読み込むメソッド
+
+        Args:
+        - data_path (str): CSVファイルのパス
+        - usecols (list): 読み込むカラム名のリスト
+        - logger (Logger): Loggerクラスのインスタンス
+
+        Raises:
+        - ValueError: 指定したカラム名が特定のcsvに存在しない場合
+        - FileNotFoundError: 指定したパスにファイルが存在しない場合
+
+        Returns:
+        - df (pd.DataFrame): CSVファイルのデータ
+        """
         try:
             df = pd.read_csv(data_path, usecols=usecols)
         except ValueError as e:
@@ -169,6 +251,15 @@ class KuaiRecCSVLoader:
         return df
 
 
-def get_features_columns(_params: DictConfig) -> list:
+def get_feature_names(_params: DictConfig) -> list:
+    """hydraで指定した特徴量のカラム名をlistとして取得する
+
+    Args:
+    - _params (DictConfig): hydraで指定した特徴量のカラム名
+
+    Returns:
+    - (list): 特徴量のカラム名
+    """
+
     columns = OmegaConf.to_container(_params, resolve=True)
     return list(columns.keys())

@@ -23,23 +23,10 @@ class PointwiseBaseRecommender(ABC):
 
     @abstractmethod
     def fit(self, train, val) -> tuple:
-        """モデルの学習を行う
-        Args:
-            train: 学習データ
-            val: 検証データ
-
-        Returns:
-            tuple: 学習データと検証データの損失履歴
-        """
         pass
 
     @abstractmethod
     def predict(self, **kwargs) -> np.ndarray:
-        """引数として与えられた特徴量に対する予測値を返す
-
-        Returns:
-            np.ndarray: 予測値の配列
-        """
         pass
 
     def _cross_entropy_loss(
@@ -51,8 +38,14 @@ class PointwiseBaseRecommender(ABC):
     ) -> float:
         """与えられたデータを元にクロスエントロピー損失を計算する
 
+        Args:
+        - y_trues (np.ndarray): 正解ラベルの配列
+        - y_scores (np.ndarray): 予測確率の配列
+        - pscores (np.ndarray): 傾向スコアの配列
+        - eps (float): ゼロ除算を防ぐための微小値
+
         Returns:
-            float: クロスエントロピー損失
+        - logloss (float): クロスエントロピー損失
         """
         logloss = -np.sum(
             (y_trues / pscores) * np.log(y_scores + eps)

@@ -19,8 +19,8 @@ class DataLoader(BaseLoader):
     """学習、評価に用いるデータを生成する
 
     Args:
-        _params: 実験設定のパラメータ(read only)
-        logger: ロギングのインスタンス
+    - _params (ExperimentConfig): 実験設定のパラメータ(read only)
+    - logger (Logger): Loggerクラスのインスタンス
     """
 
     _params: ExperimentConfig
@@ -30,7 +30,7 @@ class DataLoader(BaseLoader):
         """半人工データを生成する"""
 
         # small_matrix.csvのインタラクションデータを研究に用いる
-        small_matrix_df = KuaiRecCSVLoader.create_interaction_df(
+        small_matrix_df = KuaiRecCSVLoader.create_small_matrix_df(
             _params=self._params.tables.interaction,
             logger=self.logger,
         )
@@ -73,11 +73,15 @@ class DataLoader(BaseLoader):
         """モデルと推定量ごとのtrain, val, testデータを返す
 
         Args:
-            model_name: モデルの名前。FMまたは、MF
-            estimator: 推定量の名前。Ideal, IPSまたは、Naive
+        - model_name (str): モデルの名前。FMまたは、MF
+        - estimator (str): 推定量の名前。Ideal, IPSまたは、Naive
+
+        Raises:
+        - ValueError: model_nameがFMまたは、MFでない場合
+        - ValueError: estimatorがIdeal, IPSまたは、Naiveでない場合
 
         Returns:
-            tuple: train, val, testデータ
+        - (tuple): train, val, testデータ
         """
 
         # params validation
@@ -118,12 +122,15 @@ class DataLoader(BaseLoader):
 
     @property
     def val_user2data_indices(self) -> dict:
+        """validationデータのユーザーごとのデータインデックスを返す"""
         return self.datasets["user2data_indices"]["val"]["all"]
 
     @property
     def test_user2data_indices(self) -> dict:
+        """testデータのユーザーごとのデータインデックスを返す"""
         return self.datasets["user2data_indices"]["test"]
 
     @property
     def test_y(self) -> np.ndarray:
+        """testデータのターゲット変数を返す"""
         return self.datasets["clicks"]["test"]

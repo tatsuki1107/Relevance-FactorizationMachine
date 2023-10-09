@@ -9,12 +9,28 @@ from src.base import PointwiseBaseRecommender
 
 @dataclass
 class LogisticMatrixFactorization(PointwiseBaseRecommender):
+    """
+    Logistic Matrix Factorization model for recommendation.
+
+    Args:
+    - n_users (int): ユーザー数
+    - n_items (int): アイテム数
+    - reg (float): L2正則化項の係数
+    - alpha (float, optional): 因子行列のスケール調整パラメータ .Defaults to 2.
+    """
+
     n_users: int
     n_items: int
     reg: float
     alpha: float = 2
 
     def __post_init__(self) -> None:
+        """モデルのパラメータを初期化
+        - P: ユーザーの因子行列
+        - Q: アイテムの因子行列
+        - b_u: ユーザーのバイアス項
+        - b_i: アイテムのバイアス項
+        """
         np.random.seed(self.seed)
 
         # init user embeddings
@@ -47,7 +63,17 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         train: Tuple[np.ndarray, np.ndarray, np.ndarray],
         val: Tuple[np.ndarray, np.ndarray, np.ndarray],
     ) -> list:
-        train
+        """
+        モデルの学習を実行するメソッド
+
+        Args:
+        - train (Tuple[特徴量, ラベル, 傾向スコア]): 学習データ.
+        - val (tuple[特徴量, ラベル, 傾向スコア]): 検証データ.
+
+        Returns:
+        - list: 学習データと検証データのエポック毎の損失.
+        """
+
         train_X, train_y, train_pscores = train
         val_X, val_y, val_pscores = val
 
@@ -80,24 +106,32 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
                 self._update_b_i(item_id=item_id, err=err)
 
             pred_scores = self.predict(batch_X)
-            trainloss = self._cross_entropy_loss(
+            train_logloss = self._cross_entropy_loss(
                 y_trues=batch_y,
                 y_scores=pred_scores,
                 pscores=batch_pscores,
             )
-            train_loss.append(trainloss)
+            train_loss.append(train_logloss)
 
             pred_scores = self.predict(val_X)
-            valloss = self._cross_entropy_loss(
+            val_logloss = self._cross_entropy_loss(
                 y_trues=val_y,
                 y_scores=pred_scores,
                 pscores=val_pscores,
             )
-            val_loss.append(valloss)
+            val_loss.append(val_logloss)
 
         return train_loss, val_loss
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """特徴量(ユーザー、アイテムのID)から予測確率を計算する
+
+        Args:
+        - X (np.ndarray): 特徴量の配列
+
+        Returns:
+        - (np.ndarray): 予測確率の配列
+        """
         user_ids, item_ids = X[:, 0], X[:, 1]
         return np.array(
             [
@@ -107,6 +141,15 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         )
 
     def _predict_pair(self, user_id: int, item_id: int) -> float:
+        """ユーザーとアイテムのペアから予測確率を計算する
+
+        Args:
+        - user_id (int): 単一のユーザーID
+        - item_id (int): 単一のアイテムID
+
+        Returns:
+        - (float): 単一の予測確率
+        """
         return self._sigmoid(
             np.dot(self.P(user_id), self.Q(item_id))
             + self.b_u(user_id)
@@ -115,17 +158,44 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         )
 
     def _update_P(self, user_id: int, item_id: int, err: float) -> None:
+        """ユーザーの因子行列を更新する。更新の詳細は、README.mdを参照
+
+        Args:
+            user_id (int): 単一のユーザーID
+            item_id (int): 単一のアイテムID
+            err (float): 予測値と正解ラベルの残差
+        """
         grad_P = -err * self.Q(item_id) + self.reg * self.P(user_id)
         self.P.update(grad=grad_P, index=user_id)
 
     def _update_Q(self, user_id: int, item_id: int, err: float) -> None:
+        """アイテムの因子行列を更新する。更新の詳細は、README.mdを参照
+
+        Args:
+            user_id (int): 単一のユーザーID
+            item_id (int): 単一のアイテムID
+            err (float): 予測値と正解ラベルの残差
+        """
         grad_Q = -err * self.P(user_id) + self.reg * self.Q(item_id)
         self.Q.update(grad=grad_Q, index=item_id)
 
     def _update_b_u(self, user_id: int, err: float) -> None:
+        """ユーザーのバイアス項を更新する。更新の詳細は、README.mdを参照
+
+        Args:
+            user_id (int): 単一のユーザーID
+            err (float): 予測値と正解ラベルの残差
+        """
         grad_b_u = -err + self.reg * self.b_u(user_id)
         self.b_u.update(grad=grad_b_u, index=user_id)
 
     def _update_b_i(self, item_id: int, err: float) -> None:
+        """アイテムのバイアス項を更新する。更新の詳細は、README.mdを参照
+
+        Args:
+            item_id (int): 単一のアイテムID
+            err (float): 予測値と正解ラベルの残差
+        """
+
         grad_b_i = -err + self.reg * self.b_i(item_id)
         self.b_i.update(grad=grad_b_i, index=item_id)

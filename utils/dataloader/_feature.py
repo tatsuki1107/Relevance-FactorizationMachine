@@ -16,6 +16,14 @@ VALUE_ERROR_MESSAGE = "'{}' datatype is not supported. feature_name: '{}'"
 
 @dataclass
 class FeatureGenerator(BaseLoader):
+    """抽出したログデータの情報を元に特徴量を生成するクラス
+
+    Args:
+    - _params (TableConfig): テーブル(interaction, user, video)ごとの
+    設定パラメータ (read only)
+    - logger (Logger): Loggerクラスのインスタンス
+    """
+
     _params: TableConfig
     logger: Logger
 
@@ -23,6 +31,18 @@ class FeatureGenerator(BaseLoader):
         self,
         interaction_df: pd.DataFrame,
     ) -> Tuple[csr_matrix, pd.DataFrame]:
+        """特徴量の生成を実行するメソッド
+
+        Args:
+        - interaction_df (pd.DataFrame): SemiSyntheticLogDataGeneratorクラスで
+        抽出されたログデータ
+
+        Returns:
+        - features (csr_matrix): FM用の特徴量行列
+        - interaction_df (pd.DataFrame): MFで用いるためユーザーとアイテムの
+        インデックスを追加したログデータ
+        """
+
         dataframes_dict = self._create_basedict(
             interaction_df=interaction_df,
         )
@@ -71,6 +91,21 @@ class FeatureGenerator(BaseLoader):
     def _feature_engineering(
         self, df: pd.DataFrame, columns: Dict[str, str]
     ) -> pd.DataFrame:
+        """特徴量エンジニアリングを実行するメソッド
+
+        Args:
+        - df (pd.DataFrame): 特徴量エンジニアリングを実行するデータフレーム
+        - columns (Dict[str, str]): 特徴量エンジニアリングを実行するカラム名と
+        データタイプの辞書
+
+        Raises:
+            ValueError: 特徴量エンジニアリングを実行するデータタイプがint, float,
+            label, multilabel以外の場合
+
+        Returns:
+        - df (pd.DataFrame): 特徴量エンジニアリングを実行したデータフレーム
+        """
+
         datatypes = defaultdict(list)
         for feature_name, datatype in columns.items():
             if datatype not in {"int", "float", "label", "multilabel"}:
@@ -107,6 +142,16 @@ class FeatureGenerator(BaseLoader):
         self,
         interaction_df: pd.DataFrame,
     ) -> Dict[str, pd.DataFrame]:
+        """テーブル毎に特徴エンジニアリングを行うために、辞書を生成するメソッド
+
+        Args:
+        - interaction_df (pd.DataFrame): SemiSyntheticLogDataGeneratorクラスで
+        抽出されたログデータ
+
+        Returns:
+        - dataframes_dict (Dict[str, pd.DataFrame]): テーブル毎に特徴エンジニアリングを行うための辞書
+        """
+
         user_features_df = KuaiRecCSVLoader.create_user_features_df(
             existing_user_ids=interaction_df["user_id"],
             _params=self._params.user,
@@ -129,6 +174,19 @@ class FeatureGenerator(BaseLoader):
     def _create_basefeature(
         self, interaction_df: pd.DataFrame
     ) -> Tuple[csr_matrix, pd.DataFrame]:
+        """FM用のベースとなる特徴量 (ユーザーIDとアイテムIDのワンホット・エンコード)を
+        生成するメソッド
+
+        Args:
+        - interaction_df (pd.DataFrame): SemiSyntheticLogDataGeneratorクラスで
+        抽出されたログデータ
+
+        Returns:
+        - basefeatures (csr_matrix): FM用のベースとなる特徴量
+        - interaction_df (pd.DataFrame): MFで用いるためユーザーとアイテムの
+        インデックスを追加したログデータ
+        """
+
         existing_unique_user_ids = interaction_df["user_id"].unique()
         existing_unique_video_ids = interaction_df["video_id"].unique()
 

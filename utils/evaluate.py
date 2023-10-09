@@ -3,7 +3,7 @@ from typing import Tuple, Union, Optional
 from collections import defaultdict
 from dataclasses import dataclass
 from src.mf import LogisticMatrixFactorization as MF
-from src.fm import FactorizationMachine as FM
+from src.fm import FactorizationMachines as FM
 from utils.metrics import metric_candidates
 
 METRIC_NAME_ERROR_MESSAGE = "metric_name must be in {}. metric_name: '{}'"
@@ -15,11 +15,11 @@ class Evaluator:
     """モデルごとに評価指標を計算するクラス
 
     Args:
-        X: 特徴量行列。 Noneであれば、ランダム推薦をもって評価する。
-        indices_per_user: ユーザーごとに分割されたデータのインデックスのリスト
-        used_matrics: 使用する評価指標の集合
-        K: 評価するランキング位置のタプル
-        thetahold: 二値分類の閾値
+    - X (Optional, np.ndarray): 特徴量行列。 Noneであれば、ランダム推薦をもって評価する。
+    - indices_per_user (list): ユーザーごとに分割されたデータのインデックスのリスト
+    - used_matrics (set): 使用する評価指標の集合
+    - K (Tuple[int]): 評価するランキング位置のタプル
+    - thetahold (Optional, float): 二値分類の閾値
     """
 
     X: Optional[np.ndarray]
@@ -30,6 +30,12 @@ class Evaluator:
     thetahold: Optional[float] = None
 
     def __post_init__(self) -> None:
+        """使用する評価指標の関数を辞書に格納する
+
+        Raises:
+        - ValueError: metric_nameが使用可能な評価指標の集合に含まれていない場合
+        """
+
         self.metric_functions = {}
         for metric_name in self.used_metrics:
             if metric_name not in metric_candidates:
@@ -43,14 +49,14 @@ class Evaluator:
     def evaluate(
         self, model: Union[MF, FM, str], pscores: Optional[np.ndarray] = None
     ) -> defaultdict:
-        """評価を行うメソッド
+        """評価を実行するメソッド
 
         Args:
-            model: 学習済みモデルのインスタンス。または、"Random"文字列。
-            pscores: 傾向スコア。検証時に引数として必要。
+        - model (FM,MF,str): 学習済みモデルのインスタンス。または、"Random"文字列。
+        - pscores (Optional, np.ndarray): 傾向スコア。検証時に引数として必要。
 
         Returns:
-            results: 評価指標の結果を格納した辞書
+        - results (defaultdict): 評価指標の結果を格納した辞書
         """
 
         if pscores is None:
@@ -85,12 +91,14 @@ class Evaluator:
         """学習済みモデルを用いてユーザーごとのスコアを予測する
 
         Args:
-            model: 学習済みモデルのインスタンス。または、"Random"文字列。
-            indices: 単一ユーザーのデータインデックス. Noneであれば、
+        - model (MF,FM,str): 学習済みモデルのインスタンス。または、"Random"文字列。
+        - indices (list): 単一ユーザーのデータインデックス. Noneであれば、
                     全ユーザーのデータを用いて予測する。
+        Raises:
+        - ValueError: modelがMF,FM,Randomのいずれでもない場合
 
         Returns:
-            y_scores: ユーザーごとのスコア.閾値があればバイナリ化する。
+        - y_scores (np.ndarray): ユーザーごとのスコア.閾値があればバイナリ化する。
         """
 
         if indices is None:
