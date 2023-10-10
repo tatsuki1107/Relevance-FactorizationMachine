@@ -48,6 +48,7 @@
   - `reslut`: 実験結果管理
     - `img`: <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/utils/plot.py">`Visualizer`</a>による画像結果
     - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/logs/result/metric.csv">`metric.csv`</a>: 詳細な結果指標
+  - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/logs/main.log">`main.log`</a>: 実験ログ
 - `src`:  推薦アルゴリズム実装
   - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/src/base.py">`base.py`</a>: 基底クラスの実装
   - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/src/fm.py">`fm.py`</a>: Factorization Machines (FM) の実装
