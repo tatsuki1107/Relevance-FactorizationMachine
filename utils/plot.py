@@ -8,6 +8,15 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Visualizer:
+    """実験結果の描画をするためのクラス
+
+    Args:
+    - metrics (Set[str]): 使用する評価指標の集合
+    - K (List[int]): ランク指標を算出するランキング位置
+    - result_df (pd.DataFrame): 実験結果
+    - estimators (List[str]): 評価する推定量
+    """
+
     metrics: Set[str]
     K: List[int]
     result_df: pd.DataFrame
@@ -16,6 +25,8 @@ class Visualizer:
     )
 
     def __post_init__(self):
+        """描画の実行"""
+
         sns.set()
         self.log_path = Path("./logs/result/img")
         self.log_path.mkdir(exist_ok=True, parents=True)
@@ -25,6 +36,8 @@ class Visualizer:
         self._plot_metric_per_frequency()
 
     def _plot_metrics_per_model(self) -> None:
+        """モデル(FM, MF)ごとのランク指標を描画して保存する"""
+
         for model_name in ["FM", "MF"]:
             plt.figure(figsize=(20, 6))
             for i, metric in enumerate(self.metrics):
@@ -48,6 +61,12 @@ class Visualizer:
             plt.savefig(self.log_path / f"{model_name}_metrics.png")
 
     def _plot_metric_vs_model(self, metric: str = "DCG"):
+        """MFとFMの性能を比べるための描画
+
+        Args:
+            metric (str, optional): 比較するランク指標。デフォルトでは、DCG@K
+        """
+
         plt.figure(figsize=(20, 6))
 
         for i, estimator in enumerate(self.estimators):
@@ -70,6 +89,12 @@ class Visualizer:
     def _plot_metric_per_frequency(
         self, metric: str = "DCG", model_name: str = "FM"
     ):
+        """露出頻度ごとのモデルのランク性能を描画
+
+        Args:
+            metric (str, optional): 評価する指標。デフォルトでは、DCG@K
+            model_name (str, optional): 評価するモデル。デフォルトでは、FM
+        """
         frequencies = ["all", "popular", "rare"]
         plt.figure(figsize=(20, 6))
 

@@ -7,5 +7,11 @@ RUN apt-get update \
 
 RUN pip install --upgrade poetry && poetry config virtualenvs.create false
 
+# python modules
+COPY src ./src
+COPY test ./test
+COPY utils ./utils
+
 COPY poetry.lock pyproject.toml ./
+
 RUN poetry install 
