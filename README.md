@@ -29,11 +29,11 @@
 ## 扱うcsvファイルの詳細
 実験には以下の5つのcsvファイルを使用します。(*実験スクリプトを実行する際は、これらのファイルを/data/kuairec/ディレクトリに格納する必要があります。)
 
-- `small_matrix.csv`: 実験的に収集された、ユーザー数1411人、動画数3327本のフィードバックデータ。評価値行列の密度は約99.6%。
-- `big_matrix.csv`: 自然に観測された、ユーザー数7176人、動画数10728本のフィードバックデータ。
-- `item_categories.csv`: 各動画のカテゴリ情報。
-- `item_daily_features.csv`: 日毎の動画特徴量。
-- `user_features.csv`: 匿名化されたユーザー特徴量。
+- `small_matrix.csv`: 実験的に収集された、ユーザー数1411人、動画数3327本のフィードバックデータ。評価値行列の密度は約99.6%
+- `big_matrix.csv`: 自然に観測された、ユーザー数7176人、動画数10728本のフィードバックデータ
+- `item_categories.csv`: 各動画のカテゴリ情報
+- `item_daily_features.csv`: 日毎の動画特徴量
+- `user_features.csv`: 匿名化されたユーザー特徴量
 
 # ディレクトリ構成
 
@@ -79,3 +79,65 @@
 - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/pyproject.toml">`pyproject.toml`</a>: Pythonパッケージ
 - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">`short_paper.md`</a>: 実験の概要・背景・実験設定・結果
 
+# 実験設定の詳細
+
+このドキュメントでは、推薦システムの実験設定についての詳細な解説を提供します。設定は[こちらのconfig.yaml](https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/conf/config.yaml)で確認できます。
+
+## 実験の再現性
+
+- **`seed`**: 実験の再現性を保証するための乱数のシード値
+
+## 半人工データセットの生成設定 (`data_logging_settings`)
+
+- **`data_path`**: KuaiRecデータセットの保存先
+- **`train_val_test_ratio`**: データセットの訓練、検証、テストへの分割比率
+- **`density`**: 評価値行列の密度
+- **`behavior_policy`**: ログデータ生成のアルゴリズム。露出バイアスのみを仮定し、ランダムポリシーを使用
+
+## KuaiRecデータセットのテーブル設定 (`tables`)
+
+### 1. Interactionテーブル
+
+- **`data_path`**: ログデータの保存先
+- **`used_features`**: 実験に使用する特徴量のリスト
+  - **key**: カラム名
+  - **value**: モデルへの入力用データタイプ
+
+### 2. Userテーブル
+
+- **`data_path`**: ユーザー特徴量の保存先
+- **`used_features`**: 実験に使用する特徴量のリスト
+  - **key**: カラム名
+  - **value**: モデルへの入力用データタイプ
+
+### 3. Videoテーブル
+
+#### 3.1 Dailyテーブル
+
+- **`data_path`**: 日別の動画特徴量の保存先
+- **`used_features`**: 実験に使用する特徴量のリスト
+  - **key**: カラム名
+  - **value**: モデルへの入力用データタイプ
+
+#### 3.2 Categoryテーブル
+
+- **`data_path`**: 動画カテゴリー情報の保存先
+- **`used_features`**: 実験に使用する特徴量のリスト
+  - **key**: カラム名
+  - **value**: モデルへの入力用データタイプ
+
+## モデルのハイパーパラメータ設定
+
+- **`is_search_params`**: ハイパーパラメータのチューニングを実験前に行うかどうかのフラグ
+- **`model_param_range`**: 各モデルのハイパーパラメータの範囲
+  - **`MF` (Matrix Factorization)**
+    - **`n_epochs`**: 学習のイテレーション数
+    - **`n_factors`**: 潜在因子の数
+    - **`lr`**: 学習率
+    - **`batch_size`**: バッチサイズ
+    - **`clipping`**: 傾向スコアのクリッピング値
+  - **`FM` (Factorization Machines)**
+    - (同様の設定が含まれています)
+
+---
+このドキュメントは、実験設定の詳細を提供するものです。具体的な実装やさらなる詳細については、ソースコードや関連ドキュメントを参照してください。
