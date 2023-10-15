@@ -162,7 +162,7 @@ $`|B|`$: バッチサイズ
 
 ```math
 \begin{aligned}
-\hat{L}_{IPS}(\hat{R}_{u,i}) &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[\frac{Y_{u,i}}{\theta_{u,i}}\log(\hat{R}_{u,i}) + (1 - \frac{Y_{u,i}}{\theta_{u,i}})\log(1 - \hat{R}_{u,i})] + \lambda (||\mathbf{p}_u||^2 + ||\mathbf{q}_i||^2 + b_u^2 + b_i^2) \\
+\hat{L}_{IPS}(\hat{R}_{u,i}) &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[\frac{Y_{u,i}}{\theta_{u,i}}\log(\hat{R}_{u,i}) + (1 - \frac{Y_{u,i}}{\theta_{u,i}})\log(1 - \hat{R}_{u,i})] + \frac{\lambda}{2} (||\mathbf{p}_u||^2 + ||\mathbf{q}_i||^2 + b_u^2 + b_i^2) \\
 \end{aligned}
 ```
 ```math
@@ -174,10 +174,10 @@ subject \quad to \quad \lambda \geq 0
 ### 勾配
 ```math
 \begin{aligned}
-・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial \mathbf{q}_i} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[ (\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i})\mathbf{p}_u] + 2\lambda \mathbf{q}_i  \\
-・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial \mathbf{p}_u} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[ (\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i})\mathbf{q}_i] + 2\lambda \mathbf{p}_u  \\
-・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial b_i} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i}] + 2\lambda b_i  \\
-・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial b_u} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i}] + 2\lambda b_u  \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial \mathbf{q}_i} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[ (\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i})\mathbf{p}_u] + \lambda \mathbf{q}_i  \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial \mathbf{p}_u} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[ (\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i})\mathbf{q}_i] + \lambda \mathbf{p}_u  \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial b_i} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i}] + \lambda b_i  \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial b_u} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i}] + \lambda b_u  \\
 \end{aligned}
 ```
 
