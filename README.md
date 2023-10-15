@@ -1,10 +1,13 @@
 # Unbiased Recommender Learning With Relevance-FactorizationMachines
 
-本リポジトリは大学院での研究を元にアルゴリズムの性能実験を行うものです。  
-研究の内容はショートverとして<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">short_paper.md</a>に記載しております。  
+本リポジトリは、大学院の研究成果を基盤とし、アルゴリズムの性能評価を目的としています。本研究での主な成果は、以下の2点に集約されます。  
+1. Factorization Machinesを用いて、露出バイアスを考慮した推薦モデルの構築。
+2. 露出バイアスが含まれたログデータを使用し、2種類の不偏推定量の性能を比較。
+
+研究の詳細は<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">short_paper.md</a>に記載しております。  
 先にこちらをご覧くださいませ。
 
-# 主な使用技術
+# 1. 主な使用技術
 詳細は、<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/pyproject.toml">pyproject.toml</a>を参照下さい。
 |名称|バージョン|説明|
 |:---:|:--------:|:-:|
@@ -23,10 +26,10 @@
 
 アルゴリズムへの深い理解と実装スキルの向上を目指しているため、コードは主にNumpyとSciPyを使用したオリジナルの実装となっています。
 
-# 使用するデータセット
+# 2. 使用するデータセット
 本研究での実験には、<a href="https://kuairec.com/">KuaiRecデータセット</a>を使用します。使用する背景の詳細は、<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">`short_paper.md`</a>の`半合成データを用いた性能実験`の項目を参照してください。
 
-## 扱うcsvファイルの詳細
+## 2.2 扱うcsvファイルの詳細
 実験には以下の5つのcsvファイルを使用します。(*実験スクリプトを実行する際は、これらのファイルを/data/kuairec/ディレクトリに格納する必要があります。)
 
 - `small_matrix.csv`: 実験的に収集された、ユーザー数1411人、動画数3327本のフィードバックデータ。評価値行列の密度は約99.6%
@@ -35,7 +38,7 @@
 - `item_daily_features.csv`: 日毎の動画特徴量
 - `user_features.csv`: 匿名化されたユーザー特徴量
 
-# ディレクトリ構成
+# 3. ディレクトリ構成
 
 - `conf`: 実験設定関連
   - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/conf/config.py">`config.py`</a>: `config.yaml`の型アノテーションクラス
@@ -79,22 +82,22 @@
 - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/pyproject.toml">`pyproject.toml`</a>: Pythonパッケージ
 - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">`short_paper.md`</a>: 実験の概要・背景・実験設定・結果
 
-# 実験設定の詳細
+# 4. 実験設定の詳細
 
-このドキュメントでは、推薦システムの実験設定についての詳細な解説を提供します。設定は[こちらのconfig.yaml](https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/conf/config.yaml)で確認できます。
+実験設定についての詳細な解説を提供します。設定は[こちらのconfig.yaml](https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/conf/config.yaml)で確認できます。
 
-## 実験の再現性
+## 4.1 実験の再現性
 
 - **`seed`**: 実験の再現性を保証するための乱数のシード値
 
-## 半人工データセットの生成設定 (`data_logging_settings`)
+## 4.2 半人工データセットの生成設定 (`data_logging_settings`)
 
 - **`data_path`**: KuaiRecデータセットの保存先
 - **`train_val_test_ratio`**: データセットの訓練、検証、テストへの分割比率
 - **`density`**: 評価値行列の密度
 - **`behavior_policy`**: ログデータ生成のアルゴリズム。露出バイアスのみを仮定し、ランダムポリシーを使用
 
-## KuaiRecデータセットのテーブル設定 (`tables`)
+## 4.3 KuaiRecデータセットのテーブル設定 (`tables`)
 
 ### 1. Interactionテーブル
 
@@ -126,7 +129,7 @@
   - **key**: カラム名
   - **value**: モデルへの入力用データタイプ
 
-## モデルのハイパーパラメータ設定
+## 4.4 モデルのハイパーパラメータ設定
 
 - **`is_search_params`**: ハイパーパラメータのチューニングを実験前に行うかどうかのフラグ
 - **`model_param_range`**: 各モデルのハイパーパラメータの範囲
