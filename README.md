@@ -139,5 +139,110 @@
   - **`FM` (Factorization Machines)**
     - (同様の設定が含まれています)
 
----
-このドキュメントは、実験設定の詳細を提供するものです。具体的な実装やさらなる詳細については、ソースコードを参照してください。
+
+# 付録
+この付録は<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">short_paper.md</a>の **`実験設定 7.学習`** の詳細を説明するためのものです。  
+
+## Matrix Factorization の詳細
+
+### 予測式
+```math
+\begin{aligned}
+\sigma(x) &= \frac{1}{1 + \exp(-x)}  \\
+\hat{R}_{u,i} &= \sigma(\mathbf{q}_i^T\mathbf{p}_u + b_u + b_i + b)  \\
+\end{aligned}
+```
+
+### 目的関数
+$`B \subseteq D`$: エポックごとに生成するバッチデータ  
+$`|B|`$: バッチサイズ  
+
+```math
+\begin{aligned}
+\hat{L}_{IPS}(\hat{R}_{u,i}) &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[\frac{Y_{u,i}}{\theta_{u,i}}\log(\hat{R}_{u,i}) + (1 - \frac{Y_{u,i}}{\theta_{u,i}})\log(1 - \hat{R}_{u,i})] + \lambda (||\mathbf{p}_u||^2 + ||\mathbf{q}_i||^2 + b_u^2 + b_i^2) \\
+\end{aligned}
+```
+```math
+\begin{aligned}
+Minimize \quad \hat{L}_{IPS}(\hat{R}_{u,i}) \\
+subject \quad to \quad \lambda \geq 0
+\end{aligned}
+```
+### 勾配
+```math
+\begin{aligned}
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial \mathbf{q}_i} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[ (\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i})\mathbf{p}_u] + 2\lambda \mathbf{q}_i  \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial \mathbf{p}_u} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[ (\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i})\mathbf{q}_i] + 2\lambda \mathbf{p}_u  \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial b_i} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i}] + 2\lambda b_i  \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial b_u} &= -\frac{1}{|B|}\sum_{(u,i) \in B}^{|B|}[\frac{Y_{u,i}}{\theta_{u,i}} - \hat{R}_{u,i}] + 2\lambda b_u  \\
+\end{aligned}
+```
+
+### 更新式
+```math
+\begin{aligned}
+&・　\mathbf{q}^{new}_{i}  := \mathbf{q}^{old}_{i} - \eta \frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial \mathbf{q}^{old}_i} \\
+&・　\mathbf{p}^{new}_{u}  := \mathbf{p}^{old}_{u} - \eta \frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial \mathbf{p}^{old}_u} \\
+&・　 b^{new}_{i}  := b^{old}_{i} - \eta \frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial b^{old}_i} \\
+&・　 b^{new}_{u}  := b^{old}_{u} - \eta \frac{\partial \hat{L}_{IPS}(\hat{R}_{u,i})}{\partial b^{old}_u} \\
+\end{aligned}
+```
+
+## Factorization Machines の詳細
+
+### 予測式
+$n$: 特徴数  
+$t$: レコード位置  
+$K$: 因子数  
+
+
+```math
+\begin{aligned}
+\hat{y}(\mathbf{x}_t) &= w_0 + \sum_{i=1}^{n}w_{i}x_{t,i}+\sum_{i=1}^{n}\sum_{j=i+1}^{n}<\mathbf{v}_{i},\mathbf{v}_{j}>x_{t,i}x_{t,j}\\
+&= w_0 + \sum_{i=1}^{n}w_{i}x_{t,i}+\frac{1}{2} \sum_{f=1}^{K} \left( \left( \sum_{j=1}^{n} v_{j,f}x_{t,j} \right)^2 - \sum_{j=1}^{n} v_{j,f}^2 x_{t,j}^2 \right)\\
+\hat{R}_{t} &= \sigma(\hat{y}(\mathbf{x}_t)) \\
+\end{aligned}
+```
+
+### 目的関数
+
+```math
+\hat{L}_{IPS}(\hat{R}_{t}) = -\frac{1}{|B|}\sum_{t=1}^{|B|}[\frac{Y_{t}}{\theta_{t}}\log(\hat{R}_{t}) + (1 - \frac{Y_{t}}{\theta_{t}})\log(1 - \hat{R}_{t})] 
+```
+```math
+\begin{aligned}
+Minimize \quad \hat{L}_{IPS}(\hat{R}_{t}) \\
+\end{aligned}
+```
+
+### 勾配
+```math
+\begin{aligned}
+\frac{\partial \hat{y}(\mathbf{x}_t)}{\partial w_0} &= 1 \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{t})}{\partial w_0} &= -\frac{1}{|B|}\sum_{t=1}^{|B|}\left[(\frac{Y_{t}}{\theta_{t}} - \hat{R}_{t}) \frac{\partial \hat{y}(\mathbf{x}_t)}{\partial w_0} \right]
+\end{aligned}
+```
+
+```math
+\begin{aligned}
+\frac{\partial \hat{y}(\mathbf{x}_t)}{\partial \mathbf{w}} &= \mathbf{x}_t \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{t})}{\partial \mathbf{w}} &= -\frac{1}{|B|}\sum_{t=1}^{|B|}\left[(\frac{Y_{t}}{\theta_{t}} - \hat{R}_{t}) \frac{\partial \hat{y}(\mathbf{x}_t)}{\partial \mathbf{w}} \right]
+\end{aligned}
+```
+
+```math
+\begin{aligned}
+\frac{\partial \hat{y}(\mathbf{x}_t)}{\partial v_{i,f}} &= x_{t,j} \sum_{j^{'}=1}^{n} \left[v_{j^{'},f}x_{t,j^{'}} \right] - v_{j,f}x_{t,j}^2 \\
+・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{t})}{\partial v_{i,f}} &= -\frac{1}{|B|}\sum_{t=1}^{|B|}\left[(\frac{Y_{t}}{\theta_{t}} - \hat{R}_{t}) \frac{\partial \hat{y}(\mathbf{x}_t)}{\partial v_{i,f}} \right]
+\end{aligned}
+```
+### 更新式
+```math
+\begin{aligned}
+&・　w_0^{new} := w_0^{old} - \eta \frac{\partial \hat{L}_{IPS}(\hat{R}_{t})}{\partial w_0^{old}} \\
+&・　\mathbf{w}^{new} := \mathbf{w}^{old} - \eta \frac{\partial \hat{L}_{IPS}(\hat{R}_{t})}{\partial \mathbf{w}^{old}} \\
+&・　v_{i,f}^{new} := v_{i,f}^{old} - \eta \frac{\partial \hat{L}_{IPS}(\hat{R}_{t})}{\partial v_{i,f}^{old}} \\
+\end{aligned}
+```
+
+
