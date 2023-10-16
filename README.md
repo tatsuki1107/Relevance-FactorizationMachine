@@ -235,7 +235,7 @@ Minimize \quad \hat{L}_{IPS}(\hat{R}_{t}) \\
 
 ```math
 \begin{aligned}
-\frac{\partial \hat{y}(\mathbf{x}_t)}{\partial v_{i,f}} &= x_{t,j} \sum_{j^{'}=1}^{n} \left[v_{j^{'},f}x_{t,j^{'}} \right] - v_{j,f}x_{t,j}^2 \\
+\frac{\partial \hat{y}(\mathbf{x}_t)}{\partial v_{i,f}} &= x_{t,i} \sum_{j=1}^{n} \left[v_{j,f}x_{t,j} \right] - v_{i,f}x_{t,i}^2 \\
 ・　\frac{\partial \hat{L}_{IPS}(\hat{R}_{t})}{\partial v_{i,f}} &= -\frac{1}{|B|}\sum_{t=1}^{|B|}\left[(\frac{Y_{t}}{\theta_{t}} - \hat{R}_{t}) \frac{\partial \hat{y}(\mathbf{x}_t)}{\partial v_{i,f}} \right]
 \end{aligned}
 ```
