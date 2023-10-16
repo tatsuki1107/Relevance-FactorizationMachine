@@ -181,8 +181,8 @@ $`|B|`$: バッチサイズ
 ```
 ```math
 \begin{aligned}
-Minimize \quad \hat{L}_{IPS}(\hat{R}_{u,i}) \\
-subject \quad to \quad \lambda \geq 0
+& \underset{\mathbf{p}_u, \mathbf{q}_i, b_u, b_i}{\text{Minimize}} & & \hat{L}_{IPS}(\hat{R}_{u,i}) \\
+& \text{subject to} & & \lambda \geq 0
 \end{aligned}
 ```
 ### 勾配
@@ -228,9 +228,10 @@ $K$: 因子数
 ```
 ```math
 \begin{aligned}
-Minimize \quad \hat{L}_{IPS}(\hat{R}_{t}) \\
+& \underset{w_0, \mathbf{w}, V}{\text{Minimize}} & & \hat{L}_{IPS}(\hat{R}_{t})
 \end{aligned}
 ```
+
 
 ### 勾配
 ```math
