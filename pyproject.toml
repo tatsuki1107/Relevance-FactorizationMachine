@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "unbiased factorization machine"
+name = "unbiased factorization machines"
 version = "0.1.0"
 description = ""
 authors = ["tatsuki takahashi"]
