@@ -142,6 +142,20 @@
   - **`FM` (Factorization Machines)**
     - (同様の設定が含まれています)
 
+# セットアップ
+
+## 1. Docker Desktopのインストール
+本実験スクリプトは、Docker環境で動作します。各OSに応じてDocker Desktopをインストールして下さい。
+
+## 2. Docker Image のビルド
+```
+docker compose build
+```
+## 3. 実験スクリプトの実行
+```
+docker compose run unbiased-fm poetry run python main.py is_search_params=False
+```
+
 
 # 付録
 この付録は<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">short_paper.md</a>の **`実験設定 7.学習`** の詳細を説明するためのものです。  
