@@ -1,6 +1,7 @@
 from hydra import initialize, compose
 from logging import getLogger
 from utils.dataloader.loader import DataLoader
+import numpy as np
 
 
 class TestDataLoader:
@@ -14,5 +15,6 @@ class TestDataLoader:
         datasets = loader.load(model_name="FM", estimator="IPS")
 
         assert isinstance(datasets, tuple)
+        assert isinstance(datasets[1][2], np.ndarray)
         assert isinstance(loader.test_user2data_indices, dict)
         assert isinstance(loader.val_user2data_indices, list)

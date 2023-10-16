@@ -1,20 +1,529 @@
-[2023-10-11 04:45:25,966][__main__][INFO] - start data loading...
-[2023-10-11 04:45:41,139][__main__][INFO] - created small_matrix_df
-[2023-10-11 04:45:41,484][__main__][INFO] - mean of relevance: 0.4149662423709277
-[2023-10-11 04:45:41,487][__main__][INFO] - std of relevance: 0.2507729286422716
-[2023-10-11 04:46:20,680][__main__][INFO] - mean of exposure: 0.46022244447642285
-[2023-10-11 04:46:20,683][__main__][INFO] - std of exposure: 0.3575756547215601
-[2023-10-11 04:46:20,709][__main__][INFO] - biased click through rate: 0.18901927912824812
-[2023-10-11 04:46:20,711][__main__][INFO] - unbiased click through rate: 0.4154378432009853
-[2023-10-11 04:46:20,713][__main__][INFO] - created interaction_df
-[2023-10-11 04:46:47,516][__main__][INFO] - created features
-[2023-10-11 04:46:47,628][__main__][INFO] - prepared train and evaluation datasets
-[2023-10-11 04:46:47,643][__main__][INFO] - data loading is done.
-[2023-10-11 04:46:47,646][__main__][INFO] - start experiment...
-[2023-10-11 04:46:55,924][__main__][INFO] - FM_Ideal is done.
-[2023-10-11 04:47:02,133][__main__][INFO] - FM_IPS is done.
-[2023-10-11 04:47:09,361][__main__][INFO] - FM_Naive is done.
-[2023-10-11 04:47:11,916][__main__][INFO] - MF_Ideal is done.
-[2023-10-11 04:47:18,117][__main__][INFO] - MF_IPS is done.
-[2023-10-11 04:47:21,960][__main__][INFO] - MF_Naive is done.
-[2023-10-11 04:47:23,050][__main__][INFO] - Random is done.
+[2023-10-15 05:52:57,318][__main__][INFO] - start data loading...
+[2023-10-15 05:53:00,260][__main__][INFO] - created small_matrix_df
+[2023-10-15 05:53:00,643][__main__][INFO] - mean of relevance: 0.4149662423709277
+[2023-10-15 05:53:00,647][__main__][INFO] - std of relevance: 0.2507729286422716
+[2023-10-15 05:53:06,101][__main__][INFO] - mean of exposure: 0.46022244447642285
+[2023-10-15 05:53:06,104][__main__][INFO] - std of exposure: 0.3575756547215601
+[2023-10-15 05:53:06,131][__main__][INFO] - biased click through rate: 0.18901927912824812
+[2023-10-15 05:53:06,132][__main__][INFO] - unbiased click through rate: 0.4154378432009853
+[2023-10-15 05:53:06,135][__main__][INFO] - created interaction_df
+[2023-10-15 05:53:23,225][__main__][INFO] - created features
+[2023-10-15 05:53:23,318][__main__][INFO] - prepared train and evaluation datasets
+[2023-10-15 05:53:23,332][__main__][INFO] - data loading is done.
+[2023-10-15 05:53:23,365][__main__][INFO] - Random Baseline: {'DCG': 0.3650583906490239}
+[2023-10-15 05:53:23,378][__main__][INFO] - start random search...
+[2023-10-15 05:53:27,930][__main__][INFO] - model: FM, estimator: Ideal, epoch: 0, params: {'n_epochs': 41, 'n_factors': 137, 'lr': 0.0004954572803443675, 'batch_size': 287}, DCG@3: 1.0627611748752062
+[2023-10-15 05:53:27,972][__main__][INFO] - log loss: 0.9374260315202677, prediction min: 2.3401444241978783e-68, max: 0.998202426711875, mean: 0.30236116011403913, std: 0.22691731819734154
+[2023-10-15 05:53:33,674][__main__][INFO] - model: FM, estimator: Ideal, epoch: 1, params: {'n_epochs': 68, 'n_factors': 103, 'lr': 0.0006177594900131471, 'batch_size': 274}, DCG@3: 1.1470771313297716
+[2023-10-15 05:53:33,705][__main__][INFO] - log loss: 0.9226591988174828, prediction min: 4.8990749289984e-63, max: 1.0, mean: 0.48829641816232366, std: 0.2703634630594399
+[2023-10-15 05:53:39,938][__main__][INFO] - model: FM, estimator: Ideal, epoch: 2, params: {'n_epochs': 71, 'n_factors': 113, 'lr': 0.0006401250305436765, 'batch_size': 290}, DCG@3: 1.129823568472527
+[2023-10-15 05:53:39,971][__main__][INFO] - log loss: 0.8677378533878402, prediction min: 2.5725711518869517e-38, max: 1.0, mean: 0.46923362719801226, std: 0.2582372590775163
+[2023-10-15 05:53:41,523][__main__][INFO] - model: FM, estimator: Ideal, epoch: 3, params: {'n_epochs': 15, 'n_factors': 115, 'lr': 0.00018607222463948406, 'batch_size': 273}, DCG@3: 1.096088313047804
+[2023-10-15 05:53:41,566][__main__][INFO] - log loss: 0.9159402309251169, prediction min: 6.92156202892625e-36, max: 0.9999999999999998, mean: 0.4385772259039232, std: 0.2699156823684219
+[2023-10-15 05:53:47,062][__main__][INFO] - model: FM, estimator: Ideal, epoch: 4, params: {'n_epochs': 68, 'n_factors': 111, 'lr': 0.0008299333545797039, 'batch_size': 253}, DCG@3: 1.1184437433509697
+[2023-10-15 05:53:47,095][__main__][INFO] - log loss: 0.8586981665203057, prediction min: 3.7999027805508144e-26, max: 0.9999999999999951, mean: 0.4718811461181872, std: 0.25485790472632924
+[2023-10-15 05:53:48,997][__main__][INFO] - model: FM, estimator: Ideal, epoch: 5, params: {'n_epochs': 21, 'n_factors': 111, 'lr': 0.0007553451208593934, 'batch_size': 254}, DCG@3: 1.0422592345366437
+[2023-10-15 05:53:49,029][__main__][INFO] - log loss: 1.038102607659391, prediction min: 4.627775327827048e-113, max: 0.9977202207498728, mean: 0.24588146149398982, std: 0.2189646128386901
+[2023-10-15 05:53:55,501][__main__][INFO] - model: FM, estimator: Ideal, epoch: 6, params: {'n_epochs': 62, 'n_factors': 136, 'lr': 0.00010443456204132156, 'batch_size': 288}, DCG@3: 1.12633165376568
+[2023-10-15 05:53:55,542][__main__][INFO] - log loss: 0.8568912787492705, prediction min: 4.0544970504232684e-32, max: 0.999999999713749, mean: 0.43427106485919, std: 0.2663129407341609
+[2023-10-15 05:53:58,073][__main__][INFO] - model: FM, estimator: Ideal, epoch: 7, params: {'n_epochs': 23, 'n_factors': 132, 'lr': 0.0009271013525454448, 'batch_size': 299}, DCG@3: 1.169321872158441
+[2023-10-15 05:53:58,118][__main__][INFO] - log loss: 0.8872633190561534, prediction min: 4.881449645075293e-61, max: 0.999999999999847, mean: 0.5846486502657288, std: 0.24921321782243283
+[2023-10-15 05:53:59,881][__main__][INFO] - model: FM, estimator: Ideal, epoch: 8, params: {'n_epochs': 15, 'n_factors': 119, 'lr': 0.0006271293662448123, 'batch_size': 273}, DCG@3: 1.0353366253014498
+[2023-10-15 05:53:59,916][__main__][INFO] - log loss: 1.1731706789151344, prediction min: 3.97073471683763e-94, max: 0.9999999999682128, mean: 0.17416592502302267, std: 0.19134697554296784
+[2023-10-15 05:54:02,697][__main__][INFO] - model: FM, estimator: Ideal, epoch: 9, params: {'n_epochs': 30, 'n_factors': 111, 'lr': 0.0003879367776559182, 'batch_size': 266}, DCG@3: 1.1100840401415306
+[2023-10-15 05:54:02,735][__main__][INFO] - log loss: 0.9009417831973946, prediction min: 7.352268168698662e-38, max: 0.9999999998837241, mean: 0.4463408124823151, std: 0.2712473172484136
+[2023-10-15 05:54:07,956][__main__][INFO] - model: FM, estimator: Ideal, epoch: 10, params: {'n_epochs': 51, 'n_factors': 128, 'lr': 0.0009367267428911944, 'batch_size': 297}, DCG@3: 1.1346928251097637
+[2023-10-15 05:54:07,993][__main__][INFO] - log loss: 0.8422164620320027, prediction min: 3.276783751100003e-77, max: 0.999999999998936, mean: 0.48196977392091134, std: 0.25182853567264546
+[2023-10-15 05:54:12,728][__main__][INFO] - model: FM, estimator: Ideal, epoch: 11, params: {'n_epochs': 51, 'n_factors': 118, 'lr': 0.0001232239850032774, 'batch_size': 267}, DCG@3: 1.1197363887983645
+[2023-10-15 05:54:12,772][__main__][INFO] - log loss: 0.9031484387085953, prediction min: 3.7516761873143173e-38, max: 0.999999998992104, mean: 0.4577350370735973, std: 0.27951249891871627
+[2023-10-15 05:54:20,037][__main__][INFO] - model: FM, estimator: Ideal, epoch: 12, params: {'n_epochs': 79, 'n_factors': 124, 'lr': 0.0007249765831032625, 'batch_size': 259}, DCG@3: 1.1120733234302245
+[2023-10-15 05:54:20,072][__main__][INFO] - log loss: 0.9032679024595396, prediction min: 7.665339739516257e-89, max: 0.9948736918842799, mean: 0.3765572664159342, std: 0.24734543857814245
+[2023-10-15 05:54:23,669][__main__][INFO] - model: FM, estimator: Ideal, epoch: 13, params: {'n_epochs': 45, 'n_factors': 101, 'lr': 0.00019263251078235834, 'batch_size': 299}, DCG@3: 1.133947926101307
+[2023-10-15 05:54:23,702][__main__][INFO] - log loss: 0.9281976673326684, prediction min: 2.764574230500336e-53, max: 0.999954617548445, mean: 0.4449144394667255, std: 0.283149914624016
+[2023-10-15 05:54:30,458][__main__][INFO] - model: FM, estimator: Ideal, epoch: 14, params: {'n_epochs': 61, 'n_factors': 142, 'lr': 0.0009448125986833231, 'batch_size': 280}, DCG@3: 1.1161222017341679
+[2023-10-15 05:54:30,499][__main__][INFO] - log loss: 0.8331858137718836, prediction min: 1.7866276963851575e-75, max: 0.996151210028678, mean: 0.4404393684674673, std: 0.24334706570962786
+[2023-10-15 05:54:38,582][__main__][INFO] - model: FM, estimator: Ideal, epoch: 15, params: {'n_epochs': 75, 'n_factors': 143, 'lr': 0.0005517088287396856, 'batch_size': 286}, DCG@3: 1.0668314246314319
+[2023-10-15 05:54:38,623][__main__][INFO] - log loss: 0.8828500379277135, prediction min: 7.53361226311832e-40, max: 1.0, mean: 0.3870145108297547, std: 0.2416196944381454
+[2023-10-15 05:54:46,433][__main__][INFO] - model: FM, estimator: Ideal, epoch: 16, params: {'n_epochs': 75, 'n_factors': 136, 'lr': 0.0006574285562590394, 'batch_size': 291}, DCG@3: 1.1596708745950834
+[2023-10-15 05:54:46,483][__main__][INFO] - log loss: 0.826582757160456, prediction min: 2.757454188557925e-35, max: 0.9999999999998461, mean: 0.5062381539005298, std: 0.258673389699102
+[2023-10-15 05:54:52,647][__main__][INFO] - model: FM, estimator: Ideal, epoch: 17, params: {'n_epochs': 56, 'n_factors': 146, 'lr': 0.00039034945194121407, 'batch_size': 264}, DCG@3: 1.1273597177780519
+[2023-10-15 05:54:52,689][__main__][INFO] - log loss: 0.8298896904828302, prediction min: 1.1511108289226132e-51, max: 0.9999999978179672, mean: 0.43859554379763466, std: 0.25892185995724454
+[2023-10-15 05:54:54,409][__main__][INFO] - model: FM, estimator: Ideal, epoch: 18, params: {'n_epochs': 18, 'n_factors': 104, 'lr': 0.0009982518199825453, 'batch_size': 281}, DCG@3: 1.0318898302166972
+[2023-10-15 05:54:54,452][__main__][INFO] - log loss: 1.1358150306597101, prediction min: 8.226791471475907e-161, max: 0.999999999998956, mean: 0.21589749406451886, std: 0.20558445572806053
+[2023-10-15 05:55:00,545][__main__][INFO] - model: FM, estimator: Ideal, epoch: 19, params: {'n_epochs': 58, 'n_factors': 131, 'lr': 0.00028907254328844556, 'batch_size': 294}, DCG@3: 1.1063132229107253
+[2023-10-15 05:55:00,582][__main__][INFO] - log loss: 0.8717813238671606, prediction min: 4.0158157244594727e-41, max: 1.0, mean: 0.4458089572885821, std: 0.260911661020115
+[2023-10-15 05:55:04,159][__main__][INFO] - model: FM, estimator: Ideal, epoch: 20, params: {'n_epochs': 38, 'n_factors': 120, 'lr': 0.0004963089613675752, 'batch_size': 265}, DCG@3: 1.1962497166773467
+[2023-10-15 05:55:04,194][__main__][INFO] - log loss: 0.9497284873704998, prediction min: 1.6629226045841796e-86, max: 0.9996079637686354, mean: 0.5534635742229199, std: 0.2859337330300329
+[2023-10-15 05:55:05,538][__main__][INFO] - model: FM, estimator: Ideal, epoch: 21, params: {'n_epochs': 14, 'n_factors': 100, 'lr': 0.0009142166538229108, 'batch_size': 275}, DCG@3: 1.033302272056708
+[2023-10-15 05:55:05,567][__main__][INFO] - log loss: 1.2044620352436965, prediction min: 8.18068467793644e-156, max: 0.9968105465324042, mean: 0.1860049174933026, std: 0.1941140129550886
+[2023-10-15 05:55:08,079][__main__][INFO] - model: FM, estimator: Ideal, epoch: 22, params: {'n_epochs': 27, 'n_factors': 113, 'lr': 0.00039324602829677224, 'batch_size': 266}, DCG@3: 1.125732439693381
+[2023-10-15 05:55:08,111][__main__][INFO] - log loss: 0.8876747725742303, prediction min: 8.389013952935998e-45, max: 1.0, mean: 0.4456041039840566, std: 0.274823028130997
+[2023-10-15 05:55:14,920][__main__][INFO] - model: FM, estimator: Ideal, epoch: 23, params: {'n_epochs': 67, 'n_factors': 136, 'lr': 0.0009072934493811966, 'batch_size': 258}, DCG@3: 1.1220382085887863
+[2023-10-15 05:55:14,958][__main__][INFO] - log loss: 0.8455935642135678, prediction min: 1.7053336108784553e-72, max: 0.9999999999998361, mean: 0.4389259159577877, std: 0.2555975996866148
+[2023-10-15 05:55:16,443][__main__][INFO] - model: FM, estimator: Ideal, epoch: 24, params: {'n_epochs': 16, 'n_factors': 103, 'lr': 0.0009106105766727376, 'batch_size': 271}, DCG@3: 1.0301839535807338
+[2023-10-15 05:55:16,476][__main__][INFO] - log loss: 1.0962073030550554, prediction min: 2.5173268951592288e-90, max: 0.9949668105082398, mean: 0.19851492799597212, std: 0.19442208559616808
+[2023-10-15 05:55:18,816][__main__][INFO] - model: FM, estimator: Ideal, epoch: 25, params: {'n_epochs': 23, 'n_factors': 104, 'lr': 0.0004512207981175938, 'batch_size': 264}, DCG@3: 1.0944431586085441
+[2023-10-15 05:55:18,848][__main__][INFO] - log loss: 0.9901315926446191, prediction min: 2.620431131933707e-112, max: 0.9928572190596747, mean: 0.3365947333327591, std: 0.2618140160047619
+[2023-10-15 05:55:25,404][__main__][INFO] - model: FM, estimator: Ideal, epoch: 26, params: {'n_epochs': 62, 'n_factors': 138, 'lr': 0.0009150624064291202, 'batch_size': 264}, DCG@3: 1.0860390108124278
+[2023-10-15 05:55:25,443][__main__][INFO] - log loss: 0.8723630133623345, prediction min: 1.612928349694164e-44, max: 1.0, mean: 0.43095081171826577, std: 0.2496511926483524
+[2023-10-15 05:55:31,995][__main__][INFO] - model: FM, estimator: Ideal, epoch: 27, params: {'n_epochs': 78, 'n_factors': 110, 'lr': 0.0007229509996948046, 'batch_size': 256}, DCG@3: 1.1490162306495217
+[2023-10-15 05:55:32,027][__main__][INFO] - log loss: 0.8799009202654776, prediction min: 1.585239907423106e-41, max: 0.9999999999989932, mean: 0.5085638741626325, std: 0.2718693951187602
+[2023-10-15 05:55:36,962][__main__][INFO] - model: FM, estimator: Ideal, epoch: 28, params: {'n_epochs': 54, 'n_factors': 117, 'lr': 0.0009620955222823759, 'batch_size': 290}, DCG@3: 1.1133791494478515
+[2023-10-15 05:55:36,994][__main__][INFO] - log loss: 0.8557071721378433, prediction min: 1.3662321242531364e-77, max: 1.0, mean: 0.4981482375538033, std: 0.24211670238753577
+[2023-10-15 05:55:42,714][__main__][INFO] - model: FM, estimator: Ideal, epoch: 29, params: {'n_epochs': 66, 'n_factors': 118, 'lr': 0.00044913006133155117, 'batch_size': 251}, DCG@3: 1.1183364585044373
+[2023-10-15 05:55:42,748][__main__][INFO] - log loss: 0.8969023787936906, prediction min: 2.4647418026618276e-53, max: 0.9999993343643351, mean: 0.4066835525713583, std: 0.27650344850172537
+[2023-10-15 05:55:45,825][__main__][INFO] - model: FM, estimator: Ideal, epoch: 30, params: {'n_epochs': 30, 'n_factors': 117, 'lr': 0.0004152266431810316, 'batch_size': 296}, DCG@3: 1.0575748078458123
+[2023-10-15 05:55:45,860][__main__][INFO] - log loss: 0.900713779498897, prediction min: 3.4502916211369584e-59, max: 0.9959690439120387, mean: 0.3266296650562679, std: 0.23794350444050325
+[2023-10-15 05:55:48,204][__main__][INFO] - model: FM, estimator: Ideal, epoch: 31, params: {'n_epochs': 18, 'n_factors': 134, 'lr': 0.0004686945175740456, 'batch_size': 261}, DCG@3: 1.1543846596672356
+[2023-10-15 05:55:48,263][__main__][INFO] - log loss: 0.9749639846685636, prediction min: 5.883089716731999e-29, max: 1.0, mean: 0.5980146825612214, std: 0.27511143352914574
+[2023-10-15 05:55:56,075][__main__][INFO] - model: FM, estimator: Ideal, epoch: 32, params: {'n_epochs': 75, 'n_factors': 135, 'lr': 0.0008459217694638242, 'batch_size': 288}, DCG@3: 1.1341688319076548
+[2023-10-15 05:55:56,113][__main__][INFO] - log loss: 0.838245450886205, prediction min: 3.8061570007513845e-16, max: 1.0, mean: 0.4917053410696026, std: 0.24579920199891286
+[2023-10-15 05:55:59,877][__main__][INFO] - model: FM, estimator: Ideal, epoch: 33, params: {'n_epochs': 34, 'n_factors': 139, 'lr': 0.0004375767628750812, 'batch_size': 293}, DCG@3: 1.2029069216629735
+[2023-10-15 05:55:59,916][__main__][INFO] - log loss: 0.9429643350218926, prediction min: 1.1656041738227586e-92, max: 0.9999911765715349, mean: 0.58447873061296, std: 0.27566977581043484
+[2023-10-15 05:56:06,477][__main__][INFO] - model: FM, estimator: Ideal, epoch: 34, params: {'n_epochs': 62, 'n_factors': 141, 'lr': 0.0004799067998437966, 'batch_size': 294}, DCG@3: 1.160436673241384
+[2023-10-15 05:56:06,522][__main__][INFO] - log loss: 0.8500807752723759, prediction min: 6.563013162824397e-53, max: 0.9999427363535545, mean: 0.5101024152988557, std: 0.26165060721310335
+[2023-10-15 05:56:10,870][__main__][INFO] - model: FM, estimator: Ideal, epoch: 35, params: {'n_epochs': 37, 'n_factors': 145, 'lr': 0.0005267627621487776, 'batch_size': 294}, DCG@3: 1.1861377416489216
+[2023-10-15 05:56:10,917][__main__][INFO] - log loss: 0.9073572402048103, prediction min: 7.399971088065939e-16, max: 0.9999999999999929, mean: 0.5905033284164056, std: 0.25653157393555615
+[2023-10-15 05:56:17,139][__main__][INFO] - model: FM, estimator: Ideal, epoch: 36, params: {'n_epochs': 73, 'n_factors': 117, 'lr': 0.00030077851411710785, 'batch_size': 258}, DCG@3: 1.1250063606344551
+[2023-10-15 05:56:17,173][__main__][INFO] - log loss: 0.8830049490383222, prediction min: 1.9461091631282167e-75, max: 0.9956145291347992, mean: 0.43632894629304253, std: 0.26368279090639873
+[2023-10-15 05:56:21,353][__main__][INFO] - model: FM, estimator: Ideal, epoch: 37, params: {'n_epochs': 45, 'n_factors': 120, 'lr': 0.00025224480684203675, 'batch_size': 295}, DCG@3: 1.1268277806791869
+[2023-10-15 05:56:21,388][__main__][INFO] - log loss: 0.8547436953064013, prediction min: 1.2502008539779388e-44, max: 0.9999999998026068, mean: 0.4423124062199353, std: 0.26720931973158324
+[2023-10-15 05:56:23,393][__main__][INFO] - model: FM, estimator: Ideal, epoch: 38, params: {'n_epochs': 16, 'n_factors': 147, 'lr': 0.0005352911407617603, 'batch_size': 271}, DCG@3: 1.205765346944555
+[2023-10-15 05:56:23,437][__main__][INFO] - log loss: 1.0267230326882655, prediction min: 5.633103721162278e-50, max: 1.0, mean: 0.6669224262321003, std: 0.26729452772050405
+[2023-10-15 05:56:25,958][__main__][INFO] - model: FM, estimator: Ideal, epoch: 39, params: {'n_epochs': 27, 'n_factors': 115, 'lr': 0.0009430921948132671, 'batch_size': 277}, DCG@3: 1.145990399465095
+[2023-10-15 05:56:25,991][__main__][INFO] - log loss: 0.8540740106377075, prediction min: 5.5147215456434164e-80, max: 0.999997387987641, mean: 0.5270661085219952, std: 0.2532974377737976
+[2023-10-15 05:56:25,994][__main__][INFO] - best params: ({'n_epochs': 16, 'n_factors': 147, 'lr': 0.0005352911407617603, 'batch_size': 271}, 1.205765346944555)
+[2023-10-15 05:56:30,436][__main__][INFO] - model: FM, estimator: IPS, epoch: 0, params: {'n_epochs': 57, 'n_factors': 103, 'lr': 0.0007952238461641759, 'batch_size': 287, 'clipping': 0.006638212375209552}, DCG@3: 0.09229662666884758
+[2023-10-15 05:56:30,465][__main__][INFO] - log loss: 7.640896753296156, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6196184875216768, std: 0.4854806046002522
+[2023-10-15 05:56:36,265][__main__][INFO] - model: FM, estimator: IPS, epoch: 1, params: {'n_epochs': 75, 'n_factors': 107, 'lr': 0.0007193608471049238, 'batch_size': 259, 'clipping': 0.007292006617741907}, DCG@3: 0.10777881897847061
+[2023-10-15 05:56:36,295][__main__][INFO] - log loss: 8.363564461673066, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5551534343662822, std: 0.49694878878774246
+[2023-10-15 05:56:42,171][__main__][INFO] - model: FM, estimator: IPS, epoch: 2, params: {'n_epochs': 72, 'n_factors': 108, 'lr': 0.0006091732719000748, 'batch_size': 297, 'clipping': 0.005761455843441467}, DCG@3: 0.07770802911131175
+[2023-10-15 05:56:42,201][__main__][INFO] - log loss: 6.840346025563559, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6741310412425545, std: 0.4686986030230769
+[2023-10-15 05:56:43,886][__main__][INFO] - model: FM, estimator: IPS, epoch: 3, params: {'n_epochs': 13, 'n_factors': 145, 'lr': 0.00011838999738643961, 'batch_size': 282, 'clipping': 0.006756973105479749}, DCG@3: 0.08642528885354092
+[2023-10-15 05:56:43,925][__main__][INFO] - log loss: 1.1232383508170782, prediction min: 5.7291821512321556e-67, max: 0.9999999999930516, mean: 0.7389850737124383, std: 0.30155078451019657
+[2023-10-15 05:56:49,711][__main__][INFO] - model: FM, estimator: IPS, epoch: 4, params: {'n_epochs': 53, 'n_factors': 135, 'lr': 0.00015211090905463902, 'batch_size': 275, 'clipping': 0.003219990078137493}, DCG@3: 0.09115924163156901
+[2023-10-15 05:56:49,749][__main__][INFO] - log loss: 6.451348844744489, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6339694798015038, std: 0.4761108089095717
+[2023-10-15 05:56:51,947][__main__][INFO] - model: FM, estimator: IPS, epoch: 5, params: {'n_epochs': 27, 'n_factors': 100, 'lr': 0.0003552236601046905, 'batch_size': 262, 'clipping': 0.007224248822343904}, DCG@3: 0.09460509286495411
+[2023-10-15 05:56:51,977][__main__][INFO] - log loss: 7.121690068247409, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6048361535038798, std: 0.4866523041205295
+[2023-10-15 05:56:54,472][__main__][INFO] - model: FM, estimator: IPS, epoch: 6, params: {'n_epochs': 26, 'n_factors': 112, 'lr': 0.00015835162440898918, 'batch_size': 289, 'clipping': 0.007278105379497886}, DCG@3: 0.07295885942771128
+[2023-10-15 05:56:54,523][__main__][INFO] - log loss: 3.1922829209214005, prediction min: 8.070875334223871e-105, max: 1.0, mean: 0.7385335743859862, std: 0.39792024335960674
+[2023-10-15 05:57:01,191][__main__][INFO] - model: FM, estimator: IPS, epoch: 7, params: {'n_epochs': 71, 'n_factors': 124, 'lr': 0.0008169552789544363, 'batch_size': 282, 'clipping': 0.0013641095725201507}, DCG@3: 0.0918698033961072
+[2023-10-15 05:57:01,226][__main__][INFO] - log loss: 7.588249621006483, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6233883736711151, std: 0.4845361794982881
+[2023-10-15 05:57:06,805][__main__][INFO] - model: FM, estimator: IPS, epoch: 8, params: {'n_epochs': 51, 'n_factors': 139, 'lr': 0.0006391528875129094, 'batch_size': 261, 'clipping': 0.003416164769004782}, DCG@3: 0.103857620699132
+[2023-10-15 05:57:06,843][__main__][INFO] - log loss: 8.07812570083916, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5702329789640352, std: 0.49504275438171735
+[2023-10-15 05:57:13,574][__main__][INFO] - model: FM, estimator: IPS, epoch: 9, params: {'n_epochs': 79, 'n_factors': 110, 'lr': 0.0007926284811618677, 'batch_size': 262, 'clipping': 0.008757439102881483}, DCG@3: 0.1038309074125283
+[2023-10-15 05:57:13,606][__main__][INFO] - log loss: 8.078139493304862, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.573852069667496, std: 0.49451579530468726
+[2023-10-15 05:57:15,660][__main__][INFO] - model: FM, estimator: IPS, epoch: 10, params: {'n_epochs': 15, 'n_factors': 147, 'lr': 0.0003690278340626054, 'batch_size': 261, 'clipping': 0.006693332107589948}, DCG@3: 0.09286094883225018
+[2023-10-15 05:57:15,701][__main__][INFO] - log loss: 4.227439797691917, prediction min: 4.5124256385522763e-144, max: 1.0, mean: 0.6465910815830332, std: 0.45074984629150466
+[2023-10-15 05:57:17,371][__main__][INFO] - model: FM, estimator: IPS, epoch: 11, params: {'n_epochs': 16, 'n_factors': 120, 'lr': 0.000190231213331795, 'batch_size': 277, 'clipping': 0.005601118747949426}, DCG@3: 0.08281651334008412
+[2023-10-15 05:57:17,405][__main__][INFO] - log loss: 1.9438884666595528, prediction min: 6.849730410841286e-54, max: 1.0, mean: 0.734501264410443, std: 0.36653200141571884
+[2023-10-15 05:57:22,324][__main__][INFO] - model: FM, estimator: IPS, epoch: 12, params: {'n_epochs': 50, 'n_factors': 133, 'lr': 0.0005465424045983629, 'batch_size': 257, 'clipping': 0.0032457033917565117}, DCG@3: 0.10352177992857217
+[2023-10-15 05:57:22,365][__main__][INFO] - log loss: 8.27636473085448, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5679710472743723, std: 0.4953583922095447
+[2023-10-15 05:57:27,427][__main__][INFO] - model: FM, estimator: IPS, epoch: 13, params: {'n_epochs': 52, 'n_factors': 127, 'lr': 0.0004467036251221322, 'batch_size': 268, 'clipping': 0.007242031026293515}, DCG@3: 0.1026771482070466
+[2023-10-15 05:57:27,464][__main__][INFO] - log loss: 8.05021310397419, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.575586217296271, std: 0.49425370383519396
+[2023-10-15 05:57:31,345][__main__][INFO] - model: FM, estimator: IPS, epoch: 14, params: {'n_epochs': 38, 'n_factors': 128, 'lr': 0.00044010185905152694, 'batch_size': 298, 'clipping': 0.00792133894096735}, DCG@3: 0.07475303733269681
+[2023-10-15 05:57:31,382][__main__][INFO] - log loss: 6.795723198787254, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6825665714972391, std: 0.46546903494506964
+[2023-10-15 05:57:38,006][__main__][INFO] - model: FM, estimator: IPS, epoch: 15, params: {'n_epochs': 61, 'n_factors': 141, 'lr': 0.0008741686090030445, 'batch_size': 274, 'clipping': 0.001967280506996238}, DCG@3: 0.0951348203362561
+[2023-10-15 05:57:38,044][__main__][INFO] - log loss: 7.8480847651138665, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6042373520319686, std: 0.4890138795999183
+[2023-10-15 05:57:41,887][__main__][INFO] - model: FM, estimator: IPS, epoch: 16, params: {'n_epochs': 47, 'n_factors': 105, 'lr': 0.0009733885741065352, 'batch_size': 278, 'clipping': 0.006726251031854758}, DCG@3: 0.09425394158597152
+[2023-10-15 05:57:41,917][__main__][INFO] - log loss: 7.715034542494955, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.611852522053834, std: 0.4873284450041846
+[2023-10-15 05:57:45,093][__main__][INFO] - model: FM, estimator: IPS, epoch: 17, params: {'n_epochs': 34, 'n_factors': 121, 'lr': 0.0009564649361276914, 'batch_size': 264, 'clipping': 0.0031947271765868967}, DCG@3: 0.10378814132079357
+[2023-10-15 05:57:45,127][__main__][INFO] - log loss: 7.992744728975791, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5763401945261253, std: 0.49413780942133273
+[2023-10-15 05:57:50,851][__main__][INFO] - model: FM, estimator: IPS, epoch: 18, params: {'n_epochs': 73, 'n_factors': 101, 'lr': 0.0005543942903290287, 'batch_size': 276, 'clipping': 0.00976969226638422}, DCG@3: 0.094873908006497
+[2023-10-15 05:57:50,880][__main__][INFO] - log loss: 7.717892416056792, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6068762723365755, std: 0.4884439194129027
+[2023-10-15 05:57:56,027][__main__][INFO] - model: FM, estimator: IPS, epoch: 19, params: {'n_epochs': 70, 'n_factors': 100, 'lr': 0.0007082616188138779, 'batch_size': 268, 'clipping': 0.0015777359321228188}, DCG@3: 0.10315915820824365
+[2023-10-15 05:57:56,057][__main__][INFO] - log loss: 8.0198463499094, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5740028651134735, std: 0.4944932516779143
+[2023-10-15 05:57:58,620][__main__][INFO] - model: FM, estimator: IPS, epoch: 20, params: {'n_epochs': 29, 'n_factors': 107, 'lr': 0.0007068844715957644, 'batch_size': 291, 'clipping': 0.0031890967223613307}, DCG@3: 0.0901025316296647
+[2023-10-15 05:57:58,651][__main__][INFO] - log loss: 7.485259774992109, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6329638844906884, std: 0.4819964786397789
+[2023-10-15 05:58:01,088][__main__][INFO] - model: FM, estimator: IPS, epoch: 21, params: {'n_epochs': 24, 'n_factors': 115, 'lr': 0.0003779929016054184, 'batch_size': 289, 'clipping': 0.003035674278483735}, DCG@3: 0.08230382132908313
+[2023-10-15 05:58:01,141][__main__][INFO] - log loss: 6.857245514084745, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6524394958594986, std: 0.4740755608428773
+[2023-10-15 05:58:09,548][__main__][INFO] - model: FM, estimator: IPS, epoch: 22, params: {'n_epochs': 78, 'n_factors': 144, 'lr': 0.0006942682110937689, 'batch_size': 276, 'clipping': 0.008310436269493788}, DCG@3: 0.094224797919818
+[2023-10-15 05:58:09,592][__main__][INFO] - log loss: 7.696400645099497, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6087612154112946, std: 0.48802766112409857
+[2023-10-15 05:58:13,355][__main__][INFO] - model: FM, estimator: IPS, epoch: 23, params: {'n_epochs': 34, 'n_factors': 133, 'lr': 0.000923360398514738, 'batch_size': 275, 'clipping': 0.0016511129573700259}, DCG@3: 0.10627836293284079
+[2023-10-15 05:58:13,392][__main__][INFO] - log loss: 8.098459763213278, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5595265022996305, std: 0.4964439500326015
+[2023-10-15 05:58:15,060][__main__][INFO] - model: FM, estimator: IPS, epoch: 24, params: {'n_epochs': 13, 'n_factors': 140, 'lr': 0.000539130745600771, 'batch_size': 274, 'clipping': 0.005690884121894577}, DCG@3: 0.09260174512227291
+[2023-10-15 05:58:15,098][__main__][INFO] - log loss: 5.6415765461025424, prediction min: 6.766489787672959e-281, max: 1.0, mean: 0.6407335423453714, std: 0.46664341823460237
+[2023-10-15 05:58:20,460][__main__][INFO] - model: FM, estimator: IPS, epoch: 25, params: {'n_epochs': 40, 'n_factors': 143, 'lr': 0.0008553770490598714, 'batch_size': 273, 'clipping': 0.009221054154608086}, DCG@3: 0.10263423683840746
+[2023-10-15 05:58:20,502][__main__][INFO] - log loss: 7.874265049351782, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.582899796426148, std: 0.4930797336663749
+[2023-10-15 05:58:22,815][__main__][INFO] - model: FM, estimator: IPS, epoch: 26, params: {'n_epochs': 17, 'n_factors': 139, 'lr': 0.00037387180286542753, 'batch_size': 286, 'clipping': 0.002198168308208859}, DCG@3: 0.0761204606318797
+[2023-10-15 05:58:22,860][__main__][INFO] - log loss: 5.31471090999997, prediction min: 1.1531337485599528e-241, max: 1.0, mean: 0.6948624910502998, std: 0.44806868770077873
+[2023-10-15 05:58:25,208][__main__][INFO] - model: FM, estimator: IPS, epoch: 27, params: {'n_epochs': 24, 'n_factors': 112, 'lr': 0.0005008030139199779, 'batch_size': 295, 'clipping': 0.004350355167165932}, DCG@3: 0.06726132239405412
+[2023-10-15 05:58:25,241][__main__][INFO] - log loss: 6.326460055792627, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.7113126376245774, std: 0.4527898544998815
+[2023-10-15 05:58:31,230][__main__][INFO] - model: FM, estimator: IPS, epoch: 28, params: {'n_epochs': 54, 'n_factors': 146, 'lr': 0.00012425983383129976, 'batch_size': 275, 'clipping': 0.0010706643307449928}, DCG@3: 0.09117031403517116
+[2023-10-15 05:58:31,274][__main__][INFO] - log loss: 5.692712852116059, prediction min: 1.0857962948800943e-187, max: 1.0, mean: 0.644907861296122, std: 0.4672019878585097
+[2023-10-15 05:58:33,773][__main__][INFO] - model: FM, estimator: IPS, epoch: 29, params: {'n_epochs': 25, 'n_factors': 126, 'lr': 0.0009564166300833382, 'batch_size': 271, 'clipping': 0.0015182008441909306}, DCG@3: 0.10087644216893013
+[2023-10-15 05:58:33,811][__main__][INFO] - log loss: 7.885326511767993, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5854633242861189, std: 0.4926418728894066
+[2023-10-15 05:58:38,382][__main__][INFO] - model: FM, estimator: IPS, epoch: 30, params: {'n_epochs': 57, 'n_factors': 108, 'lr': 0.0009313940326982958, 'batch_size': 258, 'clipping': 0.003931321883037393}, DCG@3: 0.10074257464502526
+[2023-10-15 05:58:38,414][__main__][INFO] - log loss: 7.833925116922224, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5916459322928448, std: 0.49152926982446865
+[2023-10-15 05:58:42,850][__main__][INFO] - model: FM, estimator: IPS, epoch: 31, params: {'n_epochs': 48, 'n_factors': 124, 'lr': 0.0003865706707278531, 'batch_size': 264, 'clipping': 0.007934511161388914}, DCG@3: 0.10349544806449362
+[2023-10-15 05:58:42,887][__main__][INFO] - log loss: 7.884414806297451, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5763469321318503, std: 0.4941304996092483
+[2023-10-15 05:58:45,810][__main__][INFO] - model: FM, estimator: IPS, epoch: 32, params: {'n_epochs': 29, 'n_factors': 126, 'lr': 0.00023300962070873837, 'batch_size': 267, 'clipping': 0.007786154393355085}, DCG@3: 0.08942998080277337
+[2023-10-15 05:58:45,851][__main__][INFO] - log loss: 5.473582630746294, prediction min: 3.460488468899651e-223, max: 1.0, mean: 0.6483733369843652, std: 0.463796645684561
+[2023-10-15 05:58:49,279][__main__][INFO] - model: FM, estimator: IPS, epoch: 33, params: {'n_epochs': 39, 'n_factors': 113, 'lr': 0.0001538009432859628, 'batch_size': 286, 'clipping': 0.0061841312006709346}, DCG@3: 0.07823334969307448
+[2023-10-15 05:58:49,311][__main__][INFO] - log loss: 5.287539191297424, prediction min: 8.556512964497629e-169, max: 1.0, mean: 0.6791236134252089, std: 0.45325863307129854
+[2023-10-15 05:58:54,982][__main__][INFO] - model: FM, estimator: IPS, epoch: 34, params: {'n_epochs': 76, 'n_factors': 102, 'lr': 0.0005828434196754128, 'batch_size': 252, 'clipping': 0.0023737024001188583}, DCG@3: 0.10304668608372196
+[2023-10-15 05:58:55,013][__main__][INFO] - log loss: 8.045628493111678, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.5753600241272714, std: 0.49428824259083587
+[2023-10-15 05:58:57,817][__main__][INFO] - model: FM, estimator: IPS, epoch: 35, params: {'n_epochs': 25, 'n_factors': 136, 'lr': 0.0001375998123233518, 'batch_size': 296, 'clipping': 0.004087988540286287}, DCG@3: 0.07221124747505844
+[2023-10-15 05:58:57,859][__main__][INFO] - log loss: 2.6225712328440736, prediction min: 1.0464098918392187e-59, max: 1.0, mean: 0.7627347376497337, std: 0.37927065520954933
+[2023-10-15 05:58:59,706][__main__][INFO] - model: FM, estimator: IPS, epoch: 36, params: {'n_epochs': 17, 'n_factors': 122, 'lr': 0.0004968954260404525, 'batch_size': 279, 'clipping': 0.0017451216224151768}, DCG@3: 0.08616215898878796
+[2023-10-15 05:58:59,741][__main__][INFO] - log loss: 6.584432199879641, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6387571212662342, std: 0.47635221188659915
+[2023-10-15 05:59:02,954][__main__][INFO] - model: FM, estimator: IPS, epoch: 37, params: {'n_epochs': 31, 'n_factors': 131, 'lr': 0.00016342681325824101, 'batch_size': 291, 'clipping': 0.007368882882936812}, DCG@3: 0.08264360704308688
+[2023-10-15 05:59:02,994][__main__][INFO] - log loss: 4.462322309392538, prediction min: 4.727801837566331e-115, max: 1.0, mean: 0.6803095201465206, std: 0.4446350880972443
+[2023-10-15 05:59:04,952][__main__][INFO] - model: FM, estimator: IPS, epoch: 38, params: {'n_epochs': 17, 'n_factors': 134, 'lr': 0.0005453930303385709, 'batch_size': 265, 'clipping': 0.00818741337128363}, DCG@3: 0.09735812457508476
+[2023-10-15 05:59:04,992][__main__][INFO] - log loss: 6.874919285958779, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6080527819070982, std: 0.4846030102667479
+[2023-10-15 05:59:13,244][__main__][INFO] - model: FM, estimator: IPS, epoch: 39, params: {'n_epochs': 76, 'n_factors': 145, 'lr': 0.00029905759496941524, 'batch_size': 291, 'clipping': 0.0034333036731710492}, DCG@3: 0.09020069786761445
+[2023-10-15 05:59:13,286][__main__][INFO] - log loss: 7.519151802146308, prediction min: 9.85967654375977e-305, max: 1.0, mean: 0.6257257030837668, std: 0.4839349621427372
+[2023-10-15 05:59:13,287][__main__][INFO] - best params: ({'n_epochs': 24, 'n_factors': 112, 'lr': 0.0005008030139199779, 'batch_size': 295, 'clipping': 0.004350355167165932}, 0.06726132239405412)
+[2023-10-15 05:59:16,302][__main__][INFO] - model: FM, estimator: Naive, epoch: 0, params: {'n_epochs': 28, 'n_factors': 136, 'lr': 0.0008962499908021849, 'batch_size': 250}, DCG@3: 0.18196462189178053
+[2023-10-15 05:59:16,341][__main__][INFO] - log loss: 1.0166371637238591, prediction min: 7.28258911659708e-27, max: 1.0, mean: 0.2084996666927035, std: 0.23363628220254673
+[2023-10-15 05:59:21,391][__main__][INFO] - model: FM, estimator: Naive, epoch: 1, params: {'n_epochs': 49, 'n_factors': 130, 'lr': 0.0009245702395107621, 'batch_size': 277}, DCG@3: 0.2346977260632729
+[2023-10-15 05:59:21,430][__main__][INFO] - log loss: 1.063622248638672, prediction min: 6.153637688124478e-156, max: 0.9992808986608673, mean: 0.2745471579942353, std: 0.2614568656387161
+[2023-10-15 05:59:26,556][__main__][INFO] - model: FM, estimator: Naive, epoch: 2, params: {'n_epochs': 52, 'n_factors': 124, 'lr': 0.0007866800839174588, 'batch_size': 269}, DCG@3: 0.2512609397594514
+[2023-10-15 05:59:26,599][__main__][INFO] - log loss: 1.1236172310100585, prediction min: 2.460989897724886e-246, max: 0.9989570628883095, mean: 0.2671819836987966, std: 0.2617037626106362
+[2023-10-15 05:59:31,336][__main__][INFO] - model: FM, estimator: Naive, epoch: 3, params: {'n_epochs': 61, 'n_factors': 101, 'lr': 0.0004842232649469103, 'batch_size': 282}, DCG@3: 0.28484322203126977
+[2023-10-15 05:59:31,365][__main__][INFO] - log loss: 1.0353871570018514, prediction min: 2.472485170350713e-84, max: 1.0, mean: 0.31158606271770506, std: 0.2813768276995298
+[2023-10-15 05:59:35,075][__main__][INFO] - model: FM, estimator: Naive, epoch: 4, params: {'n_epochs': 36, 'n_factors': 126, 'lr': 0.0004056367721985822, 'batch_size': 276}, DCG@3: 0.2496731366880753
+[2023-10-15 05:59:35,113][__main__][INFO] - log loss: 0.8825098317341346, prediction min: 1.2749601673534514e-36, max: 0.9999997847348622, mean: 0.31898147644181324, std: 0.2560025243323675
+[2023-10-15 05:59:38,233][__main__][INFO] - model: FM, estimator: Naive, epoch: 5, params: {'n_epochs': 38, 'n_factors': 101, 'lr': 0.00017341085037576542, 'batch_size': 259}, DCG@3: 0.2584371670939076
+[2023-10-15 05:59:38,263][__main__][INFO] - log loss: 0.9223599371626356, prediction min: 2.456449701106208e-26, max: 1.0, mean: 0.32062872663506836, std: 0.2606023974995321
+[2023-10-15 05:59:41,342][__main__][INFO] - model: FM, estimator: Naive, epoch: 6, params: {'n_epochs': 26, 'n_factors': 143, 'lr': 0.0006789977663508186, 'batch_size': 283}, DCG@3: 0.2967297212232909
+[2023-10-15 05:59:41,385][__main__][INFO] - log loss: 0.9670186274680225, prediction min: 4.6359992428732984e-191, max: 0.995450876796208, mean: 0.3921674734013928, std: 0.2676469431886178
+[2023-10-15 05:59:42,722][__main__][INFO] - model: FM, estimator: Naive, epoch: 7, params: {'n_epochs': 11, 'n_factors': 129, 'lr': 0.0005681025787340226, 'batch_size': 252}, DCG@3: 0.22088922164701863
+[2023-10-15 05:59:42,759][__main__][INFO] - log loss: 0.957828579086535, prediction min: 9.84579448176115e-214, max: 0.9986623200059784, mean: 0.33453670078933484, std: 0.25555049393409623
+[2023-10-15 05:59:47,028][__main__][INFO] - model: FM, estimator: Naive, epoch: 8, params: {'n_epochs': 50, 'n_factors': 112, 'lr': 0.00021412674891073657, 'batch_size': 260}, DCG@3: 0.20406312249447595
+[2023-10-15 05:59:47,061][__main__][INFO] - log loss: 0.9199523150046611, prediction min: 2.3610377522684052e-78, max: 0.9964659130404809, mean: 0.29443402380781747, std: 0.25226516918225095
+[2023-10-15 05:59:50,308][__main__][INFO] - model: FM, estimator: Naive, epoch: 9, params: {'n_epochs': 38, 'n_factors': 108, 'lr': 0.00037617360853828464, 'batch_size': 265}, DCG@3: 0.21577483160332958
+[2023-10-15 05:59:50,343][__main__][INFO] - log loss: 0.9415114786602524, prediction min: 2.2704899333343818e-100, max: 0.9981820034043991, mean: 0.29164729197825806, std: 0.24836220173330972
+[2023-10-15 05:59:55,341][__main__][INFO] - model: FM, estimator: Naive, epoch: 10, params: {'n_epochs': 43, 'n_factors': 147, 'lr': 0.00025086874159387817, 'batch_size': 261}, DCG@3: 0.2499451118144044
+[2023-10-15 05:59:55,386][__main__][INFO] - log loss: 0.8631312427071772, prediction min: 2.0285812260003555e-36, max: 1.0, mean: 0.30656241545796725, std: 0.25195114629357623
+[2023-10-15 06:00:02,841][__main__][INFO] - model: FM, estimator: Naive, epoch: 11, params: {'n_epochs': 77, 'n_factors': 125, 'lr': 0.00020809598167797463, 'batch_size': 278}, DCG@3: 0.22624062880040324
+[2023-10-15 06:00:02,877][__main__][INFO] - log loss: 0.9436891740012282, prediction min: 2.157935957594388e-64, max: 0.9972147482587576, mean: 0.3165383501546284, std: 0.2625876023395736
+[2023-10-15 06:00:05,310][__main__][INFO] - model: FM, estimator: Naive, epoch: 12, params: {'n_epochs': 28, 'n_factors': 102, 'lr': 0.00020708946777758659, 'batch_size': 262}, DCG@3: 0.23741747732656357
+[2023-10-15 06:00:05,339][__main__][INFO] - log loss: 0.897368123260091, prediction min: 1.1149604441634148e-62, max: 0.998686544376743, mean: 0.3007724949725248, std: 0.24976567850089945
+[2023-10-15 06:00:11,154][__main__][INFO] - model: FM, estimator: Naive, epoch: 13, params: {'n_epochs': 58, 'n_factors': 132, 'lr': 0.0008426423143761613, 'batch_size': 261}, DCG@3: 0.22725861327245248
+[2023-10-15 06:00:11,191][__main__][INFO] - log loss: 1.0847290478206537, prediction min: 2.070508883558718e-172, max: 0.998839016334769, mean: 0.26735387100725355, std: 0.26002057587410066
+[2023-10-15 06:00:13,385][__main__][INFO] - model: FM, estimator: Naive, epoch: 14, params: {'n_epochs': 26, 'n_factors': 100, 'lr': 0.0006102534969486104, 'batch_size': 272}, DCG@3: 0.28034269827350583
+[2023-10-15 06:00:13,413][__main__][INFO] - log loss: 1.0369647617052635, prediction min: 1.5151496489089406e-180, max: 0.9998016585606374, mean: 0.356186735425524, std: 0.2780708533247443
+[2023-10-15 06:00:14,862][__main__][INFO] - model: FM, estimator: Naive, epoch: 15, params: {'n_epochs': 13, 'n_factors': 117, 'lr': 0.00024728286648193935, 'batch_size': 273}, DCG@3: 0.20566001523581684
+[2023-10-15 06:00:14,894][__main__][INFO] - log loss: 0.8701545827553018, prediction min: 2.0915998556916944e-42, max: 0.9999999999907268, mean: 0.31483279624248667, std: 0.24181445244034827
+[2023-10-15 06:00:20,087][__main__][INFO] - model: FM, estimator: Naive, epoch: 16, params: {'n_epochs': 65, 'n_factors': 106, 'lr': 0.0009124357293178914, 'batch_size': 280}, DCG@3: 0.2734475357353435
+[2023-10-15 06:00:20,117][__main__][INFO] - log loss: 1.0173510932157772, prediction min: 6.197855099168693e-13, max: 1.0, mean: 0.29224696544468143, std: 0.2859781570595248
+[2023-10-15 06:00:24,729][__main__][INFO] - model: FM, estimator: Naive, epoch: 17, params: {'n_epochs': 51, 'n_factors': 117, 'lr': 0.000733017071494159, 'batch_size': 265}, DCG@3: 0.23156616760711918
+[2023-10-15 06:00:24,762][__main__][INFO] - log loss: 0.9647668458390817, prediction min: 7.022438219108423e-131, max: 1.0, mean: 0.27522669830018937, std: 0.2540866139713175
+[2023-10-15 06:00:25,824][__main__][INFO] - model: FM, estimator: Naive, epoch: 18, params: {'n_epochs': 10, 'n_factors': 104, 'lr': 0.0006254271818802775, 'batch_size': 290}, DCG@3: 0.3895543313585695
+[2023-10-15 06:00:25,854][__main__][INFO] - log loss: 0.9761059360029035, prediction min: 1.4673207710394941e-32, max: 0.9999999999646456, mean: 0.4951208552558345, std: 0.28081377104140737
+[2023-10-15 06:00:27,944][__main__][INFO] - model: FM, estimator: Naive, epoch: 19, params: {'n_epochs': 25, 'n_factors': 101, 'lr': 0.00045490290405749854, 'batch_size': 297}, DCG@3: 0.26343759341773126
+[2023-10-15 06:00:27,973][__main__][INFO] - log loss: 0.9894521295721403, prediction min: 6.4502283025608165e-77, max: 0.9999999999994176, mean: 0.31065035216998826, std: 0.2665477412072596
+[2023-10-15 06:00:29,267][__main__][INFO] - model: FM, estimator: Naive, epoch: 20, params: {'n_epochs': 10, 'n_factors': 131, 'lr': 0.0006018929047956066, 'batch_size': 290}, DCG@3: 0.07741012330771857
+[2023-10-15 06:00:29,304][__main__][INFO] - log loss: 1.1549042371151197, prediction min: 5.6228396842005546e-151, max: 0.9950810397203446, mean: 0.11518008719658851, std: 0.14862330779312422
+[2023-10-15 06:00:31,545][__main__][INFO] - model: FM, estimator: Naive, epoch: 21, params: {'n_epochs': 23, 'n_factors': 119, 'lr': 0.00032619678306927946, 'batch_size': 254}, DCG@3: 0.19797479566533602
+[2023-10-15 06:00:31,579][__main__][INFO] - log loss: 0.9194973574963398, prediction min: 3.4877960746126562e-68, max: 0.9976692714282132, mean: 0.29847678524264, std: 0.2479427450832931
+[2023-10-15 06:00:32,996][__main__][INFO] - model: FM, estimator: Naive, epoch: 22, params: {'n_epochs': 15, 'n_factors': 102, 'lr': 0.0006047107536404227, 'batch_size': 297}, DCG@3: 0.36276233757501297
+[2023-10-15 06:00:33,024][__main__][INFO] - log loss: 1.0410172288977428, prediction min: 8.836650326496689e-192, max: 0.9985847836400786, mean: 0.452133494315016, std: 0.2932664374727208
+[2023-10-15 06:00:34,433][__main__][INFO] - model: FM, estimator: Naive, epoch: 23, params: {'n_epochs': 16, 'n_factors': 102, 'lr': 0.0006164984470667878, 'batch_size': 261}, DCG@3: 0.14849630333982755
+[2023-10-15 06:00:34,467][__main__][INFO] - log loss: 1.0469980318494336, prediction min: 1.5632060512825542e-197, max: 0.997252938433687, mean: 0.19175491022678445, std: 0.21193213979141903
+[2023-10-15 06:00:39,533][__main__][INFO] - model: FM, estimator: Naive, epoch: 24, params: {'n_epochs': 56, 'n_factors': 122, 'lr': 0.0005731427923331717, 'batch_size': 262}, DCG@3: 0.2538576376329118
+[2023-10-15 06:00:39,574][__main__][INFO] - log loss: 1.0353321975075154, prediction min: 2.2404634526156004e-168, max: 0.9993502698765933, mean: 0.2966119279511675, std: 0.26511914938749087
+[2023-10-15 06:00:44,918][__main__][INFO] - model: FM, estimator: Naive, epoch: 25, params: {'n_epochs': 46, 'n_factors': 139, 'lr': 0.0003516100590774283, 'batch_size': 291}, DCG@3: 0.21150223528529638
+[2023-10-15 06:00:44,976][__main__][INFO] - log loss: 0.927040895273257, prediction min: 1.7604415860412897e-100, max: 0.9991032153649558, mean: 0.3202090644491911, std: 0.25178708059391486
+[2023-10-15 06:00:50,478][__main__][INFO] - model: FM, estimator: Naive, epoch: 26, params: {'n_epochs': 63, 'n_factors': 105, 'lr': 0.000489906719285562, 'batch_size': 283}, DCG@3: 0.2622706872091832
+[2023-10-15 06:00:50,507][__main__][INFO] - log loss: 1.0539487903838904, prediction min: 1.7166643557095084e-96, max: 0.9994208043065933, mean: 0.2921949568843711, std: 0.2796666199659106
+[2023-10-15 06:00:57,970][__main__][INFO] - model: FM, estimator: Naive, epoch: 27, params: {'n_epochs': 71, 'n_factors': 136, 'lr': 0.0006036294911919405, 'batch_size': 295}, DCG@3: 0.24687437972155282
+[2023-10-15 06:00:58,012][__main__][INFO] - log loss: 1.0051964727583254, prediction min: 2.1149987667698998e-87, max: 1.0, mean: 0.29016982373356187, std: 0.27495047269018513
+[2023-10-15 06:01:00,812][__main__][INFO] - model: FM, estimator: Naive, epoch: 28, params: {'n_epochs': 30, 'n_factors': 110, 'lr': 0.0008027982764823129, 'batch_size': 278}, DCG@3: 0.38068542690283674
+[2023-10-15 06:01:00,849][__main__][INFO] - log loss: 1.0552331425294486, prediction min: 1.2366161775904535e-241, max: 0.9998902103002169, mean: 0.416116796596745, std: 0.2978312796630359
+[2023-10-15 06:01:03,171][__main__][INFO] - model: FM, estimator: Naive, epoch: 29, params: {'n_epochs': 28, 'n_factors': 101, 'lr': 0.0008925782006621292, 'batch_size': 284}, DCG@3: 0.1372844967970337
+[2023-10-15 06:01:03,201][__main__][INFO] - log loss: 1.1021163711485213, prediction min: 8.757587933631592e-152, max: 0.999995285077166, mean: 0.19685758975423376, std: 0.22809393583353346
+[2023-10-15 06:01:06,976][__main__][INFO] - model: FM, estimator: Naive, epoch: 30, params: {'n_epochs': 38, 'n_factors': 127, 'lr': 0.0009031291561035467, 'batch_size': 287}, DCG@3: 0.16586635274502834
+[2023-10-15 06:01:07,013][__main__][INFO] - log loss: 1.111759036122505, prediction min: 1.5141369477676387e-235, max: 0.9995281891569476, mean: 0.23785955195712938, std: 0.24862854067196158
+[2023-10-15 06:01:10,998][__main__][INFO] - model: FM, estimator: Naive, epoch: 31, params: {'n_epochs': 40, 'n_factors': 128, 'lr': 0.0004742596289201676, 'batch_size': 292}, DCG@3: 0.22516181796505186
+[2023-10-15 06:01:11,035][__main__][INFO] - log loss: 0.9267653548420371, prediction min: 3.1556146496489956e-55, max: 0.9999998052459749, mean: 0.30891204731837946, std: 0.25805638408909437
+[2023-10-15 06:01:15,308][__main__][INFO] - model: FM, estimator: Naive, epoch: 32, params: {'n_epochs': 39, 'n_factors': 142, 'lr': 0.0006188591303030436, 'batch_size': 279}, DCG@3: 0.21395910109222285
+[2023-10-15 06:01:15,348][__main__][INFO] - log loss: 1.014781389500393, prediction min: 4.768304758669451e-177, max: 0.9996285461482827, mean: 0.27441815326361635, std: 0.24888301138260616
+[2023-10-15 06:01:23,007][__main__][INFO] - model: FM, estimator: Naive, epoch: 33, params: {'n_epochs': 74, 'n_factors': 142, 'lr': 0.0004929748351187272, 'batch_size': 267}, DCG@3: 0.2515769625723788
+[2023-10-15 06:01:23,046][__main__][INFO] - log loss: 1.0268131276622305, prediction min: 1.525158220191521e-134, max: 0.9989709085580183, mean: 0.2898135200422087, std: 0.26354536062640466
+[2023-10-15 06:01:30,446][__main__][INFO] - model: FM, estimator: Naive, epoch: 34, params: {'n_epochs': 69, 'n_factors': 140, 'lr': 0.00028887177432491143, 'batch_size': 276}, DCG@3: 0.22687267442625808
+[2023-10-15 06:01:30,485][__main__][INFO] - log loss: 0.9405085587142656, prediction min: 5.572065276124734e-53, max: 0.9980570416800557, mean: 0.2869181760378721, std: 0.2504388615395912
+[2023-10-15 06:01:37,119][__main__][INFO] - model: FM, estimator: Naive, epoch: 35, params: {'n_epochs': 66, 'n_factors': 130, 'lr': 0.0007354995128229367, 'batch_size': 295}, DCG@3: 0.2539716013527772
+[2023-10-15 06:01:37,156][__main__][INFO] - log loss: 1.0658744185809017, prediction min: 8.636541061450479e-123, max: 0.9993725057827725, mean: 0.28830602251598314, std: 0.2714105968814023
+[2023-10-15 06:01:44,217][__main__][INFO] - model: FM, estimator: Naive, epoch: 36, params: {'n_epochs': 71, 'n_factors': 131, 'lr': 0.0009121202612159172, 'batch_size': 293}, DCG@3: 0.23539968772239478
+[2023-10-15 06:01:44,256][__main__][INFO] - log loss: 1.1186393564635937, prediction min: 2.4803366397756777e-186, max: 0.9995238873464792, mean: 0.2674377795638863, std: 0.2714554830810041
+[2023-10-15 06:01:49,737][__main__][INFO] - model: FM, estimator: Naive, epoch: 37, params: {'n_epochs': 64, 'n_factors': 115, 'lr': 0.00030161594981308276, 'batch_size': 266}, DCG@3: 0.22923235519002297
+[2023-10-15 06:01:49,769][__main__][INFO] - log loss: 0.9496961951887908, prediction min: 3.737847039912585e-60, max: 0.9999860981357873, mean: 0.2929549241559247, std: 0.2596539981200477
+[2023-10-15 06:01:52,725][__main__][INFO] - model: FM, estimator: Naive, epoch: 38, params: {'n_epochs': 38, 'n_factors': 100, 'lr': 0.0005575049470216874, 'batch_size': 280}, DCG@3: 0.24376868961206777
+[2023-10-15 06:01:52,753][__main__][INFO] - log loss: 1.0238869448976167, prediction min: 1.244165650887313e-153, max: 0.9998318461426957, mean: 0.30689308642732815, std: 0.2674330407839467
+[2023-10-15 06:01:54,440][__main__][INFO] - model: FM, estimator: Naive, epoch: 39, params: {'n_epochs': 17, 'n_factors': 116, 'lr': 0.0004699268977087321, 'batch_size': 287}, DCG@3: 0.20115040180808808
+[2023-10-15 06:01:54,478][__main__][INFO] - log loss: 1.0079353275659597, prediction min: 1.8311708028776557e-157, max: 0.9993560470958965, mean: 0.3167139558627122, std: 0.2604628427907917
+[2023-10-15 06:01:54,480][__main__][INFO] - best params: ({'n_epochs': 10, 'n_factors': 104, 'lr': 0.0006254271818802775, 'batch_size': 290}, 0.3895543313585695)
+[2023-10-15 06:01:56,403][__main__][INFO] - model: MF, estimator: Ideal, epoch: 0, params: {'n_epochs': 29, 'n_factors': 173, 'lr': 0.0009544900626873341, 'reg': 0.19826150959990002, 'batch_size': 250}, DCG@3: 1.0678876331515719
+[2023-10-15 06:01:56,484][__main__][INFO] - log loss: 0.782905728662051, prediction min: 0.15181457235461143, max: 0.9437775422076919, mean: 0.5989049990889661, std: 0.1347528758051683
+[2023-10-15 06:01:57,657][__main__][INFO] - model: MF, estimator: Ideal, epoch: 1, params: {'n_epochs': 17, 'n_factors': 179, 'lr': 3.87104036397472e-05, 'reg': 0.4152300448237791, 'batch_size': 285}, DCG@3: 1.078731002854935
+[2023-10-15 06:01:57,717][__main__][INFO] - log loss: 0.7845798280189545, prediction min: 0.10108597331281227, max: 0.9379874934074706, mean: 0.5999311200222578, std: 0.13385877812098831
+[2023-10-15 06:01:58,795][__main__][INFO] - model: MF, estimator: Ideal, epoch: 2, params: {'n_epochs': 16, 'n_factors': 116, 'lr': 0.0008498810285879651, 'reg': 0.3965008883731167, 'batch_size': 274}, DCG@3: 1.0916827814224395
+[2023-10-15 06:01:58,853][__main__][INFO] - log loss: 0.8058532383508508, prediction min: 0.07858515024703219, max: 0.9667250401470426, mean: 0.5970846023258042, std: 0.1601931243539352
+[2023-10-15 06:01:59,972][__main__][INFO] - model: MF, estimator: Ideal, epoch: 3, params: {'n_epochs': 16, 'n_factors': 157, 'lr': 0.0005918759674729913, 'reg': 0.17826898114669565, 'batch_size': 288}, DCG@3: 1.0817818725825177
+[2023-10-15 06:02:00,031][__main__][INFO] - log loss: 0.790419178912409, prediction min: 0.08958229284379558, max: 0.9426870455145756, mean: 0.5995636417606848, std: 0.14123236944587717
+[2023-10-15 06:02:01,389][__main__][INFO] - model: MF, estimator: Ideal, epoch: 4, params: {'n_epochs': 20, 'n_factors': 170, 'lr': 0.0008405492551390923, 'reg': 0.8587321551290954, 'batch_size': 263}, DCG@3: 1.0718556870072626
+[2023-10-15 06:02:01,450][__main__][INFO] - log loss: 0.7877847681760228, prediction min: 0.12628545535434393, max: 0.9568358895228168, mean: 0.6018965338183464, std: 0.13533213914400136
+[2023-10-15 06:02:03,270][__main__][INFO] - model: MF, estimator: Ideal, epoch: 5, params: {'n_epochs': 27, 'n_factors': 171, 'lr': 0.000324333793960278, 'reg': 0.8893968764331815, 'batch_size': 297}, DCG@3: 1.0724969209894295
+[2023-10-15 06:02:03,333][__main__][INFO] - log loss: 0.7875772931140167, prediction min: 0.11605319779720365, max: 0.9554030804537149, mean: 0.5998583359815208, std: 0.1357550064958855
+[2023-10-15 06:02:05,096][__main__][INFO] - model: MF, estimator: Ideal, epoch: 6, params: {'n_epochs': 26, 'n_factors': 139, 'lr': 0.0009612215601801708, 'reg': 0.8063851143245125, 'batch_size': 270}, DCG@3: 1.0810217015591417
+[2023-10-15 06:02:05,157][__main__][INFO] - log loss: 0.7939934065540493, prediction min: 0.10354507585723552, max: 0.9726018258331328, mean: 0.5966311800018201, std: 0.1470840329575597
+[2023-10-15 06:02:06,118][__main__][INFO] - model: MF, estimator: Ideal, epoch: 7, params: {'n_epochs': 13, 'n_factors': 166, 'lr': 0.0001321593187435455, 'reg': 0.3581066678884164, 'batch_size': 299}, DCG@3: 1.0909291086832043
+[2023-10-15 06:02:06,178][__main__][INFO] - log loss: 0.7890456099347004, prediction min: 0.10210492350419599, max: 0.9508442139964643, mean: 0.6020739214088314, std: 0.13833872576694747
+[2023-10-15 06:02:07,265][__main__][INFO] - model: MF, estimator: Ideal, epoch: 8, params: {'n_epochs': 16, 'n_factors': 146, 'lr': 0.0009649028147502813, 'reg': 0.7899555113442612, 'batch_size': 271}, DCG@3: 1.0778211614391333
+[2023-10-15 06:02:07,323][__main__][INFO] - log loss: 0.7929859155710525, prediction min: 0.10658948753162473, max: 0.9723874416163872, mean: 0.5990415562402772, std: 0.14487995150749633
+[2023-10-15 06:02:08,571][__main__][INFO] - model: MF, estimator: Ideal, epoch: 9, params: {'n_epochs': 18, 'n_factors': 141, 'lr': 0.00023372173911363897, 'reg': 0.4641618029357957, 'batch_size': 293}, DCG@3: 1.0839938323090577
+[2023-10-15 06:02:08,631][__main__][INFO] - log loss: 0.794963463552097, prediction min: 0.09391498704973833, max: 0.9597574245176516, mean: 0.597058790596702, std: 0.1491099901541428
+[2023-10-15 06:02:09,858][__main__][INFO] - model: MF, estimator: Ideal, epoch: 10, params: {'n_epochs': 17, 'n_factors': 136, 'lr': 0.0001786687522586474, 'reg': 0.9704943220466229, 'batch_size': 269}, DCG@3: 1.0890693280895383
+[2023-10-15 06:02:09,919][__main__][INFO] - log loss: 0.7955778321987984, prediction min: 0.08326786694412351, max: 0.9539299875989579, mean: 0.5979192530821081, std: 0.1493303224301871
+[2023-10-15 06:02:11,457][__main__][INFO] - model: MF, estimator: Ideal, epoch: 11, params: {'n_epochs': 23, 'n_factors': 191, 'lr': 0.0009287410695473154, 'reg': 0.25653606032593956, 'batch_size': 278}, DCG@3: 1.089866518351451
+[2023-10-15 06:02:11,526][__main__][INFO] - log loss: 0.7830244171681112, prediction min: 0.1665702028849944, max: 0.9347827003120212, mean: 0.6022084212523408, std: 0.13032339852529526
+[2023-10-15 06:02:13,349][__main__][INFO] - model: MF, estimator: Ideal, epoch: 12, params: {'n_epochs': 27, 'n_factors': 130, 'lr': 0.0007266461939322801, 'reg': 0.2542598408715653, 'batch_size': 298}, DCG@3: 1.0896528237490752
+[2023-10-15 06:02:13,409][__main__][INFO] - log loss: 0.800449784355371, prediction min: 0.10465670395702519, max: 0.9578369294266127, mean: 0.599100082441399, std: 0.15408858045694648
+[2023-10-15 06:02:14,310][__main__][INFO] - model: MF, estimator: Ideal, epoch: 13, params: {'n_epochs': 12, 'n_factors': 123, 'lr': 0.00029513107033006736, 'reg': 0.17038356932438659, 'batch_size': 253}, DCG@3: 1.081044720411751
+[2023-10-15 06:02:14,370][__main__][INFO] - log loss: 0.8035564827231304, prediction min: 0.11081971134466916, max: 0.9545098602751249, mean: 0.597152118505882, std: 0.15619452040813692
+[2023-10-15 06:02:15,203][__main__][INFO] - model: MF, estimator: Ideal, epoch: 14, params: {'n_epochs': 11, 'n_factors': 170, 'lr': 0.0003374170193521208, 'reg': 0.9936879284991214, 'batch_size': 254}, DCG@3: 1.0718659569201048
+[2023-10-15 06:02:15,264][__main__][INFO] - log loss: 0.7881219634204985, prediction min: 0.12628545535434393, max: 0.9568358895228168, mean: 0.6019493665684982, std: 0.13565167676557277
+[2023-10-15 06:02:16,546][__main__][INFO] - model: MF, estimator: Ideal, epoch: 15, params: {'n_epochs': 18, 'n_factors': 133, 'lr': 7.528397909474476e-05, 'reg': 0.23117229151266455, 'batch_size': 272}, DCG@3: 1.0928633941985075
+[2023-10-15 06:02:16,612][__main__][INFO] - log loss: 0.7957477897302024, prediction min: 0.09613613633614636, max: 0.9654430611886526, mean: 0.6004214011462228, std: 0.150678954416369
+[2023-10-15 06:02:17,719][__main__][INFO] - model: MF, estimator: Ideal, epoch: 16, params: {'n_epochs': 16, 'n_factors': 155, 'lr': 0.0006371506217794108, 'reg': 0.14578124779754645, 'batch_size': 278}, DCG@3: 1.0834908702588308
+[2023-10-15 06:02:17,777][__main__][INFO] - log loss: 0.7890142988061346, prediction min: 0.08064374200275214, max: 0.9713744534469824, mean: 0.600557306723283, std: 0.14177090661259698
+[2023-10-15 06:02:19,287][__main__][INFO] - model: MF, estimator: Ideal, epoch: 17, params: {'n_epochs': 23, 'n_factors': 113, 'lr': 0.0008168603291119881, 'reg': 0.9511372938999647, 'batch_size': 266}, DCG@3: 1.0945792282640394
+[2023-10-15 06:02:19,346][__main__][INFO] - log loss: 0.8064344333091054, prediction min: 0.08639820042715103, max: 0.9661699753956475, mean: 0.5967231293608403, std: 0.16283783622193995
+[2023-10-15 06:02:21,267][__main__][INFO] - model: MF, estimator: Ideal, epoch: 18, params: {'n_epochs': 29, 'n_factors': 105, 'lr': 0.000647349550018501, 'reg': 0.4520953638111962, 'batch_size': 250}, DCG@3: 1.092749525515415
+[2023-10-15 06:02:21,327][__main__][INFO] - log loss: 0.8107557477216295, prediction min: 0.07037971377043176, max: 0.9767838299795614, mean: 0.5972734905222545, std: 0.16680913476409806
+[2023-10-15 06:02:22,188][__main__][INFO] - model: MF, estimator: Ideal, epoch: 19, params: {'n_epochs': 12, 'n_factors': 160, 'lr': 3.537430558330306e-05, 'reg': 0.8185874594735694, 'batch_size': 277}, DCG@3: 1.077337251174355
+[2023-10-15 06:02:22,250][__main__][INFO] - log loss: 0.7909374380943777, prediction min: 0.1181139338726576, max: 0.9501119217697102, mean: 0.5995131290085222, std: 0.14021416390808641
+[2023-10-15 06:02:23,853][__main__][INFO] - model: MF, estimator: Ideal, epoch: 20, params: {'n_epochs': 24, 'n_factors': 179, 'lr': 2.3069291927172742e-05, 'reg': 0.7121462769112655, 'batch_size': 278}, DCG@3: 1.078731002854935
+[2023-10-15 06:02:23,918][__main__][INFO] - log loss: 0.784578403835497, prediction min: 0.10106998976308167, max: 0.9380565266214506, mean: 0.5999324969858447, std: 0.13385500926558544
+[2023-10-15 06:02:24,882][__main__][INFO] - model: MF, estimator: Ideal, epoch: 21, params: {'n_epochs': 13, 'n_factors': 175, 'lr': 0.0006937064945930542, 'reg': 0.3397932320463805, 'batch_size': 279}, DCG@3: 1.0750995591671446
+[2023-10-15 06:02:24,946][__main__][INFO] - log loss: 0.7863973203074712, prediction min: 0.13871744043322934, max: 0.9335964311343118, mean: 0.6000096647673505, std: 0.1360729960191334
+[2023-10-15 06:02:26,752][__main__][INFO] - model: MF, estimator: Ideal, epoch: 22, params: {'n_epochs': 27, 'n_factors': 138, 'lr': 0.00016153342043583315, 'reg': 0.5911775347830678, 'batch_size': 265}, DCG@3: 1.0919522010836633
+[2023-10-15 06:02:26,813][__main__][INFO] - log loss: 0.7950539224762171, prediction min: 0.11265094939401746, max: 0.9588869536527993, mean: 0.5988875889064119, std: 0.14925240150801863
+[2023-10-15 06:02:28,331][__main__][INFO] - model: MF, estimator: Ideal, epoch: 23, params: {'n_epochs': 23, 'n_factors': 113, 'lr': 0.0004615926447504168, 'reg': 0.2339596355679091, 'batch_size': 263}, DCG@3: 1.094832647565932
+[2023-10-15 06:02:28,393][__main__][INFO] - log loss: 0.8069666870549413, prediction min: 0.08639820042715103, max: 0.9661699753956475, mean: 0.5967019346913536, std: 0.1633755788216824
+[2023-10-15 06:02:29,380][__main__][INFO] - model: MF, estimator: Ideal, epoch: 24, params: {'n_epochs': 14, 'n_factors': 191, 'lr': 0.0005524862941419066, 'reg': 0.1855525388399099, 'batch_size': 280}, DCG@3: 1.0904127043343679
+[2023-10-15 06:02:29,440][__main__][INFO] - log loss: 0.7832257685895062, prediction min: 0.1665702028849944, max: 0.9347827003120212, mean: 0.6023031146671466, std: 0.13045039426082278
+[2023-10-15 06:02:31,056][__main__][INFO] - model: MF, estimator: Ideal, epoch: 25, params: {'n_epochs': 24, 'n_factors': 139, 'lr': 4.528789701766947e-05, 'reg': 0.4698237691706748, 'batch_size': 265}, DCG@3: 1.0809926490211865
+[2023-10-15 06:02:31,116][__main__][INFO] - log loss: 0.7947512838146058, prediction min: 0.10354507585723552, max: 0.9726018258331328, mean: 0.5967094026324051, std: 0.14775891306522332
+[2023-10-15 06:02:32,618][__main__][INFO] - model: MF, estimator: Ideal, epoch: 26, params: {'n_epochs': 22, 'n_factors': 116, 'lr': 0.00010292380529618263, 'reg': 0.5834230943088484, 'batch_size': 273}, DCG@3: 1.0919231143769168
+[2023-10-15 06:02:32,698][__main__][INFO] - log loss: 0.8060841195747276, prediction min: 0.07858515024703219, max: 0.9667250401470426, mean: 0.5971443479963736, std: 0.16033618189337953
+[2023-10-15 06:02:33,998][__main__][INFO] - model: MF, estimator: Ideal, epoch: 27, params: {'n_epochs': 19, 'n_factors': 102, 'lr': 0.0006987191353939945, 'reg': 0.9982457270193555, 'batch_size': 255}, DCG@3: 1.0865576904057026
+[2023-10-15 06:02:34,056][__main__][INFO] - log loss: 0.8132175857256299, prediction min: 0.07075337217761814, max: 0.9711253569570365, mean: 0.5955658972221934, std: 0.16914638123888204
+[2023-10-15 06:02:34,978][__main__][INFO] - model: MF, estimator: Ideal, epoch: 28, params: {'n_epochs': 13, 'n_factors': 103, 'lr': 0.0008490935880941026, 'reg': 0.6950910898032383, 'batch_size': 263}, DCG@3: 1.0989209492347682
+[2023-10-15 06:02:35,038][__main__][INFO] - log loss: 0.8136356828772574, prediction min: 0.0914391272911197, max: 0.9737284785685629, mean: 0.596287796364252, std: 0.1698598803468691
+[2023-10-15 06:02:36,886][__main__][INFO] - model: MF, estimator: Ideal, epoch: 29, params: {'n_epochs': 27, 'n_factors': 191, 'lr': 6.518605571852595e-05, 'reg': 0.4195815361442271, 'batch_size': 261}, DCG@3: 1.0900191678918951
+[2023-10-15 06:02:36,950][__main__][INFO] - log loss: 0.7832958910618812, prediction min: 0.1665702028849944, max: 0.9347827003120212, mean: 0.6023489680524224, std: 0.13047483874217328
+[2023-10-15 06:02:38,341][__main__][INFO] - model: MF, estimator: Ideal, epoch: 30, params: {'n_epochs': 21, 'n_factors': 108, 'lr': 0.00025709904389013155, 'reg': 0.1728990040217501, 'batch_size': 291}, DCG@3: 1.0945584455638817
+[2023-10-15 06:02:38,402][__main__][INFO] - log loss: 0.8088677027902782, prediction min: 0.05999991979475634, max: 0.9643817954734277, mean: 0.5943269688268285, std: 0.1663517180327516
+[2023-10-15 06:02:40,154][__main__][INFO] - model: MF, estimator: Ideal, epoch: 31, params: {'n_epochs': 25, 'n_factors': 115, 'lr': 0.000828194596370571, 'reg': 0.8750532636920203, 'batch_size': 274}, DCG@3: 1.1046580547715632
+[2023-10-15 06:02:40,213][__main__][INFO] - log loss: 0.8061230535693206, prediction min: 0.10209651560519041, max: 0.9629057016618603, mean: 0.5971495361757764, std: 0.1606587769518642
+[2023-10-15 06:02:40,999][__main__][INFO] - model: MF, estimator: Ideal, epoch: 32, params: {'n_epochs': 11, 'n_factors': 148, 'lr': 0.00021311267280915423, 'reg': 0.2740326562558586, 'batch_size': 255}, DCG@3: 1.087743493374973
+[2023-10-15 06:02:41,058][__main__][INFO] - log loss: 0.7900244140664909, prediction min: 0.10429867940897528, max: 0.9560013899707936, mean: 0.598055407142455, std: 0.14415094144306703
+[2023-10-15 06:02:42,328][__main__][INFO] - model: MF, estimator: Ideal, epoch: 33, params: {'n_epochs': 19, 'n_factors': 151, 'lr': 0.00045695689507102447, 'reg': 0.29086154501459055, 'batch_size': 260}, DCG@3: 1.0963181160923576
+[2023-10-15 06:02:42,387][__main__][INFO] - log loss: 0.7916073878957336, prediction min: 0.115896091805164, max: 0.9605796911121157, mean: 0.5993811793306236, std: 0.14400671735757398
+[2023-10-15 06:02:44,022][__main__][INFO] - model: MF, estimator: Ideal, epoch: 34, params: {'n_epochs': 25, 'n_factors': 122, 'lr': 0.0006794750036721823, 'reg': 0.18932765267809015, 'batch_size': 250}, DCG@3: 1.0957479582616334
+[2023-10-15 06:02:44,083][__main__][INFO] - log loss: 0.8003229008785773, prediction min: 0.0759152764894994, max: 0.9707360248655298, mean: 0.5968809055829519, std: 0.15776969265259175
+[2023-10-15 06:02:46,067][__main__][INFO] - model: MF, estimator: Ideal, epoch: 35, params: {'n_epochs': 29, 'n_factors': 186, 'lr': 0.0009978443541074542, 'reg': 0.39870230891810954, 'batch_size': 273}, DCG@3: 1.069376122139579
+[2023-10-15 06:02:46,127][__main__][INFO] - log loss: 0.7826485170373912, prediction min: 0.12019844921670925, max: 0.9326343098608899, mean: 0.6018972129093496, std: 0.13039263610677362
+[2023-10-15 06:02:47,620][__main__][INFO] - model: MF, estimator: Ideal, epoch: 36, params: {'n_epochs': 22, 'n_factors': 195, 'lr': 0.0007296478425555281, 'reg': 0.4640500249557852, 'batch_size': 295}, DCG@3: 1.0829166023427945
+[2023-10-15 06:02:47,680][__main__][INFO] - log loss: 0.778268581813063, prediction min: 0.1444870731408613, max: 0.9374118127605551, mean: 0.6011598382505402, std: 0.12711226215033844
+[2023-10-15 06:02:48,746][__main__][INFO] - model: MF, estimator: Ideal, epoch: 37, params: {'n_epochs': 16, 'n_factors': 102, 'lr': 0.0009038545100253325, 'reg': 0.19204115103607183, 'batch_size': 254}, DCG@3: 1.0861068583490212
+[2023-10-15 06:02:48,809][__main__][INFO] - log loss: 0.813581043187181, prediction min: 0.06668308196665931, max: 0.9711253569570365, mean: 0.5955066769028269, std: 0.16951773586944996
+[2023-10-15 06:02:50,189][__main__][INFO] - model: MF, estimator: Ideal, epoch: 38, params: {'n_epochs': 20, 'n_factors': 179, 'lr': 0.0002283047814280253, 'reg': 0.4389884071358593, 'batch_size': 290}, DCG@3: 1.0787230120730729
+[2023-10-15 06:02:50,249][__main__][INFO] - log loss: 0.7845027479593403, prediction min: 0.10177029034141517, max: 0.9375639668786511, mean: 0.5999036393908714, std: 0.1338038728759083
+[2023-10-15 06:02:51,249][__main__][INFO] - model: MF, estimator: Ideal, epoch: 39, params: {'n_epochs': 14, 'n_factors': 100, 'lr': 3.7236469063268655e-05, 'reg': 0.639183295778019, 'batch_size': 284}, DCG@3: 1.0947182801448139
+[2023-10-15 06:02:51,311][__main__][INFO] - log loss: 0.8141895803851505, prediction min: 0.05312621059491622, max: 0.9667726636282934, mean: 0.5947151267222381, std: 0.17222736280408718
+[2023-10-15 06:02:51,337][__main__][INFO] - best params: ({'n_epochs': 25, 'n_factors': 115, 'lr': 0.000828194596370571, 'reg': 0.8750532636920203, 'batch_size': 274}, 1.1046580547715632)
+[2023-10-15 06:02:52,928][__main__][INFO] - model: MF, estimator: IPS, epoch: 0, params: {'n_epochs': 22, 'n_factors': 194, 'lr': 0.0001699613927588364, 'reg': 0.581850766106723, 'batch_size': 251, 'clipping': 0.002110498026754253}, DCG@3: 0.10408444663319304
+[2023-10-15 06:02:52,987][__main__][INFO] - log loss: 0.6723284231059095, prediction min: 0.15134898252852483, max: 0.912165276177027, mean: 0.5776628595503263, std: 0.1312154453705474
+[2023-10-15 06:02:54,514][__main__][INFO] - model: MF, estimator: IPS, epoch: 1, params: {'n_epochs': 23, 'n_factors': 109, 'lr': 0.0008076273561435584, 'reg': 0.31569472811518795, 'batch_size': 253, 'clipping': 0.0016857562579386007}, DCG@3: 0.13412637724790358
+[2023-10-15 06:02:54,584][__main__][INFO] - log loss: 0.7129815258496404, prediction min: 0.06494126710574333, max: 0.9666346342943563, mean: 0.5730484713915274, std: 0.16769206993251132
+[2023-10-15 06:02:56,135][__main__][INFO] - model: MF, estimator: IPS, epoch: 2, params: {'n_epochs': 23, 'n_factors': 144, 'lr': 0.0009717835968542391, 'reg': 0.9598497469794586, 'batch_size': 253, 'clipping': 0.0032628524487496625}, DCG@3: 0.12855932278191998
+[2023-10-15 06:02:56,194][__main__][INFO] - log loss: 0.6993857892580958, prediction min: 0.09369297572105802, max: 0.9534149184902418, mean: 0.5766596020069837, std: 0.1487887198279968
+[2023-10-15 06:02:57,106][__main__][INFO] - model: MF, estimator: IPS, epoch: 3, params: {'n_epochs': 13, 'n_factors': 189, 'lr': 0.00034916074251112035, 'reg': 0.528673529220956, 'batch_size': 256, 'clipping': 0.007224781207939345}, DCG@3: 0.10286358304385355
+[2023-10-15 06:02:57,166][__main__][INFO] - log loss: 0.6912859410796668, prediction min: 0.13633092080235806, max: 0.9344249234706709, mean: 0.5781763117607784, std: 0.13279753867766497
+[2023-10-15 06:02:58,582][__main__][INFO] - model: MF, estimator: IPS, epoch: 4, params: {'n_epochs': 21, 'n_factors': 152, 'lr': 0.0008523003563568187, 'reg': 0.6572549209331319, 'batch_size': 269, 'clipping': 0.0027265053874946953}, DCG@3: 0.11628930247527537
+[2023-10-15 06:02:58,641][__main__][INFO] - log loss: 0.6980442631153856, prediction min: 0.11828257688282186, max: 0.9372315567860406, mean: 0.5796284871097054, std: 0.14445839773042507
+[2023-10-15 06:02:59,856][__main__][INFO] - model: MF, estimator: IPS, epoch: 5, params: {'n_epochs': 17, 'n_factors': 138, 'lr': 0.00023780468488008064, 'reg': 0.7330219221802736, 'batch_size': 289, 'clipping': 0.0028192496606944824}, DCG@3: 0.12201919934894756
+[2023-10-15 06:02:59,919][__main__][INFO] - log loss: 0.6895556909836102, prediction min: 0.10235664358563511, max: 0.9544394676714341, mean: 0.5753900840616015, std: 0.15133747216142782
+[2023-10-15 06:03:01,089][__main__][INFO] - model: MF, estimator: IPS, epoch: 6, params: {'n_epochs': 17, 'n_factors': 157, 'lr': 0.0005269500918318919, 'reg': 0.6226396257011372, 'batch_size': 278, 'clipping': 0.008846181758580655}, DCG@3: 0.11569116594420957
+[2023-10-15 06:03:01,148][__main__][INFO] - log loss: 0.6905811728874534, prediction min: 0.0812031409314405, max: 0.9366029662152219, mean: 0.5759435843263184, std: 0.14319950708985732
+[2023-10-15 06:03:02,166][__main__][INFO] - model: MF, estimator: IPS, epoch: 7, params: {'n_epochs': 14, 'n_factors': 181, 'lr': 0.00014927895732859368, 'reg': 0.38696885294653427, 'batch_size': 265, 'clipping': 0.0016835743692012047}, DCG@3: 0.11853922416302287
+[2023-10-15 06:03:02,227][__main__][INFO] - log loss: 0.676080107763372, prediction min: 0.1033823356995455, max: 0.9360804125843178, mean: 0.576428596238245, std: 0.13617703597520453
+[2023-10-15 06:03:03,377][__main__][INFO] - model: MF, estimator: IPS, epoch: 8, params: {'n_epochs': 15, 'n_factors': 193, 'lr': 0.00033050259346597644, 'reg': 0.6529971560523533, 'batch_size': 267, 'clipping': 0.008437566007150756}, DCG@3: 0.09770771741755006
+[2023-10-15 06:03:03,440][__main__][INFO] - log loss: 0.702345437225025, prediction min: 0.12574036147222775, max: 0.9199527244352057, mean: 0.5774910356355158, std: 0.12948157566487373
+[2023-10-15 06:03:04,465][__main__][INFO] - model: MF, estimator: IPS, epoch: 9, params: {'n_epochs': 14, 'n_factors': 126, 'lr': 6.605274228557282e-05, 'reg': 0.38557358933372077, 'batch_size': 283, 'clipping': 0.006912182266559094}, DCG@3: 0.13610270726784493
+[2023-10-15 06:03:04,534][__main__][INFO] - log loss: 0.6953219327151304, prediction min: 0.08783072873584322, max: 0.9480046821038578, mean: 0.5734391184970978, std: 0.15673997149120497
+[2023-10-15 06:03:06,370][__main__][INFO] - model: MF, estimator: IPS, epoch: 10, params: {'n_epochs': 27, 'n_factors': 121, 'lr': 0.00022807736252107775, 'reg': 0.23478193119217386, 'batch_size': 285, 'clipping': 0.00822073316065483}, DCG@3: 0.13174513448847572
+[2023-10-15 06:03:06,428][__main__][INFO] - log loss: 0.7067941666973477, prediction min: 0.08544314542926058, max: 0.9533706194777821, mean: 0.574572183794733, std: 0.16082219004172876
+[2023-10-15 06:03:07,595][__main__][INFO] - model: MF, estimator: IPS, epoch: 11, params: {'n_epochs': 17, 'n_factors': 181, 'lr': 0.0008157716957230584, 'reg': 0.9251140301303786, 'batch_size': 297, 'clipping': 0.0046501060520270305}, DCG@3: 0.11871725491335451
+[2023-10-15 06:03:07,655][__main__][INFO] - log loss: 0.675813481972275, prediction min: 0.1033823356995455, max: 0.9360804125843178, mean: 0.5766942010133873, std: 0.13578959730809842
+[2023-10-15 06:03:08,404][__main__][INFO] - model: MF, estimator: IPS, epoch: 12, params: {'n_epochs': 10, 'n_factors': 198, 'lr': 0.0007267647249644125, 'reg': 0.11965063658645209, 'batch_size': 270, 'clipping': 0.005191525274902448}, DCG@3: 0.08975057086731458
+[2023-10-15 06:03:08,469][__main__][INFO] - log loss: 0.6659413891015226, prediction min: 0.12332453937498986, max: 0.9252701572652202, mean: 0.5770767183757782, std: 0.1291003744103675
+[2023-10-15 06:03:10,066][__main__][INFO] - model: MF, estimator: IPS, epoch: 13, params: {'n_epochs': 23, 'n_factors': 157, 'lr': 0.0002150195330922285, 'reg': 0.7206601805469929, 'batch_size': 278, 'clipping': 0.009643354831281835}, DCG@3: 0.11557704493866162
+[2023-10-15 06:03:10,129][__main__][INFO] - log loss: 0.6903191021425016, prediction min: 0.0812031409314405, max: 0.9366029662152219, mean: 0.5758837269742435, std: 0.14326593281056038
+[2023-10-15 06:03:12,113][__main__][INFO] - model: MF, estimator: IPS, epoch: 14, params: {'n_epochs': 28, 'n_factors': 174, 'lr': 0.0003506542677354841, 'reg': 0.791270184243683, 'batch_size': 288, 'clipping': 0.008763213520368166}, DCG@3: 0.0999936895917978
+[2023-10-15 06:03:12,177][__main__][INFO] - log loss: 0.6785700233182469, prediction min: 0.1340494008336937, max: 0.9207859729732214, mean: 0.5750310903551471, std: 0.13786692059285874
+[2023-10-15 06:03:13,364][__main__][INFO] - model: MF, estimator: IPS, epoch: 15, params: {'n_epochs': 17, 'n_factors': 199, 'lr': 0.0006643844074017225, 'reg': 0.8828543313667998, 'batch_size': 275, 'clipping': 0.0017918736457419155}, DCG@3: 0.10070910397762206
+[2023-10-15 06:03:13,423][__main__][INFO] - log loss: 0.6679818427124982, prediction min: 0.1412277127152669, max: 0.9385318315598454, mean: 0.5770901304471009, std: 0.1308027394022812
+[2023-10-15 06:03:15,382][__main__][INFO] - model: MF, estimator: IPS, epoch: 16, params: {'n_epochs': 28, 'n_factors': 155, 'lr': 0.0006526723865984233, 'reg': 0.5688336724006983, 'batch_size': 253, 'clipping': 0.007173884123635541}, DCG@3: 0.11703962033860166
+[2023-10-15 06:03:15,443][__main__][INFO] - log loss: 0.686166789593014, prediction min: 0.07303359484635273, max: 0.968233075129119, mean: 0.5770762287787136, std: 0.14379157980799162
+[2023-10-15 06:03:16,612][__main__][INFO] - model: MF, estimator: IPS, epoch: 17, params: {'n_epochs': 15, 'n_factors': 183, 'lr': 2.007313518634548e-05, 'reg': 0.8882002282158142, 'batch_size': 282, 'clipping': 0.00406637121178394}, DCG@3: 0.09729524895927656
+[2023-10-15 06:03:16,674][__main__][INFO] - log loss: 0.6827161370564442, prediction min: 0.12897100019291366, max: 0.9338478728972156, mean: 0.5756808578471865, std: 0.1346144552113151
+[2023-10-15 06:03:17,988][__main__][INFO] - model: MF, estimator: IPS, epoch: 18, params: {'n_epochs': 19, 'n_factors': 197, 'lr': 0.0006026058703400829, 'reg': 0.9775026218373611, 'batch_size': 277, 'clipping': 0.007532402007724411}, DCG@3: 0.09323961464695545
+[2023-10-15 06:03:18,052][__main__][INFO] - log loss: 0.6750305673491445, prediction min: 0.09506908827252508, max: 0.942546262214483, mean: 0.5765428444851127, std: 0.12944096041865621
+[2023-10-15 06:03:19,140][__main__][INFO] - model: MF, estimator: IPS, epoch: 19, params: {'n_epochs': 16, 'n_factors': 106, 'lr': 0.0008481549262678323, 'reg': 0.8819443692104862, 'batch_size': 268, 'clipping': 0.006470864347398688}, DCG@3: 0.1443355100712382
+[2023-10-15 06:03:19,199][__main__][INFO] - log loss: 0.7068352309316775, prediction min: 0.05922941501218234, max: 0.9666278619383176, mean: 0.5726508970382568, std: 0.1684714588154655
+[2023-10-15 06:03:20,141][__main__][INFO] - model: MF, estimator: IPS, epoch: 20, params: {'n_epochs': 13, 'n_factors': 156, 'lr': 0.0005325665015218133, 'reg': 0.6519831727557955, 'batch_size': 286, 'clipping': 0.004088208894763243}, DCG@3: 0.11995942220097766
+[2023-10-15 06:03:20,200][__main__][INFO] - log loss: 0.7043898060057705, prediction min: 0.1063060369778994, max: 0.9336854782740212, mean: 0.5764283361969422, std: 0.14407687038704262
+[2023-10-15 06:03:21,183][__main__][INFO] - model: MF, estimator: IPS, epoch: 21, params: {'n_epochs': 14, 'n_factors': 165, 'lr': 0.00038721606941172183, 'reg': 0.3772462142477394, 'batch_size': 270, 'clipping': 0.0042824167094691005}, DCG@3: 0.11746496001394108
+[2023-10-15 06:03:21,244][__main__][INFO] - log loss: 0.6734521093044682, prediction min: 0.11382866127272373, max: 0.9439635063548438, mean: 0.5755412251818739, std: 0.14214025269514888
+[2023-10-15 06:03:22,348][__main__][INFO] - model: MF, estimator: IPS, epoch: 22, params: {'n_epochs': 16, 'n_factors': 140, 'lr': 0.00015460266739520065, 'reg': 0.902715675386295, 'batch_size': 291, 'clipping': 0.001221826088515664}, DCG@3: 0.12459078105590511
+[2023-10-15 06:03:22,410][__main__][INFO] - log loss: 0.6870998306418036, prediction min: 0.09581479170961087, max: 0.9534719412404159, mean: 0.5764742222193605, std: 0.15046900340609942
+[2023-10-15 06:03:23,314][__main__][INFO] - model: MF, estimator: IPS, epoch: 23, params: {'n_epochs': 13, 'n_factors': 182, 'lr': 0.0007393807059468374, 'reg': 0.9901698486012847, 'batch_size': 274, 'clipping': 0.004712695788462416}, DCG@3: 0.1012609512632745
+[2023-10-15 06:03:23,376][__main__][INFO] - log loss: 0.6692885540631448, prediction min: 0.09373478892605124, max: 0.9489784277359555, mean: 0.575260316856332, std: 0.13444755530051639
+[2023-10-15 06:03:24,342][__main__][INFO] - model: MF, estimator: IPS, epoch: 24, params: {'n_epochs': 14, 'n_factors': 197, 'lr': 0.00017606739497604823, 'reg': 0.9925783899121358, 'batch_size': 264, 'clipping': 0.003643507587233282}, DCG@3: 0.09267158820333328
+[2023-10-15 06:03:24,410][__main__][INFO] - log loss: 0.6748414519347337, prediction min: 0.09506908827252508, max: 0.942546262214483, mean: 0.5763597932718612, std: 0.12966612092074878
+[2023-10-15 06:03:25,656][__main__][INFO] - model: MF, estimator: IPS, epoch: 25, params: {'n_epochs': 18, 'n_factors': 162, 'lr': 0.00041040963490887524, 'reg': 0.12492350321865187, 'batch_size': 265, 'clipping': 0.00326795410934286}, DCG@3: 0.11146553821741685
+[2023-10-15 06:03:25,722][__main__][INFO] - log loss: 0.6728989332819377, prediction min: 0.10867653883085786, max: 0.9292938787094831, mean: 0.5766851077543453, std: 0.14130977887073531
+[2023-10-15 06:03:26,704][__main__][INFO] - model: MF, estimator: IPS, epoch: 26, params: {'n_epochs': 14, 'n_factors': 123, 'lr': 3.8198919210415943e-05, 'reg': 0.14082790962423733, 'batch_size': 295, 'clipping': 0.009032306569842368}, DCG@3: 0.129149502578719
+[2023-10-15 06:03:26,764][__main__][INFO] - log loss: 0.7093887273156989, prediction min: 0.10067376253252902, max: 0.9496137543237965, mean: 0.5737916635655754, std: 0.15838024482102456
+[2023-10-15 06:03:27,980][__main__][INFO] - model: MF, estimator: IPS, epoch: 27, params: {'n_epochs': 18, 'n_factors': 164, 'lr': 0.00019913517511533957, 'reg': 0.6992826402275696, 'batch_size': 296, 'clipping': 0.00924449829188028}, DCG@3: 0.11733371102211457
+[2023-10-15 06:03:28,040][__main__][INFO] - log loss: 0.6902497936234783, prediction min: 0.09079972239010707, max: 0.9412339772424279, mean: 0.5762820108697727, std: 0.14187014442125673
+[2023-10-15 06:03:28,955][__main__][INFO] - model: MF, estimator: IPS, epoch: 28, params: {'n_epochs': 13, 'n_factors': 114, 'lr': 0.0009883584083037276, 'reg': 0.531395922310979, 'batch_size': 283, 'clipping': 0.0026139247707930536}, DCG@3: 0.14457951041495246
+[2023-10-15 06:03:29,016][__main__][INFO] - log loss: 0.7030384192478253, prediction min: 0.07061851875929913, max: 0.960234962871637, mean: 0.5737821278840292, std: 0.16157564469385663
+[2023-10-15 06:03:30,771][__main__][INFO] - model: MF, estimator: IPS, epoch: 29, params: {'n_epochs': 26, 'n_factors': 128, 'lr': 0.000982597572377372, 'reg': 0.3787074560747523, 'batch_size': 287, 'clipping': 0.0023458114957103067}, DCG@3: 0.13851543975724576
+[2023-10-15 06:03:30,831][__main__][INFO] - log loss: 0.6999204551481639, prediction min: 0.11204810391561469, max: 0.9596396644906021, mean: 0.5763522933658787, std: 0.15732363093518797
+[2023-10-15 06:03:32,246][__main__][INFO] - model: MF, estimator: IPS, epoch: 30, params: {'n_epochs': 21, 'n_factors': 195, 'lr': 0.0007751136716371025, 'reg': 0.15514149564992444, 'batch_size': 263, 'clipping': 0.001548372661626097}, DCG@3: 0.10011286267746182
+[2023-10-15 06:03:32,306][__main__][INFO] - log loss: 0.6558022202627019, prediction min: 0.13171534970458298, max: 0.932782850740341, mean: 0.5772421471096351, std: 0.12943995771718494
+[2023-10-15 06:03:33,723][__main__][INFO] - model: MF, estimator: IPS, epoch: 31, params: {'n_epochs': 21, 'n_factors': 164, 'lr': 0.0005496232258504896, 'reg': 0.9764565266839507, 'batch_size': 294, 'clipping': 0.0019255317620092418}, DCG@3: 0.1165311145941692
+[2023-10-15 06:03:33,784][__main__][INFO] - log loss: 0.6902959888249907, prediction min: 0.09079972239010707, max: 0.9399747429451978, mean: 0.5764152524303263, std: 0.14159592350106023
+[2023-10-15 06:03:35,474][__main__][INFO] - model: MF, estimator: IPS, epoch: 32, params: {'n_epochs': 25, 'n_factors': 145, 'lr': 0.0003413012926474586, 'reg': 0.5355713984580089, 'batch_size': 263, 'clipping': 0.002822231159615625}, DCG@3: 0.12393134115186612
+[2023-10-15 06:03:35,536][__main__][INFO] - log loss: 0.6814910697594176, prediction min: 0.11453611307493902, max: 0.9557006457258775, mean: 0.5752055244297671, std: 0.14822836820784185
+[2023-10-15 06:03:37,298][__main__][INFO] - model: MF, estimator: IPS, epoch: 33, params: {'n_epochs': 25, 'n_factors': 134, 'lr': 0.0004933007056901162, 'reg': 0.729555646759807, 'batch_size': 282, 'clipping': 0.0066512035171115815}, DCG@3: 0.12676454507898519
+[2023-10-15 06:03:37,369][__main__][INFO] - log loss: 0.6971511479549407, prediction min: 0.055960873026520364, max: 0.9446157048932261, mean: 0.5748766066861073, std: 0.15247165627281792
+[2023-10-15 06:03:38,326][__main__][INFO] - model: MF, estimator: IPS, epoch: 34, params: {'n_epochs': 14, 'n_factors': 111, 'lr': 0.00010380344204432087, 'reg': 0.76404309452583, 'batch_size': 263, 'clipping': 0.0072710928092758476}, DCG@3: 0.13188597368378632
+[2023-10-15 06:03:38,387][__main__][INFO] - log loss: 0.733646485206821, prediction min: 0.05529719658449131, max: 0.963618851785455, mean: 0.5735128334750634, std: 0.16726563025002814
+[2023-10-15 06:03:40,071][__main__][INFO] - model: MF, estimator: IPS, epoch: 35, params: {'n_epochs': 25, 'n_factors': 125, 'lr': 0.0002850252250143534, 'reg': 0.5712995077861872, 'batch_size': 288, 'clipping': 0.00496700384921671}, DCG@3: 0.12455716577170338
+[2023-10-15 06:03:40,132][__main__][INFO] - log loss: 0.7015179663921217, prediction min: 0.07640959824241372, max: 0.947891741218746, mean: 0.5732068786986944, std: 0.15756779125486256
+[2023-10-15 06:03:41,159][__main__][INFO] - model: MF, estimator: IPS, epoch: 36, params: {'n_epochs': 14, 'n_factors': 139, 'lr': 0.00018601978090851718, 'reg': 0.9733574093364629, 'batch_size': 270, 'clipping': 0.0018776744932187635}, DCG@3: 0.11760534314608243
+[2023-10-15 06:03:41,219][__main__][INFO] - log loss: 0.7138649223711139, prediction min: 0.09399474192672815, max: 0.9695909232552361, mean: 0.5730827196046511, std: 0.14980629807123086
+[2023-10-15 06:03:42,324][__main__][INFO] - model: MF, estimator: IPS, epoch: 37, params: {'n_epochs': 16, 'n_factors': 156, 'lr': 0.0005919541379905324, 'reg': 0.8867829523063769, 'batch_size': 296, 'clipping': 0.002006985942230633}, DCG@3: 0.11994497908667426
+[2023-10-15 06:03:42,385][__main__][INFO] - log loss: 0.7041604838368587, prediction min: 0.10720337360285813, max: 0.9336854782740212, mean: 0.5765012189979055, std: 0.14393400968696077
+[2023-10-15 06:03:43,545][__main__][INFO] - model: MF, estimator: IPS, epoch: 38, params: {'n_epochs': 17, 'n_factors': 142, 'lr': 6.485539043799392e-05, 'reg': 0.8390440609554108, 'batch_size': 288, 'clipping': 0.008274132993294084}, DCG@3: 0.11499454808724499
+[2023-10-15 06:03:43,603][__main__][INFO] - log loss: 0.7070871063737535, prediction min: 0.08040106637505838, max: 0.938303478996107, mean: 0.5742345929450785, std: 0.15002966746021806
+[2023-10-15 06:03:44,793][__main__][INFO] - model: MF, estimator: IPS, epoch: 39, params: {'n_epochs': 17, 'n_factors': 165, 'lr': 0.00023129092651639693, 'reg': 0.6364883061491827, 'batch_size': 283, 'clipping': 0.009695418611195813}, DCG@3: 0.11709850447854565
+[2023-10-15 06:03:44,852][__main__][INFO] - log loss: 0.6734370168119035, prediction min: 0.11382866127272373, max: 0.9439635063548438, mean: 0.5755355442700697, std: 0.14212082633584414
+[2023-10-15 06:03:44,854][__main__][INFO] - best params: ({'n_epochs': 10, 'n_factors': 198, 'lr': 0.0007267647249644125, 'reg': 0.11965063658645209, 'batch_size': 270, 'clipping': 0.005191525274902448}, 0.08975057086731458)
+[2023-10-15 06:03:46,316][__main__][INFO] - model: MF, estimator: Naive, epoch: 0, params: {'n_epochs': 22, 'n_factors': 118, 'lr': 0.0009009739493126958, 'reg': 0.3569045203445901, 'batch_size': 254}, DCG@3: 0.41883954962891196
+[2023-10-15 06:03:46,374][__main__][INFO] - log loss: 0.8278173979396618, prediction min: 0.07864228961995035, max: 0.9641488997452392, mean: 0.5755639838000214, std: 0.16176580217954026
+[2023-10-15 06:03:47,971][__main__][INFO] - model: MF, estimator: Naive, epoch: 1, params: {'n_epochs': 24, 'n_factors': 178, 'lr': 0.0009737780391156233, 'reg': 0.9094803573090858, 'batch_size': 257}, DCG@3: 0.32147036804927104
+[2023-10-15 06:03:48,032][__main__][INFO] - log loss: 0.8064216027060808, prediction min: 0.11238508331400178, max: 0.9375684944194556, mean: 0.5763733870910986, std: 0.1359538659362303
+[2023-10-15 06:03:49,841][__main__][INFO] - model: MF, estimator: Naive, epoch: 2, params: {'n_epochs': 27, 'n_factors': 143, 'lr': 0.000945940269392505, 'reg': 0.3245126207711598, 'batch_size': 262}, DCG@3: 0.39410030346615765
+[2023-10-15 06:03:49,901][__main__][INFO] - log loss: 0.8094992718855919, prediction min: 0.09424963146820418, max: 0.9378744296911583, mean: 0.5727271664911026, std: 0.1500413412784374
+[2023-10-15 06:03:50,736][__main__][INFO] - model: MF, estimator: Naive, epoch: 3, params: {'n_epochs': 12, 'n_factors': 122, 'lr': 2.593346441441471e-05, 'reg': 0.5170673714454993, 'batch_size': 297}, DCG@3: 0.40940851558059127
+[2023-10-15 06:03:50,796][__main__][INFO] - log loss: 0.8263068198133683, prediction min: 0.06871799017036011, max: 0.9678575822569744, mean: 0.573638066282724, std: 0.16008095124426736
+[2023-10-15 06:03:51,832][__main__][INFO] - model: MF, estimator: Naive, epoch: 4, params: {'n_epochs': 15, 'n_factors': 104, 'lr': 0.0008492746471342584, 'reg': 0.17223694900258993, 'batch_size': 282}, DCG@3: 0.4517016909016788
+[2023-10-15 06:03:51,891][__main__][INFO] - log loss: 0.8330491016038166, prediction min: 0.061215547531603694, max: 0.9720590250344068, mean: 0.5744531618972747, std: 0.1704220740876078
+[2023-10-15 06:03:53,490][__main__][INFO] - model: MF, estimator: Naive, epoch: 5, params: {'n_epochs': 24, 'n_factors': 192, 'lr': 0.0008720636518117922, 'reg': 0.7383138681170729, 'batch_size': 272}, DCG@3: 0.3082149035556397
+[2023-10-15 06:03:53,557][__main__][INFO] - log loss: 0.8045508447068815, prediction min: 0.14428433572867463, max: 0.9382884995317271, mean: 0.5773422805674466, std: 0.13052793912281785
+[2023-10-15 06:03:54,936][__main__][INFO] - model: MF, estimator: Naive, epoch: 6, params: {'n_epochs': 20, 'n_factors': 187, 'lr': 0.0002295618751369831, 'reg': 0.286903805868605, 'batch_size': 296}, DCG@3: 0.32549685758764374
+[2023-10-15 06:03:54,996][__main__][INFO] - log loss: 0.8037797048211972, prediction min: 0.13145796498342063, max: 0.9444294068402217, mean: 0.57709471529054, std: 0.13317514383305115
+[2023-10-15 06:03:56,714][__main__][INFO] - model: MF, estimator: Naive, epoch: 7, params: {'n_epochs': 26, 'n_factors': 102, 'lr': 8.132187244997503e-05, 'reg': 0.4276018627451349, 'batch_size': 277}, DCG@3: 0.4555443006869191
+[2023-10-15 06:03:56,776][__main__][INFO] - log loss: 0.8358759065310943, prediction min: 0.05958670830391447, max: 0.967849717913558, mean: 0.5726061486589127, std: 0.17182099006245205
+[2023-10-15 06:03:58,451][__main__][INFO] - model: MF, estimator: Naive, epoch: 8, params: {'n_epochs': 25, 'n_factors': 188, 'lr': 0.0005006288872475404, 'reg': 0.6675112094609039, 'batch_size': 274}, DCG@3: 0.30471418492999536
+[2023-10-15 06:03:58,511][__main__][INFO] - log loss: 0.8027055803696648, prediction min: 0.13052791762581747, max: 0.9382038868140574, mean: 0.5764020467211101, std: 0.1320908348300943
+[2023-10-15 06:03:59,820][__main__][INFO] - model: MF, estimator: Naive, epoch: 9, params: {'n_epochs': 19, 'n_factors': 151, 'lr': 0.0002295056241336759, 'reg': 0.7491220795551311, 'batch_size': 259}, DCG@3: 0.36990500755606154
+[2023-10-15 06:03:59,879][__main__][INFO] - log loss: 0.8116187504298653, prediction min: 0.10534044170743623, max: 0.9561647686945666, mean: 0.5756293863978342, std: 0.1460547493636885
+[2023-10-15 06:04:00,782][__main__][INFO] - model: MF, estimator: Naive, epoch: 10, params: {'n_epochs': 13, 'n_factors': 118, 'lr': 0.0003761961739630114, 'reg': 0.541797255041649, 'batch_size': 276}, DCG@3: 0.4185675745025828
+[2023-10-15 06:04:00,841][__main__][INFO] - log loss: 0.8282424000703034, prediction min: 0.07864228961995035, max: 0.9641488997452392, mean: 0.5757597816829769, std: 0.16189141349554995
+[2023-10-15 06:04:01,887][__main__][INFO] - model: MF, estimator: Naive, epoch: 11, params: {'n_epochs': 15, 'n_factors': 176, 'lr': 0.0006286818552749724, 'reg': 0.5596594138293759, 'batch_size': 260}, DCG@3: 0.330664384987896
+[2023-10-15 06:04:01,948][__main__][INFO] - log loss: 0.8043175779080176, prediction min: 0.12365546094321313, max: 0.930415193336573, mean: 0.5765266249624699, std: 0.13520772759706015
+[2023-10-15 06:04:03,597][__main__][INFO] - model: MF, estimator: Naive, epoch: 12, params: {'n_epochs': 25, 'n_factors': 173, 'lr': 8.05233893018399e-05, 'reg': 0.4812887596536254, 'batch_size': 272}, DCG@3: 0.3458677230524292
+[2023-10-15 06:04:03,656][__main__][INFO] - log loss: 0.8008272338669111, prediction min: 0.1385000028458156, max: 0.937801587040922, mean: 0.5749882186323647, std: 0.13693061834597153
+[2023-10-15 06:04:04,727][__main__][INFO] - model: MF, estimator: Naive, epoch: 13, params: {'n_epochs': 15, 'n_factors': 186, 'lr': 0.0005314574514523126, 'reg': 0.6042793777744718, 'batch_size': 255}, DCG@3: 0.31817170851668874
+[2023-10-15 06:04:04,788][__main__][INFO] - log loss: 0.8061345856099051, prediction min: 0.10929939024423953, max: 0.9255673386131641, mean: 0.5778642811968678, std: 0.13268802949486588
+[2023-10-15 06:04:06,139][__main__][INFO] - model: MF, estimator: Naive, epoch: 14, params: {'n_epochs': 20, 'n_factors': 157, 'lr': 0.00041432266549216827, 'reg': 0.3006119238917123, 'batch_size': 250}, DCG@3: 0.3678522599352592
+[2023-10-15 06:04:06,199][__main__][INFO] - log loss: 0.809685266015751, prediction min: 0.0812031409314405, max: 0.9366029662152219, mean: 0.5756961415713925, std: 0.1433422054817084
+[2023-10-15 06:04:07,048][__main__][INFO] - model: MF, estimator: Naive, epoch: 15, params: {'n_epochs': 12, 'n_factors': 177, 'lr': 0.0008365988737412188, 'reg': 0.903468820619576, 'batch_size': 284}, DCG@3: 0.31825071421992057
+[2023-10-15 06:04:07,108][__main__][INFO] - log loss: 0.8017164636355872, prediction min: 0.13274040446523053, max: 0.944262407568516, mean: 0.575057538216785, std: 0.1352007404298706
+[2023-10-15 06:04:08,338][__main__][INFO] - model: MF, estimator: Naive, epoch: 16, params: {'n_epochs': 18, 'n_factors': 188, 'lr': 0.0009765528198169044, 'reg': 0.7362320238279256, 'batch_size': 294}, DCG@3: 0.3015735368038768
+[2023-10-15 06:04:08,403][__main__][INFO] - log loss: 0.8024754148240644, prediction min: 0.13182762865716013, max: 0.9377156472679045, mean: 0.5763290287221956, std: 0.13193265080422298
+[2023-10-15 06:04:09,368][__main__][INFO] - model: MF, estimator: Naive, epoch: 17, params: {'n_epochs': 14, 'n_factors': 182, 'lr': 0.0006493897547714684, 'reg': 0.536934882405075, 'batch_size': 275}, DCG@3: 0.32104038151647823
+[2023-10-15 06:04:09,432][__main__][INFO] - log loss: 0.7978043830765632, prediction min: 0.09373478892605124, max: 0.9489784277359555, mean: 0.5749759573897292, std: 0.13454723800713442
+[2023-10-15 06:04:11,178][__main__][INFO] - model: MF, estimator: Naive, epoch: 18, params: {'n_epochs': 26, 'n_factors': 141, 'lr': 0.0005754594034566799, 'reg': 0.23700798016726266, 'batch_size': 274}, DCG@3: 0.38440638396147286
+[2023-10-15 06:04:11,238][__main__][INFO] - log loss: 0.8150658584151452, prediction min: 0.08516848487331871, max: 0.9553997236115939, mean: 0.5732509512592, std: 0.15116215631311833
+[2023-10-15 06:04:12,470][__main__][INFO] - model: MF, estimator: Naive, epoch: 19, params: {'n_epochs': 18, 'n_factors': 124, 'lr': 0.000521430827152246, 'reg': 0.7685530417392813, 'batch_size': 297}, DCG@3: 0.39328437808717054
+[2023-10-15 06:04:12,530][__main__][INFO] - log loss: 0.8204407068068164, prediction min: 0.08353505709268756, max: 0.958810854938235, mean: 0.5719657324964903, std: 0.15933762416938516
+[2023-10-15 06:04:13,936][__main__][INFO] - model: MF, estimator: Naive, epoch: 20, params: {'n_epochs': 21, 'n_factors': 193, 'lr': 0.0005506441340451488, 'reg': 0.10667209044251223, 'batch_size': 282}, DCG@3: 0.3130573184729997
+[2023-10-15 06:04:13,998][__main__][INFO] - log loss: 0.8015459027157602, prediction min: 0.12574036147222775, max: 0.9203483214868426, mean: 0.577249855570981, std: 0.1295592743369143
+[2023-10-15 06:04:15,357][__main__][INFO] - model: MF, estimator: Naive, epoch: 21, params: {'n_epochs': 19, 'n_factors': 193, 'lr': 0.0001829162593771428, 'reg': 0.6500145513605501, 'batch_size': 291}, DCG@3: 0.3130573184729997
+[2023-10-15 06:04:15,419][__main__][INFO] - log loss: 0.8016769666000279, prediction min: 0.12574036147222775, max: 0.920057558229485, mean: 0.5773679548827996, std: 0.12951211980604754
+[2023-10-15 06:04:16,472][__main__][INFO] - model: MF, estimator: Naive, epoch: 22, params: {'n_epochs': 15, 'n_factors': 166, 'lr': 0.0001857212439571482, 'reg': 0.2811863979461255, 'batch_size': 271}, DCG@3: 0.3651415983419334
+[2023-10-15 06:04:16,540][__main__][INFO] - log loss: 0.8107630559242538, prediction min: 0.09267368825452782, max: 0.9455196886677538, mean: 0.5781756155607112, std: 0.14049933157063307
+[2023-10-15 06:04:17,656][__main__][INFO] - model: MF, estimator: Naive, epoch: 23, params: {'n_epochs': 16, 'n_factors': 129, 'lr': 9.82706473872029e-05, 'reg': 0.9196027880218247, 'batch_size': 273}, DCG@3: 0.42267306974418745
+[2023-10-15 06:04:17,716][__main__][INFO] - log loss: 0.8214422958631973, prediction min: 0.06993228040033324, max: 0.9418424021110621, mean: 0.5757524822388215, std: 0.1553849161613018
+[2023-10-15 06:04:19,244][__main__][INFO] - model: MF, estimator: Naive, epoch: 24, params: {'n_epochs': 23, 'n_factors': 114, 'lr': 0.0008353393773414507, 'reg': 0.7438429955478124, 'batch_size': 297}, DCG@3: 0.43169998560638395
+[2023-10-15 06:04:19,303][__main__][INFO] - log loss: 0.8277731313343871, prediction min: 0.07061851875929913, max: 0.960234962871637, mean: 0.573387641438294, std: 0.16124586392071452
+[2023-10-15 06:04:21,134][__main__][INFO] - model: MF, estimator: Naive, epoch: 25, params: {'n_epochs': 27, 'n_factors': 172, 'lr': 0.000707608292739982, 'reg': 0.4546920732928055, 'batch_size': 296}, DCG@3: 0.34384993344826037
+[2023-10-15 06:04:21,193][__main__][INFO] - log loss: 0.8048714744996748, prediction min: 0.11544180218680566, max: 0.9326363267694184, mean: 0.5750712166107366, std: 0.1379886201892976
+[2023-10-15 06:04:22,858][__main__][INFO] - model: MF, estimator: Naive, epoch: 26, params: {'n_epochs': 25, 'n_factors': 188, 'lr': 0.000937745660053491, 'reg': 0.3761129452692842, 'batch_size': 264}, DCG@3: 0.30324034557848467
+[2023-10-15 06:04:22,918][__main__][INFO] - log loss: 0.8025124543229551, prediction min: 0.130930972967459, max: 0.9384537666683892, mean: 0.5762554568184506, std: 0.13210172371078827
+[2023-10-15 06:04:23,682][__main__][INFO] - model: MF, estimator: Naive, epoch: 27, params: {'n_epochs': 11, 'n_factors': 104, 'lr': 0.00038932264470610214, 'reg': 0.5987044479529042, 'batch_size': 282}, DCG@3: 0.4524386105774341
+[2023-10-15 06:04:23,743][__main__][INFO] - log loss: 0.8331983298023183, prediction min: 0.061215547531603694, max: 0.9720950334387303, mean: 0.5745723632207366, std: 0.1703988327061526
+[2023-10-15 06:04:25,439][__main__][INFO] - model: MF, estimator: Naive, epoch: 28, params: {'n_epochs': 25, 'n_factors': 191, 'lr': 0.00041549357556441873, 'reg': 0.7008110425863799, 'batch_size': 299}, DCG@3: 0.31767180595062894
+[2023-10-15 06:04:25,499][__main__][INFO] - log loss: 0.8044569845629487, prediction min: 0.15219373075504194, max: 0.9279236874948108, mean: 0.578112716822517, std: 0.13232824351291833
+[2023-10-15 06:04:27,022][__main__][INFO] - model: MF, estimator: Naive, epoch: 29, params: {'n_epochs': 22, 'n_factors': 194, 'lr': 0.0006258662879530152, 'reg': 0.5662634140823134, 'batch_size': 295}, DCG@3: 0.3265938477629249
+[2023-10-15 06:04:27,083][__main__][INFO] - log loss: 0.7991735284731933, prediction min: 0.15134898252852483, max: 0.912165276177027, mean: 0.577412327098942, std: 0.13104953112177795
+[2023-10-15 06:04:27,781][__main__][INFO] - model: MF, estimator: Naive, epoch: 30, params: {'n_epochs': 10, 'n_factors': 130, 'lr': 0.0004979196667114883, 'reg': 0.8702448952180836, 'batch_size': 252}, DCG@3: 0.4195233319481041
+[2023-10-15 06:04:27,842][__main__][INFO] - log loss: 0.823847965038418, prediction min: 0.09501470761106329, max: 0.9532813891997194, mean: 0.5757602468752032, std: 0.15636502061612606
+[2023-10-15 06:04:28,544][__main__][INFO] - model: MF, estimator: Naive, epoch: 31, params: {'n_epochs': 10, 'n_factors': 130, 'lr': 0.0004979196667114883, 'reg': 0.8702448952180836, 'batch_size': 252}, DCG@3: 0.4195233319481041
+[2023-10-15 06:04:28,604][__main__][INFO] - log loss: 0.823847965038418, prediction min: 0.09501470761106329, max: 0.9532813891997194, mean: 0.5757602468752032, std: 0.15636502061612606
+[2023-10-15 06:04:29,976][__main__][INFO] - model: MF, estimator: Naive, epoch: 32, params: {'n_epochs': 20, 'n_factors': 121, 'lr': 0.0008760744429957263, 'reg': 0.24852189287279838, 'batch_size': 281}, DCG@3: 0.4220941614748958
+[2023-10-15 06:04:30,034][__main__][INFO] - log loss: 0.8230034630041265, prediction min: 0.08544314542926058, max: 0.9533706194777821, mean: 0.5742647976514398, std: 0.1607119460716073
+[2023-10-15 06:04:31,827][__main__][INFO] - model: MF, estimator: Naive, epoch: 33, params: {'n_epochs': 27, 'n_factors': 154, 'lr': 0.00047449499260116966, 'reg': 0.9758879488975115, 'batch_size': 254}, DCG@3: 0.37754617943994406
+[2023-10-15 06:04:31,888][__main__][INFO] - log loss: 0.810515486975272, prediction min: 0.0974395628048247, max: 0.941099999064997, mean: 0.5752729572761683, std: 0.14343363526326514
+[2023-10-15 06:04:33,213][__main__][INFO] - model: MF, estimator: Naive, epoch: 34, params: {'n_epochs': 20, 'n_factors': 126, 'lr': 1.7366736204089776e-05, 'reg': 0.29031859417675693, 'batch_size': 282}, DCG@3: 0.4195324216180689
+[2023-10-15 06:04:33,273][__main__][INFO] - log loss: 0.8182357557809453, prediction min: 0.08783072873584322, max: 0.9480046821038578, mean: 0.5734199854088728, std: 0.15675572916366706
+[2023-10-15 06:04:33,993][__main__][INFO] - model: MF, estimator: Naive, epoch: 35, params: {'n_epochs': 10, 'n_factors': 182, 'lr': 0.0004758314582490904, 'reg': 0.9379328008170807, 'batch_size': 275}, DCG@3: 0.3213123566428073
+[2023-10-15 06:04:34,053][__main__][INFO] - log loss: 0.7978919672243394, prediction min: 0.09373478892605124, max: 0.9489784277359555, mean: 0.5750414855201578, std: 0.13455449892195132
+[2023-10-15 06:04:35,825][__main__][INFO] - model: MF, estimator: Naive, epoch: 36, params: {'n_epochs': 26, 'n_factors': 160, 'lr': 0.0007645357351143738, 'reg': 0.7165287960260719, 'batch_size': 299}, DCG@3: 0.3609570973970969
+[2023-10-15 06:04:35,886][__main__][INFO] - log loss: 0.8102826417720819, prediction min: 0.10738081999985594, max: 0.9447698546269263, mean: 0.5753894931786554, std: 0.14186385191564893
+[2023-10-15 06:04:37,170][__main__][INFO] - model: MF, estimator: Naive, epoch: 37, params: {'n_epochs': 19, 'n_factors': 155, 'lr': 3.287769974708738e-05, 'reg': 0.9499828290279481, 'batch_size': 272}, DCG@3: 0.3744495790004238
+[2023-10-15 06:04:37,230][__main__][INFO] - log loss: 0.8101802174319143, prediction min: 0.07303359484635273, max: 0.968233075129119, mean: 0.5768294728398828, std: 0.14391677569918163
+[2023-10-15 06:04:38,563][__main__][INFO] - model: MF, estimator: Naive, epoch: 38, params: {'n_epochs': 20, 'n_factors': 183, 'lr': 0.0008573731971839671, 'reg': 0.5787598850493824, 'batch_size': 279}, DCG@3: 0.31328524591273044
+[2023-10-15 06:04:38,622][__main__][INFO] - log loss: 0.8018526577176691, prediction min: 0.13138718069358143, max: 0.9316875807411105, mean: 0.5754662703164052, std: 0.13432820891861602
+[2023-10-15 06:04:39,673][__main__][INFO] - model: MF, estimator: Naive, epoch: 39, params: {'n_epochs': 15, 'n_factors': 122, 'lr': 0.0005921381982605108, 'reg': 0.4329309996540819, 'batch_size': 279}, DCG@3: 0.40847862648173877
+[2023-10-15 06:04:39,743][__main__][INFO] - log loss: 0.8260116692354678, prediction min: 0.06871799017036011, max: 0.9675608626424168, mean: 0.5735278246843936, std: 0.1599497805516603
+[2023-10-15 06:04:39,745][__main__][INFO] - best params: ({'n_epochs': 26, 'n_factors': 102, 'lr': 8.132187244997503e-05, 'reg': 0.4276018627451349, 'batch_size': 277}, 0.4555443006869191)
+[2023-10-15 06:04:39,752][__main__][INFO] - random search is done.
+[2023-10-15 06:04:39,754][__main__][INFO] - start experiment...
+[2023-10-15 06:04:43,773][__main__][INFO] - FM_Ideal is done.
+[2023-10-15 06:04:47,810][__main__][INFO] - FM_IPS is done.
+[2023-10-15 06:04:50,488][__main__][INFO] - FM_Naive is done.
+[2023-10-15 06:04:53,294][__main__][INFO] - MF_Ideal is done.
+[2023-10-15 06:04:55,261][__main__][INFO] - MF_IPS is done.
+[2023-10-15 06:04:58,132][__main__][INFO] - MF_Naive is done.
+[2023-10-15 06:04:59,209][__main__][INFO] - Random is done.
+[2023-10-16 03:57:49,985][__main__][INFO] - start data loading...
+[2023-10-16 03:58:02,850][__main__][INFO] - created small_matrix_df
+[2023-10-16 03:58:03,200][__main__][INFO] - mean of relevance: 0.4149662423709277
+[2023-10-16 03:58:03,203][__main__][INFO] - std of relevance: 0.2507729286422716
+[2023-10-16 03:58:37,613][__main__][INFO] - mean of exposure: 0.46022244447642285
+[2023-10-16 03:58:37,615][__main__][INFO] - std of exposure: 0.3575756547215601
+[2023-10-16 03:58:37,642][__main__][INFO] - biased click through rate: 0.18901927912824812
+[2023-10-16 03:58:37,644][__main__][INFO] - unbiased click through rate: 0.4154378432009853
+[2023-10-16 03:58:37,647][__main__][INFO] - created interaction_df
+[2023-10-16 03:58:57,082][__main__][INFO] - created features
+[2023-10-16 03:58:57,181][__main__][INFO] - prepared train and evaluation datasets
+[2023-10-16 03:58:57,195][__main__][INFO] - data loading is done.
+[2023-10-16 03:58:57,197][__main__][INFO] - start experiment...
+[2023-10-16 03:59:01,238][__main__][INFO] - FM_Ideal is done.
+[2023-10-16 03:59:05,238][__main__][INFO] - FM_IPS is done.
+[2023-10-16 03:59:08,020][__main__][INFO] - FM_Naive is done.
+[2023-10-16 03:59:11,188][__main__][INFO] - MF_Ideal is done.
+[2023-10-16 03:59:13,184][__main__][INFO] - MF_IPS is done.
+[2023-10-16 03:59:16,174][__main__][INFO] - MF_Naive is done.
+[2023-10-16 03:59:17,293][__main__][INFO] - Random is done.

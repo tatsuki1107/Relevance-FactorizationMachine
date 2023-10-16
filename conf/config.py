@@ -1,105 +1,58 @@
 from dataclasses import dataclass
-from typing import Tuple, List
+from typing import Tuple, Union
 
 
 @dataclass(frozen=True)
-class InteractionFeatureConfig:
-    timestamp: str
-
-
-@dataclass(frozen=True)
-class InteractionTableConfig:
+class DataFrameConfig:
     data_path: str
-    used_features: InteractionFeatureConfig
+    used_features: dict
 
 
 @dataclass(frozen=True)
-class UserFeatureConfig:
-    user_active_degree: str
-    onehot_feat0: str
-    onehot_feat1: str
-    onehot_feat2: str
-    onehot_feat6: str
-    onehot_feat11: str
-    onehot_feat12: str
-    onehot_feat13: str
-    onehot_feat14: str
-    onehot_feat15: str
-
-
-@dataclass(frozen=True)
-class UserTableConfig:
-    data_path: str
-    used_features: UserFeatureConfig
-
-
-@dataclass(frozen=True)
-class VideoDailyFeatureConfig:
-    play_progress: str
-    video_duration: str
-    like_cnt: str
-    cancel_like_cnt: str
-    share_cnt: str
-    double_click_cnt: str
-    download_cnt: str
-
-
-@dataclass(frozen=True)
-class VideoDailyTableConfig:
-    data_path: str
-    used_features: VideoDailyFeatureConfig
-
-
-@dataclass(frozen=True)
-class VideoCategoryFeatureConfig:
-    feat: str
-
-
-@dataclass(frozen=True)
-class VideoCategoryTableConfig:
-    data_path: str
-    used_features: VideoCategoryFeatureConfig
-
-
-@dataclass(frozen=True)
-class VideoTableConfig:
-    daily: VideoDailyTableConfig
-    category: VideoCategoryTableConfig
+class VideoDataFrameConfig:
+    daily: DataFrameConfig
+    category: DataFrameConfig
 
 
 @dataclass(frozen=True)
 class TableConfig:
-    interaction: InteractionTableConfig
-    user: UserTableConfig
-    video: VideoTableConfig
+    interaction: DataFrameConfig
+    user: DataFrameConfig
+    video: VideoDataFrameConfig
 
 
 @dataclass(frozen=True)
 class LogDataPropensityConfig:
     data_path: str
-    train_val_test_ratio: Tuple[float, float, float]
+    train_val_test_ratio: Tuple[float]
     density: float
     behavior_policy: str
     exposure_bias: float
 
 
 @dataclass(frozen=True)
+class ParamRangeConfig:
+    min: Union[int, float]
+    max: Union[int, float]
+
+
+@dataclass(frozen=True)
 class FactorizationMachineConfig:
-    n_epochs: List[int]
-    n_factors: List[int]
-    lr: List[float]
-    batch_size: List[int]
-    clipping: List[float]
+    n_epochs: ParamRangeConfig
+    n_factors: ParamRangeConfig
+    lr: ParamRangeConfig
+    batch_size: ParamRangeConfig
+    clipping: ParamRangeConfig
 
 
 @dataclass(frozen=True)
 class LogisticMatrixFactorizationConfig:
-    n_epochs: List[int]
-    n_factors: List[int]
-    lr: List[float]
-    reg: List[float]
-    batch_size: List[int]
-    clipping: List[float]
+    n_epochs: ParamRangeConfig
+    n_factors: ParamRangeConfig
+    lr: ParamRangeConfig
+    reg: ParamRangeConfig
+    batch_size: ParamRangeConfig
+    clipping: ParamRangeConfig
 
 
 @dataclass(frozen=True)
@@ -111,7 +64,7 @@ class ModelConfig:
 @dataclass(frozen=True)
 class ExperimentConfig:
     seed: int
-    logdata_propensity: LogDataPropensityConfig
+    data_logging_settings: LogDataPropensityConfig
     tables: TableConfig
     is_search_params: bool
-    model: ModelConfig
+    model_param_range: ModelConfig

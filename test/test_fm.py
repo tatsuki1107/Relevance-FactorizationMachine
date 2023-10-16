@@ -26,11 +26,11 @@ class TestFM(ModelTestBase):
         )
 
         self.model = FM(
-            n_epochs=self.cfg.model.FM.n_epochs[0],
-            n_factors=self.cfg.model.FM.n_factors[0],
+            n_epochs=self.cfg.model_param_range.FM.n_epochs.min,
+            n_factors=self.cfg.model_param_range.FM.n_factors.min,
             n_features=self.train[0].shape[1],
-            lr=self.cfg.model.FM.lr[0],
-            batch_size=self.cfg.model.FM.batch_size[0],
+            lr=self.cfg.model_param_range.FM.lr.min,
+            batch_size=self.cfg.model_param_range.FM.batch_size.min,
             seed=self.cfg.seed,
         )
 

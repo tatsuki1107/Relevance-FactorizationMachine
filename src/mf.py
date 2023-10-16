@@ -22,7 +22,7 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
     n_users: int
     n_items: int
     reg: float
-    alpha: float = 2
+    alpha: float = 2.0
 
     def __post_init__(self) -> None:
         """モデルのパラメータを初期化

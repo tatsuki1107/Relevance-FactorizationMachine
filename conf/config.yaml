@@ -1,5 +1,8 @@
+# 乱数設定
 seed: 12345
-logdata_propensity:
+
+# ログデータ生成の設定
+data_logging_settings:
   data_path: "./data/kuairec/big_matrix.csv"
   train_val_test_ratio:
     - 0.8
@@ -8,6 +11,8 @@ logdata_propensity:
   density: 0.05
   behavior_policy: "random"
   exposure_bias: 1.0
+
+# 各テーブルの設定
 tables:
   interaction:
     data_path: "./data/kuairec/small_matrix.csv"
@@ -16,17 +21,16 @@ tables:
   user:
     data_path: "./data/kuairec/user_features.csv"
     used_features:
-      # feature name: data type
+      user_active_degree: "label"
       onehot_feat0: "label"
       onehot_feat1: "label"
       onehot_feat2: "label"
-      user_active_degree: "label"
       onehot_feat6: "label"
       onehot_feat11: "label"
+      onehot_feat12: "label"
       onehot_feat13: "label"
       onehot_feat14: "label"
       onehot_feat15: "label"
-
   video:
     daily:
       data_path: "./data/kuairec/item_daily_features.csv"
@@ -35,8 +39,8 @@ tables:
         video_duration: "float"
         like_cnt: "int"
         cancel_like_cnt: "int"
-        share_cnt: "int"
         double_click_cnt: "int"
+        share_cnt: "int"
         download_cnt: "int"
 
     category:
@@ -44,48 +48,50 @@ tables:
       used_features:
         feat: "multilabel"
 
+# モデルのハイパーパラメータの範囲
 is_search_params: False
-model:
+model_param_range:
   MF:
     n_epochs:
-      # start
-      - 10
-      # end
-      - 80
+      # minimum of parameter
+      min: 10
+      # maximum of parameter
+      max: 30
     n_factors:
-      - 100
-      - 200
+      min: 100
+      max: 200
     lr:
-      - 0.00005
-      - 0.0001
+      min: 0.00001
+      max: 0.001
     reg:
-      - 0.001
-      - 0.1
+      min: 0.1
+      max: 1.0
     batch_size:
-      - 128
-      - 512
+      min: 250
+      max: 300
     clipping:
-      - 0.001
-      - 0.01
+      min: 0.001
+      max: 0.01
   FM:
     n_epochs:
-      # start
-      - 10
-      # end
-      - 80
+      # minimum of parameter
+      min: 10
+      # maximum of parameter
+      max: 80
     n_factors:
-      - 100
-      - 150
+      min: 100
+      max: 150
     lr:
-      - 0.00005
-      - 0.0001
+      min: 0.0001
+      max: 0.001
     batch_size:
-      - 250
-      - 300
+      min: 250
+      max: 300
     clipping:
-      - 0.001
-      - 0.01
+      min: 0.001
+      max: 0.01
 
+# hydraの設定
 hydra:
   run:
     dir: ./logs

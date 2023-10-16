@@ -16,8 +16,12 @@ VALUE_ERROR_MESSAGE = (
     + "You need to rewrite conf/config.yaml"
 )
 
-LOGGER_INFO_MESSAGE = (
-    "model: {}, estimator: {}, epoch: {}, params: {}," + "{}@{}: {}"
+MODEL_PARAMS_MESSAGE = (
+    "model: {}, estimator: {}, epoch: {}, params: {}, " + "{}@{}: {}"
+)
+
+MODEL_DISTRIBUTION_MESSAGE = (
+    "log loss: {}, " + "prediction min: {}, max: {}, " + "mean: {}, std: {}"
 )
 
 
@@ -38,7 +42,8 @@ def _get_params(model_config: dict, logger: Logger) -> dict:
     dynamic_seed = int(time())
     np.random.seed(dynamic_seed)
     params = {}
-    for param_name, value_range in model_config.items():
+    for param_name, values in model_config.items():
+        value_range = list(values.values())
         if all(isinstance(value, int) for value in value_range):
             params[param_name] = np.random.randint(
                 value_range[0], value_range[1]
@@ -60,7 +65,7 @@ def random_search(
     seed: int,
     dataloader: DataLoader,
     logger: Logger,
-    n_epochs: int = 10,
+    n_epochs: int = 40,
     K: int = 3,
     used_metrics: str = "DCG",
 ) -> None:
@@ -77,10 +82,28 @@ def random_search(
     """
 
     model_config = OmegaConf.to_container(model_config, resolve=True)
-    user2data_indices = dataloader.val_user2data_indices
 
-    log_path = Path("./data/uniform_init_best_params")
+    log_path = Path("./data/best_params")
     log_path.mkdir(exist_ok=True, parents=True)
+
+    # random baseline
+    model_name = "Random"
+    val_y = dataloader.val_y
+    # val_pscores = dataloader.val_pscores
+    user2data_indices = dataloader.val_user2data_indices
+    evaluator = Evaluator(
+        X=None,
+        y_true=val_y,
+        indices_per_user=user2data_indices,
+        used_metrics=set([used_metrics]),
+        K=[K],
+    )
+    metrics = evaluator.evaluate(model=model_name, pscores=None)
+    dumped_params = dict()
+    dumped_params[f"SNIPS_{used_metrics}"] = metrics[used_metrics][0]
+    logger.info(f"Random Baseline: {dumped_params}")
+    with open(log_path / f"{model_name}_baseline.json", "w") as f:
+        json.dump(dumped_params, f)
 
     logger.info("start random search...")
 
@@ -98,7 +121,6 @@ def random_search(
                 indices_per_user=user2data_indices,
                 used_metrics=set([used_metrics]),
                 K=[K],
-                thetahold=0.75,
             )
 
             results = []
@@ -135,13 +157,13 @@ def random_search(
                         seed=seed,
                     )
 
-                _, _ = model.fit(train, val)
+                _, val_loss = model.fit(train, val)
                 metrics = evaluator.evaluate(model, pscores=val[2])
 
                 results.append((model_params, metrics[used_metrics][0]))
 
                 logger.info(
-                    LOGGER_INFO_MESSAGE.format(
+                    MODEL_PARAMS_MESSAGE.format(
                         model_name,
                         estimator,
                         epoch,
@@ -149,6 +171,17 @@ def random_search(
                         used_metrics,
                         K,
                         metrics[used_metrics][0],
+                    )
+                )
+
+                pred_scores = model.predict(val[0])
+                logger.info(
+                    MODEL_DISTRIBUTION_MESSAGE.format(
+                        val_loss[-1],
+                        pred_scores.min(),
+                        pred_scores.max(),
+                        pred_scores.mean(),
+                        pred_scores.std(),
                     )
                 )
 
@@ -162,8 +195,12 @@ def random_search(
             )[0]
             logger.info(f"best params: {best_params}")
 
+            dumped_params = dict()
+            dumped_params["params"] = best_params[0]
+            dumped_params[used_metrics] = best_params[1]
+
             base_name = f"{model_name}_{estimator}"
             with open(log_path / f"{base_name}_best_param.json", "w") as f:
-                json.dump(best_params[0], f)
+                json.dump(dumped_params, f)
 
     logger.info("random search is done.")

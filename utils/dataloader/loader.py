@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Tuple
 from logging import Logger
 from dataclasses import dataclass
 from conf.config import ExperimentConfig
@@ -39,7 +40,7 @@ class DataLoader(BaseLoader):
         # 半人工ログデータを生成する
         logdata_generator = SemiSyntheticLogDataGenerator(
             _seed=self._params.seed,
-            _params=self._params.logdata_propensity,
+            _params=self._params.data_logging_settings,
             logger=self.logger,
         )
         interaction_df = logdata_generator.load(
@@ -69,7 +70,7 @@ class DataLoader(BaseLoader):
         self.n_users = self.datasets["MF"].n_users
         self.n_items = self.datasets["MF"].n_items
 
-    def load(self, model_name: str, estimator: str) -> tuple:
+    def load(self, model_name: str, estimator: str) -> Tuple[list]:
         """モデルと推定量ごとのtrain, val, testデータを返す
 
         Args:
@@ -124,6 +125,16 @@ class DataLoader(BaseLoader):
     def val_user2data_indices(self) -> dict:
         """validationデータのユーザーごとのデータインデックスを返す"""
         return self.datasets["user2data_indices"]["val"]["all"]
+
+    @property
+    def val_y(self) -> np.ndarray:
+        """valデータのターゲット変数を返す"""
+        return self.datasets["clicks"]["val"]
+
+    @property
+    def val_pscores(self) -> np.ndarray:
+        """valデータのpscoresを返す"""
+        return self.datasets["pscores"]["val"]
 
     @property
     def test_user2data_indices(self) -> dict:

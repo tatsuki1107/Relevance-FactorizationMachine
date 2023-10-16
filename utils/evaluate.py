@@ -27,7 +27,7 @@ class Evaluator:
     indices_per_user: list
     used_metrics: set
     K: Tuple[int] = (1, 3, 5)
-    thetahold: Optional[float] = None
+    thetahold: Optional[float] = 0.75
 
     def __post_init__(self) -> None:
         """使用する評価指標の関数を辞書に格納する

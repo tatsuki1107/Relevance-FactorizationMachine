@@ -40,7 +40,7 @@ def main(cfg: ExperimentConfig) -> None:
 
     if cfg.is_search_params:
         random_search(
-            model_config=cfg.model,
+            model_config=cfg.model_param_range,
             seed=cfg.seed,
             dataloader=dataloader,
             logger=logger,
@@ -50,7 +50,6 @@ def main(cfg: ExperimentConfig) -> None:
 
     K = [i for i in range(1, 11)]
     metric_df = pd.DataFrame()
-    logloss_df = pd.DataFrame()
     used_metrics = {"DCG", "Recall", "MAP"}
 
     for model_name in ["FM", "MF"]:
@@ -65,7 +64,9 @@ def main(cfg: ExperimentConfig) -> None:
                 params_path / f"{model_name}_{estimator}_best_param.json",
                 "r",
             ) as f:
-                model_params = json.load(f)
+                data = json.load(f)
+
+            model_params = data["params"]
 
             if estimator == "IPS":
                 # pscore clipping
@@ -96,20 +97,6 @@ def main(cfg: ExperimentConfig) -> None:
 
             _, _ = model.fit(train, val)
 
-            pred_scores = model.predict(test[0])
-            logloss = model._cross_entropy_loss(
-                y_trues=test[1],
-                y_scores=pred_scores,
-                pscores=np.ones_like(test[1]),
-            )
-            logloss_df[base_name] = [logloss]
-
-            print(
-                f"{base_name}: min: {pred_scores.min()},"
-                + f"max: {pred_scores.max()}, mean: {pred_scores.mean()}"
-                + f"std: {pred_scores.std()}"
-            )
-
             for frequency, user2indices in user2data_indices.items():
                 evaluator = Evaluator(
                     X=test[0],
@@ -117,7 +104,6 @@ def main(cfg: ExperimentConfig) -> None:
                     indices_per_user=user2indices,
                     used_metrics=used_metrics,
                     K=K,
-                    thetahold=None,
                 )
 
                 results = evaluator.evaluate(model)
@@ -138,7 +124,6 @@ def main(cfg: ExperimentConfig) -> None:
             indices_per_user=user2indices,
             used_metrics=used_metrics,
             K=K,
-            thetahold=None,
         )
 
         results = evaluator.evaluate(model=model_name)
@@ -148,8 +133,8 @@ def main(cfg: ExperimentConfig) -> None:
     logger.info(f"{model_name} is done.")
 
     metric_df.to_csv(log_path / "metric.csv", index=False)
-    logloss_df.to_csv(log_path / "logloss.csv", index=False)
 
+    # visualize and save the results
     Visualizer(
         result_df=metric_df,
         K=K,

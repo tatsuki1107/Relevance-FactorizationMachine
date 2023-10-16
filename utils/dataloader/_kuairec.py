@@ -4,11 +4,8 @@ from dataclasses import dataclass
 from logging import Logger
 import pandas as pd
 from conf.config import (
-    InteractionTableConfig,
-    UserTableConfig,
-    VideoTableConfig,
-    VideoCategoryTableConfig,
-    VideoDailyTableConfig,
+    DataFrameConfig,
+    VideoDataFrameConfig,
     LogDataPropensityConfig,
 )
 
@@ -33,7 +30,7 @@ class KuaiRecCSVLoader:
 
     @staticmethod
     def create_small_matrix_df(
-        _params: InteractionTableConfig,
+        _params: DataFrameConfig,
         logger: Logger,
     ) -> pd.DataFrame:
         """small_matrix.csvを読み込むメソッド
@@ -83,7 +80,7 @@ class KuaiRecCSVLoader:
     @staticmethod
     def create_user_features_df(
         existing_user_ids: pd.Series,
-        _params: UserTableConfig,
+        _params: DataFrameConfig,
         logger: Logger,
     ) -> pd.DataFrame:
         """user_features.csvを読み込むメソッド.FeatureGeneratorクラスで抽出したログデータに存在するユーザーの特徴量のみを抽出する.
@@ -113,7 +110,7 @@ class KuaiRecCSVLoader:
     @staticmethod
     def create_item_features_df(
         existing_video_ids: pd.Series,
-        _params: VideoTableConfig,
+        _params: VideoDataFrameConfig,
         logger: Logger,
     ) -> pd.DataFrame:
         """item_category.csvとitem_daily_features.csvを統合したcsvファイルを読み込むメソッド.
@@ -151,7 +148,7 @@ class KuaiRecCSVLoader:
     @staticmethod
     def _create_item_daily_features_df(
         existing_video_ids: pd.Series,
-        _params: VideoDailyTableConfig,
+        _params: DataFrameConfig,
         logger: Logger,
     ) -> pd.DataFrame:
         """item_daily_features.csvを読み込むメソッド.FeatureGeneratorクラスで抽出したログデータに存在する動画の特徴量のみを抽出する.動画ごとにtimestampで降順ソートし、最初の行のみを抽出する.
@@ -188,7 +185,7 @@ class KuaiRecCSVLoader:
     @staticmethod
     def _create_item_categories_df(
         existing_video_ids: pd.Series,
-        _params: VideoCategoryTableConfig,
+        _params: DataFrameConfig,
         logger: Logger,
     ) -> pd.DataFrame:
         """item_category.csvを読み込むメソッド.FeatureGeneratorクラスで抽出したログデータに存在する動画の特徴量のみを抽出する.
