@@ -44,12 +44,16 @@ class Visualizer:
             plt.figure(figsize=(20, 6))
             for i, metric in enumerate(self.metrics):
                 plt.subplot(1, len(self.metrics), i + 1)
-                plt.title(f"{metric}@K", fontdict=dict(size=20))
+                plt.title(f"{metric}@K", fontdict=dict(size=25))
 
                 for estimator in self.estimators:
                     column = f"{model_name}_{estimator}_all_{metric}@K"
                     plt.scatter(self.K, self.result_df[column], marker="o")
-                    plt.plot(self.K, self.result_df[column], label=estimator)
+                    plt.plot(
+                        self.K,
+                        self.result_df[column],
+                        label=f"{model_name}_{estimator}",
+                    )
 
                 column = f"Random_all_{metric}@K"
                 plt.scatter(self.K, self.result_df[column], marker="o")
@@ -64,6 +68,7 @@ class Visualizer:
                 plt.xlabel("varying K")
                 plt.legend(loc="best", fontsize=20)
 
+            plt.tight_layout()
             plt.show()
             plt.savefig(self.log_path / f"{model_name}_metrics.png")
 
@@ -78,18 +83,35 @@ class Visualizer:
 
         for i, estimator in enumerate(self.estimators):
             plt.subplot(1, len(self.estimators), i + 1)
-            plt.title(f"{estimator}: FM vs MF", fontdict=dict(size=20))
+            plt.title(
+                f"{metric}@K: FM_{estimator} vs MF_{estimator}",
+                fontdict=dict(size=25),
+            )
 
             for model_name in ["FM", "MF"]:
                 column = f"{model_name}_{estimator}_all_{metric}@K"
                 plt.scatter(self.K, self.result_df[column], marker="o")
-                plt.plot(self.K, self.result_df[column], label=model_name)
+                plt.plot(
+                    self.K,
+                    self.result_df[column],
+                    label=f"{model_name}_{estimator}",
+                )
+
+            column = f"Random_all_{metric}@K"
+            plt.scatter(self.K, self.result_df[column], marker="o", color="r")
+            plt.plot(
+                self.K,
+                self.result_df[column],
+                label="Random",
+                linestyle="--",
+                color="r",
+            )
 
             plt.xticks(self.K)
             plt.xlabel("varying K")
-            plt.ylabel(f"{metric}@K")
             plt.legend(loc="best", fontsize=20)
 
+        plt.tight_layout()
         plt.show()
         plt.savefig(self.log_path / f"{metric}_vs_model.png")
 
@@ -106,12 +128,18 @@ class Visualizer:
 
         for i, metric in enumerate(self.metrics):
             plt.subplot(1, len(self.metrics), i + 1)
-            plt.title(f"{frequency}: {metric}@K", fontdict=dict(size=20))
+            plt.title(
+                f"{metric}@K: {frequency} items only", fontdict=dict(size=25)
+            )
 
             for estimator in self.estimators:
                 column = f"{model_name}_{estimator}_{frequency}_{metric}@K"
                 plt.scatter(self.K, self.result_df[column], marker="o")
-                plt.plot(self.K, self.result_df[column], label=estimator)
+                plt.plot(
+                    self.K,
+                    self.result_df[column],
+                    label=f"{model_name}_{estimator}",
+                )
 
             column = f"Random_{frequency}_{metric}@K"
             plt.scatter(self.K, self.result_df[column], marker="o")
@@ -123,6 +151,7 @@ class Visualizer:
             plt.xlabel("varying K")
             plt.legend(loc="best", fontsize=20)
 
+        plt.tight_layout()
         plt.show()
         plt.savefig(self.log_path / "metrics_per_frequency.png")
 
@@ -146,16 +175,18 @@ class Visualizer:
         plt.axhline(
             random_metric["SNIPS_DCG"],
             linestyle="--",
-            color="red",
+            color="r",
             label="Random",
         )
         plt.xticks([0, 1], ["FM", "MF"])
         plt.xlabel("varying model")
-        plt.ylabel(f"SNIPS {metric_name} value")
+        plt.ylabel(f"SNIPS of {metric_name} value")
         plt.legend()
         plt.title(
-            "Self Normalized Inversed Propensity Estimator of "
-            + f"{metric_name} per Model"
+            "Self-Normalized IPS Estimator of " + f"{metric_name} per Model",
+            fontdict=dict(size=22),
         )
+
+        plt.tight_layout()
         plt.show()
         plt.savefig(self.log_path / "snips_estimator.png")
