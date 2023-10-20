@@ -49,7 +49,7 @@ class FeatureGenerator(BaseLoader):
         basefeatures, interaction_df = self._create_basefeature(
             interaction_df=interaction_df
         )
-        tables_dict = OmegaConf.to_container(self._params, resolve=True)
+        tables_dict = OmegaConf.to_container(self._params)
 
         features = [basefeatures]
         for df_name, df in dataframes_dict.items():

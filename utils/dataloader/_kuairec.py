@@ -258,5 +258,5 @@ def get_feature_names(_params: DictConfig) -> list:
     - (list): 特徴量のカラム名
     """
 
-    columns = OmegaConf.to_container(_params, resolve=True)
+    columns = OmegaConf.to_container(_params)
     return list(columns.keys())

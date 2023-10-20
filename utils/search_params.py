@@ -81,7 +81,7 @@ def random_search(
     - used_metrics (str, optional): 最適化する評価指標. デフォルトは"DCG".
     """
 
-    model_config = OmegaConf.to_container(model_config, resolve=True)
+    model_config = OmegaConf.to_container(model_config)
 
     log_path = Path("./data/best_params")
     log_path.mkdir(exist_ok=True, parents=True)
