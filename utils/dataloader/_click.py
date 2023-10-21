@@ -1,8 +1,13 @@
+# Standard library imports
 from dataclasses import dataclass
 from logging import Logger
 from typing import Tuple
+
+# Third-party library imports
 import numpy as np
 import pandas as pd
+
+# Internal modules imports
 from conf.config import LogDataPropensityConfig
 from utils.dataloader.base import BaseLoader
 from utils.dataloader._kuairec import KuaiRecCSVLoader

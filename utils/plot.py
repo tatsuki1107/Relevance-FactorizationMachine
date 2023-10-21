@@ -1,10 +1,13 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
+# Standard library imports
 import json
 from typing import Set, List
 from pathlib import Path
 from dataclasses import dataclass, field
+
+# Third-party library imports
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 
 
 @dataclass

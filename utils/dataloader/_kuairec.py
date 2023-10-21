@@ -1,8 +1,13 @@
-from omegaconf import DictConfig, OmegaConf
+# Standard library imports
 from ast import literal_eval
 from dataclasses import dataclass
 from logging import Logger
+
+# Third-party library imports
+from omegaconf import DictConfig, OmegaConf
 import pandas as pd
+
+# Internal modules imports
 from conf.config import (
     DataFrameConfig,
     VideoDataFrameConfig,

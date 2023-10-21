@@ -1,9 +1,14 @@
-import numpy as np
+# Standard library imports
 from dataclasses import dataclass
 from typing import Tuple
 from tqdm import tqdm
+
+# Third-party library imports
+import numpy as np
 from sklearn.utils import resample
 from scipy.sparse import csr_matrix, diags
+
+# Internal modules imports
 from src.base import PointwiseBaseRecommender
 from utils.optimizer import SGD
 

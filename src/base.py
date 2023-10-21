@@ -1,5 +1,8 @@
+# Standard library imports
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+
+# Third-party library imports
 import numpy as np
 
 

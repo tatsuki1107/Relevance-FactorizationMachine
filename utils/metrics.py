@@ -1,5 +1,8 @@
-import numpy as np
+# Standard library imports
 from typing import Tuple, Callable, Dict
+
+# Third-party library imports
+import numpy as np
 
 NOT_IMPLEMENTED_ERROR_MESSAGE = "Re-implement if for SNIPS estimator"
 

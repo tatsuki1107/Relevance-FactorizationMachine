@@ -1,9 +1,14 @@
-import numpy as np
+# Standard library imports
 from typing import Tuple
 from dataclasses import dataclass
-from utils.optimizer import SGD
 from tqdm import tqdm
+
+# Third-party library imports
+import numpy as np
 from sklearn.utils import resample
+
+# Internal modules imports
+from utils.optimizer import SGD
 from src.base import PointwiseBaseRecommender
 
 

@@ -1,7 +1,12 @@
-import numpy as np
+# Standard library imports
 from typing import Tuple
 from logging import Logger
 from dataclasses import dataclass
+
+# Third-party library imports
+import numpy as np
+
+# Internal modules imports
 from conf.config import ExperimentConfig
 from utils.dataloader._click import SemiSyntheticLogDataGenerator
 from utils.dataloader._feature import FeatureGenerator

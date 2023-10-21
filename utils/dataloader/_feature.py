@@ -1,13 +1,18 @@
-from omegaconf import OmegaConf
+# Standard library imports
 from dataclasses import dataclass
 from typing import Dict, Tuple
 from logging import Logger
+from collections import defaultdict
+
+# Third-party library imports
+from omegaconf import OmegaConf
 import pandas as pd
 import numpy as np
 from scipy.sparse import csr_matrix, hstack
-from conf.config import TableConfig
-from collections import defaultdict
 from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
+
+# Internal modules imports
+from conf.config import TableConfig
 from utils.dataloader._kuairec import KuaiRecCSVLoader
 from utils.dataloader.base import BaseLoader
 

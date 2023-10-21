@@ -1,7 +1,12 @@
-import numpy as np
+# Standard library imports
 from typing import Tuple, Union, Optional
 from collections import defaultdict
 from dataclasses import dataclass
+
+# Third-party library imports
+import numpy as np
+
+# Internal modules imports
 from src.mf import LogisticMatrixFactorization as MF
 from src.fm import FactorizationMachines as FM
 from utils.metrics import metric_candidates

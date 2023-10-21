@@ -1,7 +1,10 @@
-import numpy as np
+# Standard library imports
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from typing import Union, Optional
+
+# Third-party library imports
+import numpy as np
 
 
 @dataclass

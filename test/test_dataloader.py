@@ -1,7 +1,12 @@
-from hydra import initialize, compose
+# Standard library imports
 from logging import getLogger
-from utils.dataloader.loader import DataLoader
+
+# Third-party library imports
+from hydra import initialize, compose
 import numpy as np
+
+# Internal modules imports
+from utils.dataloader.loader import DataLoader
 
 
 class TestDataLoader:

@@ -1,4 +1,7 @@
+# Standard library imports
 from dataclasses import dataclass
+
+# Third-party library imports
 import numpy as np
 from scipy.sparse import csr_matrix
 

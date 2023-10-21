@@ -1,8 +1,13 @@
+# Standard library imports
 from dataclasses import dataclass
+from typing import Tuple, Dict
+
+# Third-party library imports
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
-from typing import Tuple, Dict
+
+# Internal modules imports
 from utils.model import FMDataset, MFDataset
 from utils.dataloader.base import BaseLoader
 

@@ -1,17 +1,30 @@
+# Standard library imports
 from logging import getLogger
 from pathlib import Path
 import json
+
+# Third-party library imports
 import hydra
 from hydra.core.config_store import ConfigStore
-from conf.config import ExperimentConfig
 import pandas as pd
 import numpy as np
+
+# Internal modules imports
+from conf.config import ExperimentConfig
 from utils.search_params import random_search
 from utils.dataloader.loader import DataLoader
-from src.fm import FactorizationMachines as FM
-from src.mf import LogisticMatrixFactorization as MF
 from utils.evaluate import Evaluator
 from utils.plot import Visualizer
+from src.fm import FactorizationMachines as FM
+from src.mf import LogisticMatrixFactorization as MF
+
+
+LOG_PATH = Path("./logs/result")
+PARAMS_PATH = Path("./data/best_params")
+
+K = [i for i in range(1, 11)]
+METRICS = {"DCG", "Recall", "MAP"}
+
 
 cs = ConfigStore.instance()
 cs.store(name="setting", node=ExperimentConfig)
@@ -27,10 +40,7 @@ def main(cfg: ExperimentConfig) -> None:
     - cfg (ExperimentConfig): 実験設定のパラメータ
     """
 
-    log_path = Path("./logs/result")
-    log_path.mkdir(exist_ok=True, parents=True)
-
-    params_path = Path("./data/best_params")
+    LOG_PATH.mkdir(exist_ok=True, parents=True)
 
     logger.info("start data loading...")
     dataloader = DataLoader(cfg, logger)
@@ -48,10 +58,7 @@ def main(cfg: ExperimentConfig) -> None:
 
     logger.info("start experiment...")
 
-    K = [i for i in range(1, 11)]
     metric_df = pd.DataFrame()
-    used_metrics = {"DCG", "Recall", "MAP"}
-
     for model_name in ["FM", "MF"]:
         for estimator in ["Ideal", "IPS", "Naive"]:
             base_name = f"{model_name}_{estimator}"
@@ -61,7 +68,7 @@ def main(cfg: ExperimentConfig) -> None:
             )
 
             with open(
-                params_path / f"{model_name}_{estimator}_best_param.json",
+                PARAMS_PATH / f"{model_name}_{estimator}_best_param.json",
                 "r",
             ) as f:
                 data = json.load(f)
@@ -102,7 +109,7 @@ def main(cfg: ExperimentConfig) -> None:
                     X=test[0],
                     y_true=test[1],
                     indices_per_user=user2indices,
-                    used_metrics=used_metrics,
+                    used_metrics=METRICS,
                     K=K,
                 )
 
@@ -116,13 +123,12 @@ def main(cfg: ExperimentConfig) -> None:
 
     # random baseline
     model_name = "Random"
-    test_y = dataloader.test_y
     for frequency, user2indices in user2data_indices.items():
         evaluator = Evaluator(
             X=None,
-            y_true=test_y,
+            y_true=dataloader.test_y,
             indices_per_user=user2indices,
-            used_metrics=used_metrics,
+            used_metrics=METRICS,
             K=K,
         )
 
@@ -132,13 +138,13 @@ def main(cfg: ExperimentConfig) -> None:
 
     logger.info(f"{model_name} is done.")
 
-    metric_df.to_csv(log_path / "metric.csv", index=False)
+    metric_df.to_csv(LOG_PATH / "metric.csv", index=False)
 
     # visualize and save the results
     Visualizer(
         result_df=metric_df,
         K=K,
-        metrics=used_metrics,
+        metrics=METRICS,
     )
 
 

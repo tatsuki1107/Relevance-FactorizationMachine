@@ -1,3 +1,4 @@
+# Internal modules imports
 from test.test_fm import ModelTestBase
 from src.mf import LogisticMatrixFactorization as MF
 

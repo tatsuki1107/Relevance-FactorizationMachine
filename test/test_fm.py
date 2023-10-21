@@ -1,7 +1,12 @@
+# Standard library imports
 from abc import ABC
 from logging import getLogger
 from collections import defaultdict
+
+# Third-party library imports
 from hydra import initialize, compose
+
+# Internal modules imports
 from conf.config import ExperimentConfig
 from utils.evaluate import Evaluator
 from utils.dataloader.loader import DataLoader
