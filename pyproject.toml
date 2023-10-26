@@ -3,11 +3,6 @@ name = "unbiased factorization machines"
 version = "0.1.0"
 description = ""
 authors = ["tatsuki takahashi"]
-packages = [
-    { include = "src"},
-    { include = "test"},
-    { include = "utils"},
-]
 
 [tool.poetry.dependencies]
 python = "^3.9"
