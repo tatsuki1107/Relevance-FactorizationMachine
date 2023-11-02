@@ -5,7 +5,7 @@
 2. 露出バイアスが含まれたログデータを使用し、2種類の不偏推定量の性能を比較。
 
 研究の詳細は<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">short_paper.md</a>に記載しております。  
-先にこちらをご覧くださいませ。
+先にこちらをご覧ください。
 
 # 1. 主な使用技術
 詳細は、<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/pyproject.toml">pyproject.toml</a>を参照下さい。
@@ -70,7 +70,6 @@
     - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/utils/dataloader/_kuairec.py">`_kuairec.py`</a>: KuaiRecデータセットのロード
   - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/utils/evaluate.py">`evaluate.py`</a>: 学習済みの機械学習モデルの評価
   - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/utils/metrics.py">`metrics.py`</a>: 評価指標の計算
-  - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/utils/model.py">`model.py`</a>: 型アノテーション
   - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/utils/optimizer.py">`optimizer.py`</a>:  最適化アルゴリズム
   - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/utils/plot.py">`plot.py`</a>: 実験結果の可視化
   - <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/utils/search_params.py">`search_params.py`</a>: パラメータのチューニング
@@ -138,7 +137,6 @@
     - **`n_factors`**: 潜在因子の数
     - **`lr`**: 学習率
     - **`batch_size`**: バッチサイズ
-    - **`clipping`**: 傾向スコアのクリッピング値
   - **`FM` (Factorization Machines)**
     - (同様の設定が含まれています)
 
