@@ -253,9 +253,9 @@ $`|B|`$: バッチサイズ
  
 | 損失                | チューニングするDCG@3                                                                                                                                                                                                                                   |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| $`L_{Ideal}`$       | $`R_{Ideal}(\hat{Z})=\frac{1}{\|U\|}\sum_{u \in U} \frac{1}{\sum_{i \in I^{val}_u} \gamma_{u,i}}  \sum_{i \in I^{val}_u} \gamma_{u,i} \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$                                                                                      |
+| $`L_{Ideal}`$       | $`R_{Ideal}(\hat{Z})=\frac{1}{\|U\|}\sum_{u \in U} \sum_{i \in I^{val}_u} \gamma_{u,i} \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$                                                                                      |
 | $`\hat{L}_{IPS}`$   | $`\hat{R}_{SNIPS}(\hat{Z}) = \frac{1}{\|U\|}\sum_{u \in U}\frac{1}{\sum_{i \in I^{val}_u} \frac{Y_{u,i}}{\theta_{u,i}}}\sum_{i \in I^{val}_u}\frac{Y_{u,i}}{\theta_{u,i}}\cdot \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$ |
-| $`\hat{L}_{Naive}`$ | $`\hat{R}_{Naive}(\hat{Z})=\frac{1}{\|U\|}\sum_{u \in U} \frac{1}{\sum_{i \in I^{val}_u} Y_{u,i}} \sum_{i \in I^{val}_u} Y_{u,i} \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$                                                                                      |  
+| $`\hat{L}_{Naive}`$ | $`\hat{R}_{Naive}(\hat{Z})=\frac{1}{\|U\|}\sum_{u \in U} \sum_{i \in I^{val}_u} Y_{u,i} \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$                                                                                      |  
 
 具体的に、$`L_{Ideal}`$および$`\hat{L}_{Naive}`$では、検証データにおいてDCG@3を最大化するパラメータを探索する。一方、$`\hat{L}_{IPS}`$では、検証データとテストデータの分布の違いを考慮しながら、DCG@3を最大化する必要がある。このため、DCG@3の自己正規化逆傾向スコア(SNIPS)推定量[10][11]を利用し、パラメータチューニングを実施する。SNIPS推定量を用いることでIPS推定量が抱える高分散問題に対処可能になる。実際にはユーザーごとにも評価数が異なる。ユーザーごとの評価を正規化することで推定値の信頼性を高めることが狙いである。
 $`\hat{Z}_{u,i}`$は、予測評価値$`\hat{R}_{u,i}`$を降順にソートした時の予測ランキングである。
