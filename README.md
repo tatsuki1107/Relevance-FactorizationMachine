@@ -29,7 +29,7 @@
 # 2. 使用するデータセット
 本研究での実験には、<a href="https://kuairec.com/">KuaiRecデータセット</a>を使用します。使用する背景の詳細は、<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">`short_paper.md`</a>の`半合成データを用いた性能実験`の項目を参照してください。
 
-## 2.2 扱うcsvファイルの詳細
+## 2.1 扱うcsvファイルの詳細
 実験には以下の5つのcsvファイルを使用します。(*実験スクリプトを実行する際は、これらのファイルを/data/kuairec/ディレクトリに格納する必要があります。)
 
 - `small_matrix.csv`: 実験的に収集された、ユーザー数1411人、動画数3327本のフィードバックデータ。評価値行列の密度は約99.6%
