@@ -124,9 +124,10 @@ class Visualizer:
         """露出頻度ごとのモデルのランク性能を描画
 
         Args:
-            metric (str, optional): 評価する指標。デフォルトでは、DCG@K
-            model_name (str, optional): 評価するモデル。デフォルトでは、FM
+            model_name (str): 比較するモデル。デフォルトでは、FM
+            frequency (str): 比較する露出頻度。デフォルトでは、rare
         """
+
         plt.figure(figsize=(20, 6))
 
         for i, metric in enumerate(self.metrics):
@@ -159,24 +160,23 @@ class Visualizer:
         plt.savefig(self.log_path / "metrics_per_frequency.png")
 
     def _plot_snips_estimated_values(self, metric_name: str = "DCG") -> None:
+        """MFとFMの検証データにおけるSNIPS推定値を描画
+
+        Args:
+            metric_name (str): 描画するランク指標。デフォルトでは、DCG
+        """
         metric_path = Path("./data/best_params")
-        with open(metric_path / "Random_baseline.json", "r") as f:
-            random_metric: dict = json.load(f)
+        with open(metric_path / f"best_{metric_name}.json", "r") as f:
+            val_metric: dict = json.load(f)
 
-        with open(metric_path / "FM_IPS_best_param.json", "r") as f:
-            fm_metric: dict = json.load(f)
-        fm_metric.pop("params")
-
-        with open(metric_path / "MF_IPS_best_param.json", "r") as f:
-            mf_metric: dict = json.load(f)
-        mf_metric.pop("params")
+        ips_val_metrics = val_metric["IPS"]
 
         width = 0.5
         plt.figure(figsize=(10, 6))
-        plt.bar(0, fm_metric[metric_name], width, label="FM")
-        plt.bar(1, mf_metric[metric_name], width, label="MF")
+        plt.bar(0, ips_val_metrics["FM"], width, label="FM")
+        plt.bar(1, ips_val_metrics["MF"], width, label="MF")
         plt.axhline(
-            random_metric["SNIPS_DCG"],
+            ips_val_metrics["Random"],
             linestyle="--",
             color="r",
             label="Random",

@@ -30,12 +30,13 @@ class TestFM(ModelTestBase):
             model_name="FM", estimator="IPS"
         )
 
+        model_config = self.cfg.model_param_range.FM
         self.model = FM(
-            n_epochs=self.cfg.model_param_range.FM.n_epochs.min,
-            n_factors=self.cfg.model_param_range.FM.n_factors.min,
+            n_epochs=model_config.n_epochs.min,
+            n_factors=model_config.n_factors.min,
             n_features=self.train[0].shape[1],
-            lr=self.cfg.model_param_range.FM.lr.min,
-            batch_size=self.cfg.model_param_range.FM.batch_size.min,
+            lr=model_config.lr.min,
+            batch_size=model_config.batch_size.min,
             seed=self.cfg.seed,
         )
 

@@ -8,7 +8,6 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 
 # Internal modules imports
-from utils.model import FMDataset, MFDataset
 from utils.dataloader.base import BaseLoader
 
 
@@ -103,7 +102,7 @@ class DatasetPreparer(BaseLoader):
         """
 
         datatypes = ["train", "val", "test"]
-        res = {}
+        data_index_dict = {}
         for datatype in datatypes:
             data_filter = interaction_df["datatype"] == datatype
             if datatype in {"train", "val"}:
@@ -112,9 +111,9 @@ class DatasetPreparer(BaseLoader):
                 )
             else:
                 data_indices = interaction_df[data_filter].index.values
-            res[datatype] = data_indices
+            data_index_dict[datatype] = data_indices
 
-        return res
+        return data_index_dict
 
     def _negative_sample(
         self, df: pd.DataFrame, negative_multiple: int = 2
@@ -123,7 +122,7 @@ class DatasetPreparer(BaseLoader):
 
         Args:
         - df (pd.DataFrame): インタラクションのデータフレーム
-        - negative_multiple (int): ネガティブサンプルの倍数
+        - negative_multiple (int): ネガティブサンプルの倍数。デフォルトではポジティブデータの2倍
 
         Returns:
         - data_indices (np.ndarray): ネガティブサンプル後のデータのインデックス
@@ -146,7 +145,7 @@ class DatasetPreparer(BaseLoader):
         self,
         features: csr_matrix,
         feature_indices: Dict[str, np.ndarray],
-    ) -> FMDataset:
+    ) -> Dict[str, csr_matrix]:
         """FMで用いるデータセットを準備する
 
         Args:
@@ -155,20 +154,20 @@ class DatasetPreparer(BaseLoader):
         インデックス
 
         Returns:
-        - (FMDataset): FMで用いるデータセット
+        - (Dict[str, csr_matrix]): FMで用いるデータセット
         """
 
         datasets = {}
         for datatype, indices in feature_indices.items():
             datasets[datatype] = features[indices]
 
-        return FMDataset(**datasets)
+        return datasets
 
     def _prarpare_mf_datasets(
         self,
         interaction_df: pd.DataFrame,
         df_indices: Dict[str, np.ndarray],
-    ) -> MFDataset:
+    ) -> dict:
         """MFで用いるデータセットを準備する
 
         Args:
@@ -176,7 +175,7 @@ class DatasetPreparer(BaseLoader):
         - df_indices: train, val, testデータのインデックス
 
         Returns:
-        - MFDataset: MFで用いるデータセット
+        - (dict): MFで用いるデータセット
         """
 
         datasets = {}
@@ -188,13 +187,13 @@ class DatasetPreparer(BaseLoader):
         datasets["n_users"] = n_users
         datasets["n_items"] = n_items
 
-        return MFDataset(**datasets)
+        return datasets
 
     def _prepare_pscores_and_clicks_rel(
         self,
         interaction_df: pd.DataFrame,
         df_indices: Dict[str, np.ndarray],
-    ) -> Tuple[dict]:
+    ) -> Tuple[dict, dict, dict]:
         """傾向スコアとクリック、真の関連度を準備する
 
         Args:

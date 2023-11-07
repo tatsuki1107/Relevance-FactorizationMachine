@@ -7,7 +7,6 @@ import json
 import hydra
 from hydra.core.config_store import ConfigStore
 import pandas as pd
-import numpy as np
 
 # Internal modules imports
 from conf.config import ExperimentConfig
@@ -71,14 +70,7 @@ def main(cfg: ExperimentConfig) -> None:
                 PARAMS_PATH / f"{model_name}_{estimator}_best_param.json",
                 "r",
             ) as f:
-                data = json.load(f)
-
-            model_params = data["params"]
-
-            if estimator == "IPS":
-                # pscore clipping
-                train[2] = np.maximum(train[2], model_params["clipping"])
-                val[2] = np.maximum(val[2], model_params["clipping"])
+                model_params = json.load(f)
 
             if model_name == "FM":
                 model = FM(
@@ -106,6 +98,7 @@ def main(cfg: ExperimentConfig) -> None:
 
             for frequency, user2indices in user2data_indices.items():
                 evaluator = Evaluator(
+                    _seed=cfg.seed,
                     X=test[0],
                     y_true=test[1],
                     indices_per_user=user2indices,
@@ -125,6 +118,7 @@ def main(cfg: ExperimentConfig) -> None:
     model_name = "Random"
     for frequency, user2indices in user2data_indices.items():
         evaluator = Evaluator(
+            _seed=cfg.seed,
             X=None,
             y_true=dataloader.test_y,
             indices_per_user=user2indices,

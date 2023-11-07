@@ -11,15 +11,16 @@ class TestMF(ModelTestBase):
         self.train, self.val, _ = self.loader.load(
             model_name="MF", estimator="IPS"
         )
-
+        
+        model_config = self.cfg.model_param_range.MF
         self.model = MF(
-            n_epochs=self.cfg.model_param_range.MF.n_epochs.min,
-            n_factors=self.cfg.model_param_range.MF.n_factors.min,
+            n_epochs=model_config.n_epochs.min,
+            n_factors=model_config.n_factors.min,
             n_users=self.loader.n_users,
             n_items=self.loader.n_items,
-            lr=self.cfg.model_param_range.MF.lr.min,
-            reg=self.cfg.model_param_range.MF.reg.min,
-            batch_size=self.cfg.model_param_range.MF.batch_size.min,
+            lr=model_config.lr.min,
+            reg=model_config.reg.min,
+            batch_size=model_config.batch_size.min,
             seed=self.cfg.seed,
         )
 

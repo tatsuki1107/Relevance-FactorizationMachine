@@ -20,6 +20,7 @@ class Evaluator:
     """モデルごとに評価指標を計算するクラス
 
     Args:
+    - _seed (int): 乱数のシード値 (read only)
     - X (Optional, np.ndarray): 特徴量行列。 Noneであれば、ランダム推薦をもって評価する。
     - indices_per_user (list): ユーザーごとに分割されたデータのインデックスのリスト
     - used_matrics (set): 使用する評価指標の集合
@@ -27,6 +28,7 @@ class Evaluator:
     - thetahold (Optional, float): 二値分類の閾値
     """
 
+    _seed: int
     X: Optional[np.ndarray]
     y_true: np.ndarray
     indices_per_user: list
@@ -73,6 +75,9 @@ class Evaluator:
             y_true = self.y_true[indices]
             user_pscores = pscores[indices]
 
+            if np.sum(y_true) == 0:
+                continue
+
             for k in self.K:
                 for metric_name, metric_func in self.metric_functions.items():
                     metric_per_user[metric_name][k].append(
@@ -113,7 +118,8 @@ class Evaluator:
             y_scores = model.predict(self.X[indices])
 
         elif model == "Random":
-            y_scores = np.random.randint(0, 2, len(indices))
+            np.random.seed(self._seed)
+            y_scores = np.random.uniform(0, 1, len(indices))
 
         else:
             raise ValueError(MODEL_CLASS_ERROR_MESSAGE.format(model))

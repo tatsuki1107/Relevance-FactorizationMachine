@@ -51,30 +51,24 @@ model_param_range:
       min: 100
       max: 200
     lr:
-      min: 1.0e-05
+      min: 0.0001
       max: 0.001
     reg:
-      min: 0.1
-      max: 1.0
+      min: 0.01
+      max: 0.1
     batch_size:
-      min: 250
+      min: 200
       max: 300
-    clipping:
-      min: 0.001
-      max: 0.01
   FM:
     n_epochs:
       min: 10
-      max: 80
+      max: 40
     n_factors:
-      min: 100
-      max: 150
+      min: 70
+      max: 120
     lr:
-      min: 0.0001
-      max: 0.001
+      min: 8.0e-05
+      max: 0.0015
     batch_size:
-      min: 250
+      min: 200
       max: 300
-    clipping:
-      min: 0.001
-      max: 0.01

@@ -3,6 +3,7 @@ from logging import Logger
 from pathlib import Path
 from time import time
 import json
+from collections import defaultdict
 
 # Third-party library imports
 from omegaconf import OmegaConf
@@ -23,7 +24,7 @@ VALUE_ERROR_MESSAGE = (
 )
 
 MODEL_PARAMS_MESSAGE = (
-    "model: {}, estimator: {}, epoch: {}, params: {}, " + "{}@{}: {}"
+    "model: {}, estimator: {}, trial: {}, params: {}, " + "{}@{}: {}"
 )
 
 MODEL_DISTRIBUTION_MESSAGE = (
@@ -71,7 +72,7 @@ def random_search(
     seed: int,
     dataloader: DataLoader,
     logger: Logger,
-    n_epochs: int = 40,
+    n_trials: int = 100,
     K: int = 3,
     used_metrics: str = "DCG",
 ) -> None:
@@ -82,7 +83,7 @@ def random_search(
     - seed (int): 乱数シード (read only)
     - dataloader (DataLoader): DataLoaderクラスのインスタンス
     - logger (Logger): Loggerクラスのインスタンス
-    - n_epochs (int, optional): パラメータをサーチするエポック数. デフォルトは10.
+    - n_trials (int, optional): パラメータをサーチするエポック数. デフォルトは100.
     - K (int, optional):  最適化するランキング位置. デフォルトは3.
     - used_metrics (str, optional): 最適化する評価指標. デフォルトは"DCG".
     """
@@ -94,22 +95,26 @@ def random_search(
 
     # random baseline
     model_name = "Random"
-    val_y = dataloader.val_y
-    # val_pscores = dataloader.val_pscores
+    random_val_data = dataloader.val_data_for_random_policy
     user2data_indices = dataloader.val_user2data_indices
-    evaluator = Evaluator(
-        X=None,
-        y_true=val_y,
-        indices_per_user=user2data_indices,
-        used_metrics=set([used_metrics]),
-        K=[K],
-    )
-    metrics = evaluator.evaluate(model=model_name, pscores=None)
-    dumped_params = dict()
-    dumped_params[f"SNIPS_{used_metrics}"] = metrics[used_metrics][0]
-    logger.info(f"Random Baseline: {dumped_params}")
-    with open(log_path / f"{model_name}_baseline.json", "w") as f:
-        json.dump(dumped_params, f)
+    dumped_metric = defaultdict(dict)
+    for estimator, val_data in random_val_data.items():
+        evaluator = Evaluator(
+            _seed=seed,
+            X=None,
+            y_true=val_data["y_true"],
+            indices_per_user=user2data_indices,
+            used_metrics=set([used_metrics]),
+            K=[K],
+            thetahold=None
+        )
+        metrics = evaluator.evaluate(
+            model=model_name, pscores=val_data["pscore"]
+        )
+        dumped_metric[estimator][model_name] = metrics[used_metrics][0]
+        logger.info(
+            f"{used_metrics} of Random_{estimator}: {metrics[used_metrics][0]}"
+        )
 
     logger.info("start random search...")
 
@@ -122,25 +127,20 @@ def random_search(
             ) = dataloader.load(model_name=model_name, estimator=estimator)
 
             evaluator = Evaluator(
+                _seed=seed,
                 X=val[0],
                 y_true=val[1],
                 indices_per_user=user2data_indices,
                 used_metrics=set([used_metrics]),
                 K=[K],
+                thetahold=None
             )
-
-            results = []
-            for epoch in range(n_epochs):
+            # search_results = [(trial, params, metric),(...),(...)]
+            search_results = []
+            for trial in range(n_trials):
                 model_params = _get_params(
                     model_config=model_config[model_name], logger=logger
                 )
-
-                if estimator == "IPS":
-                    # pscore clipping
-                    train[2] = np.maximum(train[2], model_params["clipping"])
-                    val[2] = np.maximum(val[2], model_params["clipping"])
-                else:
-                    model_params.pop("clipping")
 
                 if model_name == "FM":
                     model = FM(
@@ -165,14 +165,16 @@ def random_search(
 
                 _, val_loss = model.fit(train, val)
                 metrics = evaluator.evaluate(model, pscores=val[2])
-
-                results.append((model_params, metrics[used_metrics][0]))
+                search_results.append((
+                    trial,
+                    model_params,
+                    metrics[used_metrics][0]))
 
                 logger.info(
                     MODEL_PARAMS_MESSAGE.format(
                         model_name,
                         estimator,
-                        epoch,
+                        trial,
                         model_params,
                         used_metrics,
                         K,
@@ -191,22 +193,20 @@ def random_search(
                     )
                 )
 
-            if estimator == "IPS":
-                is_reverse = False
-            else:
-                is_reverse = True
-
-            best_params = sorted(
-                results, key=lambda x: x[1], reverse=is_reverse
+            best_result = sorted(
+                search_results, key=lambda x: x[2], reverse=True
             )[0]
-            logger.info(f"best params: {best_params}")
-
-            dumped_params = dict()
-            dumped_params["params"] = best_params[0]
-            dumped_params[used_metrics] = best_params[1]
+            best_result = dict(zip(
+                ("trial", "params", used_metrics), best_result)
+            )
+            logger.info(f"best result: {best_result}")
 
             base_name = f"{model_name}_{estimator}"
             with open(log_path / f"{base_name}_best_param.json", "w") as f:
-                json.dump(dumped_params, f)
+                json.dump(best_result["params"], f)
+
+            dumped_metric[estimator][model_name] = best_result[used_metrics]
+            with open(log_path / f"best_{used_metrics}.json", "w") as f:
+                json.dump(dumped_metric, f)
 
     logger.info("random search is done.")

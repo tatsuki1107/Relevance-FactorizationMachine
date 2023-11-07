@@ -14,6 +14,12 @@ from utils.dataloader._kuairec import KuaiRecCSVLoader
 
 
 BEHAVIOR_POLICY_NAME_ERROR_MESSAGE = "behavior_policy must be random."
+REPRESENTATIVE_VALUE_MESSAGE = (
+    "{} distribution mean: {}, std: {}, min: {}, max: {}"
+)
+CLICK_THROUGH_RATE_MESSAGE = (
+    "biased click through rate: {}, " + "unbiased click through rate: {}"
+)
 
 
 @dataclass
@@ -47,8 +53,10 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         interaction_df = self._exract_data_by_policy(
             interaction_df=interaction_df
         )
+        data_size = interaction_df.shape[0]
+        self.logger.info(f'log data size: {data_size}')
         datatypes = self._generate_datatype(
-            data_size=interaction_df.shape[0],
+            data_size=data_size,
         )
         interaction_df["datatype"] = datatypes
 
@@ -58,16 +66,28 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         interaction_df["relevance"] = relevance_probabilities
         interaction_df.drop("watch_ratio", axis=1, inplace=True)
         self.logger.info(
-            f"mean of relevance: {relevance_probabilities.mean()}"
+            REPRESENTATIVE_VALUE_MESSAGE.format(
+                "relevance",
+                relevance_probabilities.mean(),
+                relevance_probabilities.std(),
+                relevance_probabilities.min(),
+                relevance_probabilities.max(),
+            )
         )
-        self.logger.info(f"std of relevance: {relevance_probabilities.std()}")
 
         exposure_probabilities = self._generate_exposure(
             existing_video_ids=interaction_df["video_id"]
         )
         interaction_df["exposure"] = exposure_probabilities
-        self.logger.info(f"mean of exposure: {exposure_probabilities.mean()}")
-        self.logger.info(f"std of exposure: {exposure_probabilities.std()}")
+        self.logger.info(
+            REPRESENTATIVE_VALUE_MESSAGE.format(
+                "exposure",
+                exposure_probabilities.mean(),
+                exposure_probabilities.std(),
+                exposure_probabilities.min(),
+                exposure_probabilities.max(),
+            )
+        )
 
         biased_clicks, unbiased_clicks = self._generate_clicks(
             exposure_probabilities=interaction_df["exposure"],
@@ -75,9 +95,10 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         )
         interaction_df["biased_click"] = biased_clicks
         interaction_df["unbiased_click"] = unbiased_clicks
-        self.logger.info(f"biased click through rate: {biased_clicks.mean()}")
         self.logger.info(
-            f"unbiased click through rate: {unbiased_clicks.mean()}"
+            CLICK_THROUGH_RATE_MESSAGE.format(
+                biased_clicks.mean(), unbiased_clicks.mean()
+            )
         )
 
         return interaction_df
@@ -207,13 +228,13 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
 
         # generate clicks
         np.random.seed(self._seed)
-        # exposure label ~ Be(P(O = 1))
+        # exposure label(O_{u,i}) ~ Be(\theta_{u,i})
         exposure_labels = np.random.binomial(
             n=1,
             p=exposure_probabilities,
         )
 
-        # relevance label ~ Be(P(R = 1))
+        # relevance label(R_{u,i}) ~ Be(\gamma_{u,i})
         relevance_labels = np.random.binomial(n=1, p=relevance_probabilities)
 
         # Y = R * O

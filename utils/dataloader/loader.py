@@ -2,6 +2,7 @@
 from typing import Tuple
 from logging import Logger
 from dataclasses import dataclass
+from collections import defaultdict
 
 # Third-party library imports
 import numpy as np
@@ -72,8 +73,8 @@ class DataLoader(BaseLoader):
         )
         self.logger.info("prepared train and evaluation datasets")
 
-        self.n_users = self.datasets["MF"].n_users
-        self.n_items = self.datasets["MF"].n_items
+        self.n_users = self.datasets["MF"]["n_users"]
+        self.n_items = self.datasets["MF"]["n_items"]
 
     def load(self, model_name: str, estimator: str) -> Tuple[list]:
         """モデルと推定量ごとのtrain, val, testデータを返す
@@ -120,9 +121,9 @@ class DataLoader(BaseLoader):
             val_pscores = np.ones_like(val_y)
 
         # train val test
-        train = [features.train, train_y, train_pscores]
-        val = [features.val, val_y, val_pscores]
-        test = [features.test, test_y]
+        train = [features["train"], train_y, train_pscores]
+        val = [features["val"], val_y, val_pscores]
+        test = [features["test"], test_y]
 
         return train, val, test
 
@@ -132,14 +133,25 @@ class DataLoader(BaseLoader):
         return self.datasets["user2data_indices"]["val"]["all"]
 
     @property
-    def val_y(self) -> np.ndarray:
-        """valデータのターゲット変数を返す"""
-        return self.datasets["clicks"]["val"]
+    def val_data_for_random_policy(self) -> defaultdict:
+        """ランダムベースラインの評価に用いるvalidationデータを返す"""
 
-    @property
-    def val_pscores(self) -> np.ndarray:
-        """valデータのpscoresを返す"""
-        return self.datasets["pscores"]["val"]
+        estimators = ["Ideal", "IPS", "Naive"]
+        val_data = defaultdict(dict)
+        for estimator in estimators:
+            if estimator == "Ideal":
+                val_data[estimator]["y_true"] = self.datasets["relevances"][
+                    "val"
+                ]
+                val_data[estimator]["pscore"] = None
+            elif estimator == "IPS":
+                val_data[estimator]["y_true"] = self.datasets["clicks"]["val"]
+                val_data[estimator]["pscore"] = self.datasets["pscores"]["val"]
+            else:
+                val_data[estimator]["y_true"] = self.datasets["clicks"]["val"]
+                val_data[estimator]["pscore"] = None
+
+        return val_data
 
     @property
     def test_user2data_indices(self) -> dict:

@@ -1,1 +1,1 @@
-{"params": {"n_epochs": 10, "n_factors": 104, "lr": 0.0006254271818802775, "batch_size": 290}, "DCG": 0.3895543313585695}
+{"n_epochs": 37, "n_factors": 97, "lr": 0.001174510870528196, "batch_size": 262}

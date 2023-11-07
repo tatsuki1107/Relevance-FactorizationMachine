@@ -43,7 +43,6 @@ class FactorizationMachineConfig:
     n_factors: ParamRangeConfig
     lr: ParamRangeConfig
     batch_size: ParamRangeConfig
-    clipping: ParamRangeConfig
 
 
 @dataclass(frozen=True)
@@ -53,7 +52,6 @@ class LogisticMatrixFactorizationConfig:
     lr: ParamRangeConfig
     reg: ParamRangeConfig
     batch_size: ParamRangeConfig
-    clipping: ParamRangeConfig
 
 
 @dataclass(frozen=True)
