@@ -54,7 +54,6 @@ class DataLoader(BaseLoader):
         )
         self.logger.info("created interaction_df")
 
-        del small_matrix_df
         # interaction_dfに存在するユーザーとアイテムの特徴量を生成する
         feature_generator = FeatureGenerator(
             _params=self._params.tables,

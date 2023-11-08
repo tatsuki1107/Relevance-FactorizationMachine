@@ -89,7 +89,6 @@ class FeatureGenerator(BaseLoader):
         features = hstack(features)
 
         interaction_df.drop(["user_id", "video_id"], axis=1, inplace=True)
-        del dataframes_dict["user"], dataframes_dict["video"]
 
         return features, interaction_df
 
@@ -220,6 +219,5 @@ class FeatureGenerator(BaseLoader):
             pd.get_dummies(interaction_df["video_index"], dtype=int).values
         )
         basefeatures = hstack([sparse_user_indices, sparse_video_indices])
-        del sparse_user_indices, sparse_video_indices
 
         return basefeatures, interaction_df
