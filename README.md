@@ -2,7 +2,7 @@
 
 本リポジトリは、大学院での個人の研究成果を基盤とし、アルゴリズムの性能評価を目的としています。本研究での主な成果は、以下の2点に集約されます。  
 1. Factorization Machinesを用いて、露出バイアスを考慮した推薦モデルの構築。
-2. 露出バイアスが含まれたログデータを使用し、2種類の不偏推定量の性能を比較。
+2. 露出バイアスが含まれたログデータを使用し、2種類の不偏推定量の性能を評価。
 
 研究の詳細は<a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/short_paper.md">short_paper.md</a>に記載しております。  
 先にこちらをご覧ください。
