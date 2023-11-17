@@ -17,9 +17,7 @@ class TestDataLoader:
     def test_dataloader(self):
         logger = getLogger(__name__)
         loader = DataLoader(self.cfg, logger)
-        datasets = loader.load(model_name="FM", estimator="IPS")
-
-        assert isinstance(datasets, tuple)
-        assert isinstance(datasets[1][2], np.ndarray)
-        assert isinstance(loader.test_user2data_indices, dict)
-        assert isinstance(loader.val_user2data_indices, list)
+        datasets = loader.load(model_name="MF", estimator="IPS")
+        sampled_train_y = datasets[0][1]
+        label_counts = np.unique(sampled_train_y, return_counts=True)[1]
+        assert label_counts[0] == label_counts[1]

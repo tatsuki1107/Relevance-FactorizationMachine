@@ -48,7 +48,7 @@ class DatasetPreparer(BaseLoader):
             features=features, feature_indices=dataset_indices
         )
 
-        # prepare pmf_datasets
+        # prepare mf_datasets
         usecols = ["user_index", "video_index"]
         mf_datasets = self._prarpare_mf_datasets(
             interaction_df=interaction_df[usecols], df_indices=dataset_indices
@@ -83,6 +83,7 @@ class DatasetPreparer(BaseLoader):
             "relevances": relevances,
             "clicks": clicks,
             "pscores": pscores,
+            "sampled_train_indices": dataset_indices["sampled_train"],
             "user2data_indices": user2data_indices,
         }
 
@@ -105,12 +106,13 @@ class DatasetPreparer(BaseLoader):
         data_index_dict = {}
         for datatype in datatypes:
             data_filter = interaction_df["datatype"] == datatype
-            if datatype in {"train", "val"}:
+            if datatype in {"train"}:
                 data_indices = self._negative_sample(
                     df=interaction_df[data_filter]
                 )
-            else:
-                data_indices = interaction_df[data_filter].index.values
+                data_index_dict["sampled_train"] = data_indices
+
+            data_indices = interaction_df[data_filter].index.values
             data_index_dict[datatype] = data_indices
 
         return data_index_dict
@@ -135,7 +137,7 @@ class DatasetPreparer(BaseLoader):
 
         np.random.seed(self._seed)
         negative_indices = np.random.permutation(negative_indices)[
-            : len(positive_indices) * negative_multiple
+            : len(positive_indices) * int(negative_multiple)
         ]
         data_indices = np.r_[positive_indices, negative_indices]
 
@@ -222,7 +224,7 @@ class DatasetPreparer(BaseLoader):
         interaction_df: pd.DataFrame,
         df_indices: np.ndarray,
         frequency: set,
-        thetahold: int = 0.75,
+        thetahold: int = 0.5,
     ) -> Dict[str, list]:
         """ユーザごとのランク性能を評価するために、ユーザー毎の
         データのインデックスを準備する

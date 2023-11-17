@@ -111,12 +111,11 @@ hydra:
   overrides:
     hydra:
     - hydra.mode=RUN
-    task:
-    - is_search_params=False
+    task: []
   job:
     name: main
     chdir: null
-    override_dirname: is_search_params=False
+    override_dirname: ''
     id: ???
     num: ???
     config_name: config

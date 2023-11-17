@@ -27,7 +27,7 @@ class TestFM(ModelTestBase):
 
         # prepare data for IPS estimator
         self.train, self.val, self.test = self.loader.load(
-            model_name="FM", estimator="IPS"
+            model_name="FM", estimator="Naive"
         )
 
         model_config = self.cfg.model_param_range.FM
@@ -43,15 +43,22 @@ class TestFM(ModelTestBase):
         user2data_indices = self.loader.test_user2data_indices["all"]
 
         self.evaluator = Evaluator(
+            _seed=self.cfg.seed,
             X=self.test[0],
             y_true=self.test[1],
             indices_per_user=user2data_indices,
-            used_metrics={"DCG", "Precision", "Recall"},
+            used_metrics={"DCG", "MAP", "Recall"},
         )
 
     def test_fit(self):
-        losses = self.model.fit(self.train, self.val)
-        assert isinstance(losses, tuple)
+        _, batch_y, _ = self.model._get_batch_data(
+            train_X=self.train[0],
+            train_y=self.train[1],
+            train_pscores=self.train[2],
+        )
+        assert len(batch_y[0]) == self.cfg.model_param_range.FM.batch_size.min
+        train_loss, _ = self.model.fit(self.train, self.val)
+        assert isinstance(train_loss, list)
 
         # evaluate
         results = self.evaluator.evaluate(self.model)

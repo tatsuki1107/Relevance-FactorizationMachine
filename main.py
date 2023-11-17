@@ -8,12 +8,14 @@ import hydra
 from hydra.core.config_store import ConfigStore
 import pandas as pd
 
+import numpy as np
+
 # Internal modules imports
 from conf.config import ExperimentConfig
 from utils.search_params import random_search
 from utils.dataloader.loader import DataLoader
 from utils.evaluate import Evaluator
-from utils.plot import Visualizer
+from utils.plot import Visualizer, plot_loss_curve
 from src.fm import FactorizationMachines as FM
 from src.mf import LogisticMatrixFactorization as MF
 
@@ -21,7 +23,7 @@ from src.mf import LogisticMatrixFactorization as MF
 LOG_PATH = Path("./logs/result")
 PARAMS_PATH = Path("./data/best_params")
 
-K = [i for i in range(1, 11)]
+K = [i for i in range(1, 6)]
 METRICS = {"DCG", "Recall", "MAP"}
 
 
@@ -94,7 +96,10 @@ def main(cfg: ExperimentConfig) -> None:
                     seed=cfg.seed,
                 )
 
-            _, _ = model.fit(train, val)
+            train_loss, val_loss = model.fit(train, val)
+            plot_loss_curve(train_loss, val_loss, base_name)
+            pred_y = model.predict(val[0])
+            thetahold = np.quantile(pred_y, 0.75)
 
             for frequency, user2indices in user2data_indices.items():
                 evaluator = Evaluator(
@@ -104,6 +109,7 @@ def main(cfg: ExperimentConfig) -> None:
                     indices_per_user=user2indices,
                     used_metrics=METRICS,
                     K=K,
+                    thetahold=thetahold,
                 )
 
                 results = evaluator.evaluate(model)
@@ -124,6 +130,7 @@ def main(cfg: ExperimentConfig) -> None:
             indices_per_user=user2indices,
             used_metrics=METRICS,
             K=K,
+            thetahold=0.75
         )
 
         results = evaluator.evaluate(model=model_name)

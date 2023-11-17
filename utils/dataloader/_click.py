@@ -11,6 +11,7 @@ import pandas as pd
 from conf.config import LogDataPropensityConfig
 from utils.dataloader.base import BaseLoader
 from utils.dataloader._kuairec import KuaiRecCSVLoader
+from utils.plot import plot_exposure
 
 
 BEHAVIOR_POLICY_NAME_ERROR_MESSAGE = "behavior_policy must be random."
@@ -180,11 +181,14 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
     def _generate_exposure(
         self,
         existing_video_ids: pd.Series,
+        eps: float = 0.01
     ) -> np.ndarray:
-        """半人工的なユーザーとアイテムの露出度を生成する。kuairec/big_matrix.csvのインタラクションデータのvideo_idの出現頻度を元に生成する。詳細は、short_paper.mdを参照
+        """半人工的なユーザーとアイテムの露出度を生成する。kuairec/big_matrix.csvの
+        インタラクションデータのvideo_idの出現頻度を元に生成する。詳細は、short_paper.mdを参照
 
         Args:
         - existing_video_ids (pd.Series): 抽出したログデータに存在するvideo_id
+        - eps (float): 露出度が0にならないようにするための微小な値
 
         Returns:
         - (np.ndarray): 露出度の確率の配列
@@ -206,9 +210,14 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
             video_expo_counts - video_expo_counts.mean()
         ) / video_expo_counts.std()
         video_exposures = video_expo_counts.apply(_sigmoid)
-        exposure_probabilitys = video_exposures[existing_video_ids].values
+        plot_exposure(
+            video_exposures.values ** self._params.exposure_bias
+        )
+        exposure_probabilitys = video_exposures[existing_video_ids].values **\
+            self._params.exposure_bias
+        exposure_probabilitys = np.maximum(exposure_probabilitys, eps)
 
-        return exposure_probabilitys**self._params.exposure_bias
+        return exposure_probabilitys
 
     def _generate_clicks(
         self,
@@ -243,7 +252,7 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         return biased_clicks, relevance_labels
 
 
-def _sigmoid(x: float, a: float = 3.0, b: float = -0) -> float:
+def _sigmoid(x: float, a: float = 3.0, b: float = .0) -> float:
     """kuairec/big_matrix.csvでのアイテムの出現頻度を確率に変換するためのシグモイド関数
 
     Args:

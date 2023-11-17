@@ -119,8 +119,16 @@ class DataLoader(BaseLoader):
             train_pscores = np.ones_like(train_y)
             val_pscores = np.ones_like(val_y)
 
-        # train val test
-        train = [features["train"], train_y, train_pscores]
+        # negative sampling
+        if estimator in {"IPS", "Naive"}:
+            sampled_train_indices = self.datasets["sampled_train_indices"]
+            sampled_train_X = features["train"][sampled_train_indices]
+            sampled_train_y = train_y[sampled_train_indices]
+            sampled_train_pscores = train_pscores[sampled_train_indices]
+            train = [sampled_train_X, sampled_train_y, sampled_train_pscores]
+        else:
+            train = [features["train"], train_y, train_pscores]
+
         val = [features["val"], val_y, val_pscores]
         test = [features["test"], test_y]
 

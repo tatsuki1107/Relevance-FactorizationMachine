@@ -9,7 +9,7 @@ NOT_IMPLEMENTED_ERROR_MESSAGE = "Re-implement if for SNIPS estimator"
 
 def calc_precision_at_k(
     y_true: np.ndarray,
-    y_scores: np.ndarray,
+    ranked_indices: np.ndarray,
     k: int,
     pscores: np.ndarray,
 ) -> float:
@@ -27,7 +27,7 @@ def calc_precision_at_k(
     Returns:
     - (float): Precision@kの値
     """
-    y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]][:k]
+    y_true_sorted_by_scores = y_true[ranked_indices][:k]
 
     if np.all(pscores == 1):
         return np.mean(y_true_sorted_by_scores)
@@ -37,7 +37,7 @@ def calc_precision_at_k(
 
 def calc_average_precision_at_k(
     y_true: np.ndarray,
-    y_scores: np.ndarray,
+    ranked_indices: np.ndarray,
     k: int,
     pscores: np.ndarray,
 ) -> float:
@@ -56,7 +56,7 @@ def calc_average_precision_at_k(
     - (float): Average Precision@kの値
     """
 
-    y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]]
+    y_true_sorted_by_scores = y_true[ranked_indices]
 
     average_precision = 0.0
     if not np.sum(y_true_sorted_by_scores) == 0:
@@ -74,7 +74,7 @@ def calc_average_precision_at_k(
 
 def calc_recall_at_k(
     y_true: np.ndarray,
-    y_scores: np.ndarray,
+    ranked_indices: np.ndarray,
     k: int,
     pscores: np.ndarray,
 ) -> float:
@@ -92,13 +92,12 @@ def calc_recall_at_k(
     Returns:
     - (float): Recall@kの値
     """
-    y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]]
+    y_true_sorted_by_scores = y_true[ranked_indices]
 
     recall = 0.0
     if not np.sum(y_true_sorted_by_scores) == 0:
-        recall = np.sum(y_true_sorted_by_scores[:k]) / np.sum(
-            y_true_sorted_by_scores
-        )
+        recall = np.sum(y_true_sorted_by_scores[:k]) \
+            / np.sum(y_true_sorted_by_scores)
 
     if np.all(pscores == 1):
         return recall
@@ -108,7 +107,7 @@ def calc_recall_at_k(
 
 def calc_dcg_at_k(
     y_true: np.ndarray,
-    y_scores: np.ndarray,
+    ranked_indices: np.ndarray,
     k: int,
     pscores: np.ndarray,
 ) -> float:
@@ -125,27 +124,22 @@ def calc_dcg_at_k(
     すなわち、バイアスのかかったvalデータからIPS推定量を評価する。
     """
 
-    y_true_sorted_by_scores = y_true[y_scores.argsort()[::-1]]
-
-    pscores_sorted_by_scores = pscores[y_scores.argsort()[::-1]]
+    y_true_sorted_by_scores = y_true[ranked_indices]
+    pscores_sorted_by_scores = pscores[ranked_indices]
 
     dcg_score = 0.0
     if np.sum(y_true_sorted_by_scores) == 0:
         return np.nan
     else:
-        dcg_score += y_true_sorted_by_scores[0] / pscores_sorted_by_scores[0]
+        dcg_score += y_true_sorted_by_scores[0] \
+            / pscores_sorted_by_scores[0]
 
         molecules = y_true_sorted_by_scores[1:k]
         indices = np.arange(1, molecules.shape[0] + 1)
         denominator = pscores_sorted_by_scores[1:k] * np.log2(indices + 1)
         dcg_score += np.sum(molecules / denominator)
 
-    if np.all(pscores == 1):
-        return dcg_score
-
-    return dcg_score / np.sum(
-        1.0 / pscores_sorted_by_scores[y_true_sorted_by_scores == 1]
-    )
+    return dcg_score
 
 
 def calc_roc_auc(

@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 # Third-party library imports
 import numpy as np
-from sklearn.utils import resample
+from sklearn.utils import shuffle
 
 # Internal modules imports
 from utils.optimizer import SGD
@@ -27,7 +27,7 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
     n_users: int
     n_items: int
     reg: float
-    alpha: float = 2.0
+    alpha: float = 3.0
 
     def __post_init__(self) -> None:
         """モデルのパラメータを初期化
@@ -82,41 +82,45 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         train_X, train_y, train_pscores = train
         val_X, val_y, val_pscores = val
 
+        batch_data = self._get_batch_data(
+            train_X.copy(),
+            train_y.copy(),
+            train_pscores.copy(),
+        )
+
         # init global bias
         self.b = np.mean(train_y)
 
         train_loss, val_loss = [], []
         for _ in tqdm(range(self.n_epochs)):
-            batch_X, batch_y, batch_pscores = resample(
-                train_X,
-                train_y,
-                train_pscores,
-                replace=True,
-                n_samples=self.batch_size,
-                random_state=self.seed,
-            )
-            for features, click, pscore in zip(
-                batch_X, batch_y, batch_pscores
-            ):
-                user_id, item_id = features[0], features[1]
-                err = (click / pscore) - self._predict_pair(user_id, item_id)
+            batch_loss = []
+            for features, clicks, pscores in zip(*batch_data):
+                for feature, click, pscore in zip(features, clicks, pscores):
+                    user_id, item_id = feature[0], feature[1]
+                    err = (click / pscore) - self._predict_pair(
+                        user_id, item_id)
 
-                # update user embeddings
-                self._update_P(user_id=user_id, item_id=item_id, err=err)
-                # update item embeddings
-                self._update_Q(user_id=user_id, item_id=item_id, err=err)
-                # update user bias
-                self._update_b_u(user_id=user_id, err=err)
-                # update item bias
-                self._update_b_i(item_id=item_id, err=err)
+                    # update user embeddings
+                    self._update_P(user_id=user_id, item_id=item_id, err=err)
+                    # update item embeddings
+                    self._update_Q(user_id=user_id, item_id=item_id, err=err)
+                    # update user bias
+                    self._update_b_u(user_id=user_id, err=err)
+                    # update item bias
+                    self._update_b_i(item_id=item_id, err=err)
 
-            pred_scores = self.predict(batch_X)
-            train_logloss = self._cross_entropy_loss(
-                y_trues=batch_y,
-                y_scores=pred_scores,
-                pscores=batch_pscores,
-            )
-            train_loss.append(train_logloss)
+                pred_scores = self.predict(features)
+                batch_logloss = self._cross_entropy_loss(
+                    y_trues=clicks,
+                    y_scores=pred_scores,
+                    pscores=pscores,
+                )
+                batch_loss.append(batch_logloss)
+
+            train_loss.append((
+                np.mean(batch_loss),
+                np.std(batch_loss)
+            ))
 
             pred_scores = self.predict(val_X)
             val_logloss = self._cross_entropy_loss(
@@ -204,3 +208,14 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
 
         grad_b_i = -err + self.reg * self.b_i(item_id)
         self.b_i.update(grad=grad_b_i, index=item_id)
+
+    def _get_batch_data(self, train_X, train_y, train_pscores):
+        train_X, train_y, train_pscores = shuffle(
+            train_X, train_y, train_pscores, random_state=self.seed
+        )
+        batch_X = np.array_split(train_X, len(train_X) // self.batch_size+1)
+        batch_y = np.array_split(train_y, len(train_y) // self.batch_size+1)
+        batch_pscores = np.array_split(
+            train_pscores, len(train_pscores) // self.batch_size+1)
+
+        return batch_X, batch_y, batch_pscores

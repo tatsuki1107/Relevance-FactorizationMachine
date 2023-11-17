@@ -72,6 +72,7 @@ class Evaluator:
         metric_per_user = defaultdict(lambda: defaultdict(list))
         for indices in self.indices_per_user:
             y_scores = self._predict(model, indices)
+            ranked_indices = y_scores.argsort()[::-1]
             y_true = self.y_true[indices]
             user_pscores = pscores[indices]
 
@@ -81,7 +82,7 @@ class Evaluator:
             for k in self.K:
                 for metric_name, metric_func in self.metric_functions.items():
                     metric_per_user[metric_name][k].append(
-                        metric_func(y_true, y_scores, k, user_pscores)
+                        metric_func(y_true, ranked_indices, k, user_pscores)
                     )
 
         results = defaultdict(list)

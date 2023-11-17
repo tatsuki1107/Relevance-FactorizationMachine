@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 # Third-party library imports
 import numpy as np
-from sklearn.utils import resample
+from sklearn.utils import shuffle
 from scipy.sparse import csr_matrix, diags
 
 # Internal modules imports
@@ -22,6 +22,7 @@ class FactorizationMachines(PointwiseBaseRecommender):
     """
 
     n_features: int
+    alpha: float = 2.0
 
     def __post_init__(self) -> None:
         """モデルのパラメータを初期化
@@ -34,13 +35,13 @@ class FactorizationMachines(PointwiseBaseRecommender):
         w0 = np.array([0.0])
         self.w0 = SGD(params=w0, lr=self.lr)
 
-        limit = np.sqrt(6 / self.n_features)
+        limit = self.alpha * np.sqrt(6 / self.n_features)
         # w ~ U(-limit, limit)
         w = np.random.uniform(low=-limit, high=limit, size=self.n_features)
         self.w = SGD(params=w, lr=self.lr)
 
         # V ~ U(-limit, limit)
-        limit = np.sqrt(6 / self.n_factors)
+        limit = self.alpha * np.sqrt(6 / self.n_factors)
         V = np.random.uniform(
             low=-limit, high=limit, size=(self.n_features, self.n_factors)
         )
@@ -64,31 +65,39 @@ class FactorizationMachines(PointwiseBaseRecommender):
         train_X, train_y, train_pscores = train
         val_X, val_y, val_pscores = val
 
+        batch_data = self._get_batch_data(
+            train_X.copy(),
+            train_y.copy(),
+            train_pscores.copy(),
+        )
         train_loss, val_loss = [], []
         for _ in tqdm(range(self.n_epochs)):
-            batch_X, batch_y, batch_pscores = resample(
-                train_X,
-                train_y,
-                train_pscores,
-                replace=True,
-                n_samples=self.batch_size,
-                random_state=self.seed,
-            )
-            error = (batch_y / batch_pscores) - self.predict(batch_X)
-            # shape: (batch_size,)
 
-            # update w0
-            self._update_w0(error)
-            # update wi
-            self._update_w(error, batch_X)
-            # update V
-            self._update_V(error, batch_X)
+            batch_loss = []
+            for batch_X, batch_y, batch_pscores in zip(*batch_data):
 
-            pred_scores = self.predict(batch_X)
-            train_logloss = self._cross_entropy_loss(
-                y_trues=batch_y, y_scores=pred_scores, pscores=batch_pscores
-            )
-            train_loss.append(train_logloss)
+                error = (batch_y / batch_pscores) - self.predict(batch_X)
+                # shape: (batch_size,)
+
+                # update w0
+                self._update_w0(error)
+                # update wi
+                self._update_w(error, batch_X)
+                # update V
+                self._update_V(error, batch_X)
+
+                pred_scores = self.predict(batch_X)
+                batch_logloss = self._cross_entropy_loss(
+                    y_trues=batch_y,
+                    y_scores=pred_scores,
+                    pscores=batch_pscores
+                )
+                batch_loss.append(batch_logloss)
+
+            train_loss.append((
+                np.mean(batch_loss),
+                np.std(batch_loss)
+            ))
 
             pred_scores = self.predict(val_X)
             val_logloss = self._cross_entropy_loss(
@@ -176,3 +185,16 @@ class FactorizationMachines(PointwiseBaseRecommender):
                 grad=grad_V_f[0, non_zero_feature_indices].A1,
                 index=(non_zero_feature_indices, f),
             )
+
+    def _get_batch_data(self, train_X, train_y, train_pscores):
+        train_X, train_y, train_pscores = shuffle(
+            train_X, train_y, train_pscores, random_state=self.seed
+        )
+        batch_X = self._split_data(train_X)
+        batch_y = self._split_data(train_y)
+        batch_pscores = self._split_data(train_pscores)
+        return batch_X, batch_y, batch_pscores
+
+    def _split_data(self, data):
+        return [data[i:i + self.batch_size]
+                for i in range(0, data.shape[0], self.batch_size)]

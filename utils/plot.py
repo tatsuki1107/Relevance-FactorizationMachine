@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import numpy as np
 
 
 @dataclass
@@ -38,7 +39,7 @@ class Visualizer:
         self._plot_metrics_per_model()
         self._plot_metric_vs_model()
         self._plot_metric_per_frequency()
-        self._plot_snips_estimated_values()
+        self._plot_ips_estimated_values()
 
     def _plot_metrics_per_model(self) -> None:
         """モデル(FM, MF)ごとのランク指標を描画して保存する"""
@@ -74,6 +75,7 @@ class Visualizer:
             plt.tight_layout()
             plt.show()
             plt.savefig(self.log_path / f"{model_name}_metrics.png")
+            plt.close()
 
     def _plot_metric_vs_model(self, metric: str = "DCG"):
         """MFとFMの性能を比べるための描画
@@ -117,6 +119,7 @@ class Visualizer:
         plt.tight_layout()
         plt.show()
         plt.savefig(self.log_path / f"{metric}_vs_model.png")
+        plt.close()
 
     def _plot_metric_per_frequency(
         self, model_name: str = "FM", frequency: str = "rare"
@@ -158,9 +161,10 @@ class Visualizer:
         plt.tight_layout()
         plt.show()
         plt.savefig(self.log_path / "metrics_per_frequency.png")
+        plt.close()
 
-    def _plot_snips_estimated_values(self, metric_name: str = "DCG") -> None:
-        """MFとFMの検証データにおけるSNIPS推定値を描画
+    def _plot_ips_estimated_values(self, metric_name: str = "DCG") -> None:
+        """MFとFMの検証データにおけるIPS推定値を描画
 
         Args:
             metric_name (str): 描画するランク指標。デフォルトでは、DCG
@@ -183,13 +187,73 @@ class Visualizer:
         )
         plt.xticks([0, 1], ["FM", "MF"])
         plt.xlabel("varying model")
-        plt.ylabel(f"SNIPS of {metric_name} value")
+        plt.ylabel(f"IPS of {metric_name} value")
         plt.legend()
         plt.title(
-            "Self-Normalized IPS Estimator of " + f"{metric_name} per Model",
+            "IPS Estimator of " + f"{metric_name} per Model",
             fontdict=dict(size=22),
         )
 
         plt.tight_layout()
         plt.show()
-        plt.savefig(self.log_path / "snips_estimator.png")
+        plt.savefig(self.log_path / f"IPS_estimator_of_{metric_name}.png")
+        plt.close()
+
+
+def plot_loss_curve(
+    train_loss: list,
+    val_loss: list,
+    model_name: str
+) -> None:
+    """学習曲線を描画する関数
+
+    Args:
+        train_loss (list): 学習データの損失関数の値
+        val_loss (list): 検証データの損失関数の値
+        model_name (str): モデルの名前
+    """
+    sns.set()
+    plt.figure(figsize=(10, 6))
+    mean_train_loss, std_train_loss = map(np.array, zip(*train_loss))
+    epochs = range(len(mean_train_loss))
+    plt.plot(
+        mean_train_loss,
+        label=f"train (last loss: {mean_train_loss[-1]:.2f})"
+    )
+    plt.fill_between(
+        epochs,
+        mean_train_loss - std_train_loss,
+        mean_train_loss + std_train_loss,
+        color="blue",
+        alpha=0.1
+    )
+
+    plt.plot(val_loss, label=f"val (last loss: {val_loss[-1]:.2f})")
+    plt.xlabel("epoch")
+    plt.ylabel("loss")
+    plt.legend()
+    plt.title(f"Loss Curve of {model_name}", fontdict=dict(size=22))
+
+    plt.tight_layout()
+    plt.show()
+    plt.savefig(f"./data/loss_curve/{model_name}.png")
+    plt.close()
+
+
+def plot_exposure(exposure_probabilities: np.ndarray) -> None:
+    """露出度の確率を描画する関数
+
+    Args:
+        exposure_probabilities (np.ndarray): 露出度の確率
+    """
+    sns.set()
+    plt.figure(figsize=(10, 6))
+    plt.plot(np.sort(exposure_probabilities)[::-1])
+    plt.xlabel("sorted num of video_id")
+    plt.ylabel("exposure probability")
+    plt.title("Exposure Probability Distribution", fontdict=dict(size=22))
+
+    plt.tight_layout()
+    plt.show()
+    plt.savefig("./data/exposure_probability.png")
+    plt.close()

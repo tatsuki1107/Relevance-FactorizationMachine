@@ -12,6 +12,7 @@ import numpy as np
 # Internal modules imports
 from utils.dataloader.loader import DataLoader
 from utils.evaluate import Evaluator
+from utils.plot import plot_loss_curve
 from src.fm import FactorizationMachines as FM
 from src.mf import LogisticMatrixFactorization as MF
 from conf.config import ModelConfig
@@ -72,8 +73,8 @@ def random_search(
     seed: int,
     dataloader: DataLoader,
     logger: Logger,
-    n_trials: int = 100,
-    K: int = 3,
+    n_trials: int = 10,
+    K: int = 5,
     used_metrics: str = "DCG",
 ) -> None:
     """ランダムサーチを実行する関数
@@ -119,7 +120,7 @@ def random_search(
     logger.info("start random search...")
 
     for model_name in ["FM", "MF"]:
-        for estimator in ["Ideal", "IPS", "Naive"]:
+        for estimator in ["IPS", "Naive"]:
             (
                 train,
                 val,
@@ -163,7 +164,12 @@ def random_search(
                         seed=seed,
                     )
 
-                _, val_loss = model.fit(train, val)
+                train_loss, val_loss = model.fit(train, val)
+                plot_loss_curve(
+                    train_loss,
+                    val_loss,
+                    f"{model_name}_{estimator}"
+                )
                 metrics = evaluator.evaluate(model, pscores=val[2])
                 search_results.append((
                     trial,
