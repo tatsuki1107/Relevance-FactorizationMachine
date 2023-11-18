@@ -1,5 +1,5 @@
 # Unbiased Recommender Learning With Relevance-FactorizationMachines
-更新日時: 2023/11/09 (木)
+更新日時: 2023/11/18 (土)
 
 # 目次
 - [概要](#概要)
@@ -270,16 +270,15 @@ Recall@K &= \frac{1}{|U|}\sum_{u \in U} \sum_{i \in I^{test}_u:R_{u,i}=1} \frac{
 MAP@K &= \frac{1}{|U|}\sum_{u \in U} \sum_{i \in I^{test}_u:R_{u,i}=1}\sum_{k=1}^K \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{k}
 \end{aligned}
 ```
-本実験では、関連度が高いと予測されるデータのランキング指標を評価する目的で、$`\hat{R}_{u,i}`$を以下のようにバイナリ化する。
+前述の通り、テストデータは実環境の模倣として機能する。そのため、これらの指標が高ければよりクリックが発生しやすいと捉えることができる。  
+さらに以下のカスタム評価指標を追加する。  
+
 ```math
-\hat{R}_{u,i} = 
-\begin{cases} 
-1 & \text{if } \hat{R}_{u,i} \geq 0.75 \\
-0 & \text{if } \hat{R}_{u,i} < 0.75 
-\end{cases}
+\begin{aligned}
+ME@K &= \frac{1}{|U|}\sum_{u \in U} \sum_{i \in I^{test}_u} \mathbb{I}\{\hat{Z}_{u,i} = K\} \cdot \theta_{u,i}
+\end{aligned}
 ```
-この実験では閾値を0.75として、この値以上なら、あるユーザー$`u`$はあるアイテム$`i`$を好んでいると判定する。  
-前述の通り、テストデータは実環境の模倣として機能する。そのため、これらの指標が高ければよりクリックが発生しやすいと捉えることができる。
+指標の名前は "Mean Exposure @ K" と命名した。単なるランク指標では捉えることができない、IPS推定量が過去の露出に依存せずにランキングを生成しているかどうかを評価するのに役立つ。ME@K はユーザーごとの予測ランキングがランキング位置$`K`$にある場合、該当データの露出度合いを足し合わせ平均を取る。理想的には、任意の推薦位置で ME@K が一定値を保つことが望ましく、これはランキングが過去の露出の観点から平等であることを示す。
 
 # 実験結果とディスカッション
 ![Alt text](logs/result/img/FM_metrics.png)
