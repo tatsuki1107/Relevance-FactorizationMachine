@@ -1,5 +1,5 @@
 # Unbiased Recommender Learning With Relevance-FactorizationMachines
-更新日時: 2023/11/07 (火)
+更新日時: 2023/11/18 (土)
 
 # 目次
 - [概要](#概要)
@@ -210,7 +210,7 @@ Y_{u,i} = O_{u,i} \cdot R_{u,i}, \quad \forall (u,i) \in D
 | $`\hat{L}_{Naive}`$ |           $`Y_{u,i}`$            |           $`Y_{u,i}`$            |  $`R_{u,i}`$   |  
 
 ### 7. 学習
-学習データを使用して学習を行う。MFとFMをpointwise損失に適用する際、これらの目的関数は非凸性を持つため、解析的に大域最適解を得るのは困難である。このため、最適化アルゴリズムとして勾配法の一種、バッチSGDを採用する。
+学習データを使用して学習を行う。MFとFMをpointwise損失に適用する際、これらの目的関数は非凸性を持つため、解析的に大域最適解を得るのは困難である。このため、最適化アルゴリズムとして勾配法の一種、ミニバッチSGDを採用する。
 MFの場合、パラメータのL2ノルムを正則化項として目的関数に追加し、過学習を防ぐ。一方、FMでは検証データに対する汎化性能が正則化を用いなくても向上したため、正則化は採用していない。以下のように目的関数を定義し、エポックごとにパラメータを更新する。
 
 $`B \subseteq D`$: エポックごとに生成するバッチデータ  
@@ -254,10 +254,10 @@ $`|B|`$: バッチサイズ
 | 損失                | チューニングするDCG@3                                                                                                                                                                                                                                   |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | $`L_{Ideal}`$       | $`R_{Ideal}(\hat{Z})=\frac{1}{\|U\|}\sum_{u \in U} \sum_{i \in I^{val}_u} \gamma_{u,i} \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$                                                                                      |
-| $`\hat{L}_{IPS}`$   | $`\hat{R}_{SNIPS}(\hat{Z}) = \frac{1}{\|U\|}\sum_{u \in U}\frac{1}{\sum_{i \in I^{val}_u} \frac{Y_{u,i}}{\theta_{u,i}}}\sum_{i \in I^{val}_u}\frac{Y_{u,i}}{\theta_{u,i}}\cdot \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$ |
+| $`\hat{L}_{IPS}`$   | $`\hat{R}_{IPS}(\hat{Z}) = \frac{1}{\|U\|}\sum_{u \in U} \sum_{i \in I^{val}_u}\frac{Y_{u,i}}{\theta_{u,i}}\cdot \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$ |
 | $`\hat{L}_{Naive}`$ | $`\hat{R}_{Naive}(\hat{Z})=\frac{1}{\|U\|}\sum_{u \in U} \sum_{i \in I^{val}_u} Y_{u,i} \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{\log(\hat{Z}_{u,i}+1)}`$                                                                                      |  
 
-具体的に、$`L_{Ideal}`$および$`\hat{L}_{Naive}`$では、検証データにおいてDCG@3を最大化するパラメータを探索する。一方、$`\hat{L}_{IPS}`$では、検証データとテストデータの分布の違いを考慮しながら、DCG@3を最大化する必要がある。このため、DCG@3の自己正規化逆傾向スコア(SNIPS)推定量[10][11]を利用し、パラメータチューニングを実施する。SNIPS推定量を用いることでIPS推定量が抱える高分散問題に対処可能になる。実際にはユーザーごとにも評価数が異なる。ユーザーごとの評価を正規化することで推定値の信頼性を高めることが狙いである。
+具体的に、$`L_{Ideal}`$および$`\hat{L}_{Naive}`$では、検証データにおいてDCG@3を最大化するパラメータを探索する。一方、$`\hat{L}_{IPS}`$では、検証データとテストデータの分布の違いを考慮しながら、DCG@3を最大化する必要がある。  
 $`\hat{Z}_{u,i}`$は、予測評価値$`\hat{R}_{u,i}`$を降順にソートした時の予測ランキングである。
 
 ### 9. 評価
@@ -270,16 +270,15 @@ Recall@K &= \frac{1}{|U|}\sum_{u \in U} \sum_{i \in I^{test}_u:R_{u,i}=1} \frac{
 MAP@K &= \frac{1}{|U|}\sum_{u \in U} \sum_{i \in I^{test}_u:R_{u,i}=1}\sum_{k=1}^K \frac{\mathbb{I}\{\hat{Z}_{u,i} \leq K\}}{k}
 \end{aligned}
 ```
-本実験では、関連度が高いと予測されるデータのランキング指標を評価する目的で、$`\hat{R}_{u,i}`$を以下のようにバイナリ化する。
+前述の通り、テストデータは実環境の模倣として機能する。そのため、これらの指標が高ければよりクリックが発生しやすいと捉えることができる。  
+さらに以下のカスタム評価指標を追加する。  
+
 ```math
-\hat{R}_{u,i} = 
-\begin{cases} 
-1 & \text{if } \hat{R}_{u,i} \geq 0.75 \\
-0 & \text{if } \hat{R}_{u,i} < 0.75 
-\end{cases}
+\begin{aligned}
+ME@K &= \frac{1}{|U|}\sum_{u \in U} \sum_{i \in I^{test}_u} \mathbb{I}\{\hat{Z}_{u,i} = K\} \cdot \theta_{u,i}
+\end{aligned}
 ```
-この実験では閾値を0.75として、この値以上なら、あるユーザー$`u`$はあるアイテム$`i`$を好んでいると判定する。  
-前述の通り、テストデータは実環境の模倣として機能する。そのため、これらの指標が高ければよりクリックが発生しやすいと捉えることができる。
+指標の名前は "Mean Exposure @ K" と命名した。単なるランク指標では捉えることができない、IPS推定量が過去の露出に依存せずにランキングを生成しているかどうかを評価するのに役立つ。ME@K はユーザーごとの予測ランキングがランキング位置$`K`$にある場合、該当データの露出度合いを足し合わせ平均を取る。理想的には、任意の推薦位置で ME@K が一定値を保つことが望ましく、これはランキングが過去の露出の観点から平等であることを示す。
 
 # 実験結果とディスカッション
 ![Alt text](logs/result/img/FM_metrics.png)
@@ -333,5 +332,3 @@ MAP@K &= \frac{1}{|U|}\sum_{u \in U} \sum_{i \in I^{test}_u:R_{u,i}=1}\sum_{k=1}
 [7] <a href="https://ieeexplore.ieee.org/document/5694074">Steffen Rendle. 2010. Factorization machines. In ICDM’10. 995–1000.</a>  
 [8] <a href="https://dl.acm.org/doi/10.1145/3292500.3330744">Lucas Bernardi, Themistoklis Mavridis, and Pablo Estevez. 2019. 150 successful machine learning models: 6 lessons learned at Booking.com. In Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 1743–1751.</a>  
 [9] <a href="https://arxiv.org/abs/2202.10842">Chongming Gao, Shijun Li, Wenqiang Lei, Jiawei Chen, Biao Li, Peng Jiang, Xiangnan He, Jiaxin Mao, and Tat-Seng Chua. 2022. KuaiRec: A Fully-observed Dataset and Insights for Evaluating Recommender Systems. arXiv preprint arXiv:2202.10842 (2022).</a>  
-[10] <a href="https://dl.acm.org/doi/10.1145/3240323.3240355">Longqi Yang, Yin Cui, Yuan Xuan, Chenyang Wang, Serge Belongie, and Deborah Estrin. 2018. Unbiased Offline Recommender Evaluation for Missingnot-at-random Implicit Feedback. In Proceedings of the 12th ACM Conference on Recommender Systems (RecSys ’18). ACM, New York, NY, USA, 279–287.</a>  
-[11] <a href="https://papers.nips.cc/paper_files/paper/2015/hash/39027dfad5138c9ca0c474d71db915c3-Abstract.html">Adith Swaminathan and Thorsten Joachims. 2015. The self-normalized estimator for counterfactual learning. In Advances in Neural Information Processing Systems. 3231–3239.</a>  
