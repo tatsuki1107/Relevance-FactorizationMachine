@@ -55,11 +55,11 @@ model_param_range:
       # maximum of parameter
       max: 30
     n_factors:
-      min: 100
+      min: 200
       max: 700
     lr:
-      min: 0.00001
-      max: 0.005
+      min: 0.001
+      max: 0.010
     reg:
       min: 0.1
       max: 0.2
@@ -69,15 +69,15 @@ model_param_range:
   FM:
     n_epochs:
       # minimum of parameter
-      min: 10
+      min: 3
       # maximum of parameter
       max: 20
     n_factors:
-      min: 50
-      max: 300
+      min: 100
+      max: 400
     lr:
       min: 0.00001
-      max: 0.0001
+      max: 0.00050
     batch_size:
       min: 400
       max: 500

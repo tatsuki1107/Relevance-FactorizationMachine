@@ -20,4 +20,4 @@ class TestDataLoader:
         datasets = loader.load(model_name="MF", estimator="IPS")
         sampled_train_y = datasets[0][1]
         label_counts = np.unique(sampled_train_y, return_counts=True)[1]
-        assert label_counts[0] == label_counts[1]
+        assert label_counts[0] == label_counts[1] * 2

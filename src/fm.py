@@ -1,6 +1,6 @@
 # Standard library imports
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Union
 from tqdm import tqdm
 
 # Third-party library imports
@@ -72,10 +72,8 @@ class FactorizationMachines(PointwiseBaseRecommender):
         )
         train_loss, val_loss = [], []
         for _ in tqdm(range(self.n_epochs)):
-
             batch_loss = []
             for batch_X, batch_y, batch_pscores in zip(*batch_data):
-
                 error = (batch_y / batch_pscores) - self.predict(batch_X)
                 # shape: (batch_size,)
 
@@ -90,14 +88,11 @@ class FactorizationMachines(PointwiseBaseRecommender):
                 batch_logloss = self._cross_entropy_loss(
                     y_trues=batch_y,
                     y_scores=pred_scores,
-                    pscores=batch_pscores
+                    pscores=batch_pscores,
                 )
                 batch_loss.append(batch_logloss)
 
-            train_loss.append((
-                np.mean(batch_loss),
-                np.std(batch_loss)
-            ))
+            train_loss.append((np.mean(batch_loss), np.std(batch_loss)))
 
             pred_scores = self.predict(val_X)
             val_logloss = self._cross_entropy_loss(
@@ -186,7 +181,22 @@ class FactorizationMachines(PointwiseBaseRecommender):
                 index=(non_zero_feature_indices, f),
             )
 
-    def _get_batch_data(self, train_X, train_y, train_pscores):
+    def _get_batch_data(
+        self,
+        train_X: csr_matrix,
+        train_y: np.ndarray,
+        train_pscores: np.ndarray,
+    ) -> Tuple[list, list, list]:
+        """学習データをバッチサイズ毎に分割する
+
+        Args:
+            train_X (csr_matrix): 特徴量(スパース行列)の配列
+            train_y (np.ndarray): 正解データの配列
+            train_pscores (np.ndarray): 傾向スコアの配列
+
+        Returns:
+            Tuple[list, list, list]: バッチサイズ毎に分割した学習データ
+        """
         train_X, train_y, train_pscores = shuffle(
             train_X, train_y, train_pscores, random_state=self.seed
         )
@@ -195,6 +205,16 @@ class FactorizationMachines(PointwiseBaseRecommender):
         batch_pscores = self._split_data(train_pscores)
         return batch_X, batch_y, batch_pscores
 
-    def _split_data(self, data):
-        return [data[i:i + self.batch_size]
-                for i in range(0, data.shape[0], self.batch_size)]
+    def _split_data(self, data: Union[csr_matrix, np.ndarray]) -> list:
+        """データをバッチサイズ毎に分割する
+
+        Args:
+            data (Union[csr_matrix, np.ndarray]): 学習データ
+
+        Returns:
+            list: バッチサイズ毎に分割した学習データ
+        """
+        return [
+            data[i: i + self.batch_size]
+            for i in range(0, data.shape[0], self.batch_size)
+        ]

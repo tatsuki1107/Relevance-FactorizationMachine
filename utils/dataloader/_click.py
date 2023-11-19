@@ -55,7 +55,7 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
             interaction_df=interaction_df
         )
         data_size = interaction_df.shape[0]
-        self.logger.info(f'log data size: {data_size}')
+        self.logger.info(f"log data size: {data_size}")
         datatypes = self._generate_datatype(
             data_size=data_size,
         )
@@ -179,9 +179,7 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         return relevance_probabilities
 
     def _generate_exposure(
-        self,
-        existing_video_ids: pd.Series,
-        eps: float = 0.01
+        self, existing_video_ids: pd.Series, eps: float = 0.01
     ) -> np.ndarray:
         """半人工的なユーザーとアイテムの露出度を生成する。kuairec/big_matrix.csvの
         インタラクションデータのvideo_idの出現頻度を元に生成する。詳細は、short_paper.mdを参照
@@ -210,12 +208,13 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
             video_expo_counts - video_expo_counts.mean()
         ) / video_expo_counts.std()
         video_exposures = video_expo_counts.apply(_sigmoid)
-        plot_exposure(
-            video_exposures.values ** self._params.exposure_bias
+
+        exposure_probabilitys = (
+            video_exposures[existing_video_ids].values
+            ** self._params.exposure_bias
         )
-        exposure_probabilitys = video_exposures[existing_video_ids].values **\
-            self._params.exposure_bias
         exposure_probabilitys = np.maximum(exposure_probabilitys, eps)
+        plot_exposure(exposure_probabilitys)
 
         return exposure_probabilitys
 
@@ -252,7 +251,7 @@ class SemiSyntheticLogDataGenerator(BaseLoader):
         return biased_clicks, relevance_labels
 
 
-def _sigmoid(x: float, a: float = 3.0, b: float = .0) -> float:
+def _sigmoid(x: float, a: float = 3.0, b: float = 0.0) -> float:
     """kuairec/big_matrix.csvでのアイテムの出現頻度を確率に変換するためのシグモイド関数
 
     Args:

@@ -1,11 +1,12 @@
 # Standard library imports
-from typing import Tuple
+from typing import Tuple, Union
 from logging import Logger
 from dataclasses import dataclass
 from collections import defaultdict
 
 # Third-party library imports
 import numpy as np
+from scipy.sparse import csr_matrix
 
 # Internal modules imports
 from conf.config import ExperimentConfig
@@ -89,6 +90,50 @@ class DataLoader(BaseLoader):
         Returns:
         - (tuple): train, val, testデータ
         """
+        self._validate_params(model_name=model_name, estimator=estimator)
+
+        # target variable
+        train_y, val_y, test_y = self._get_y_true(estimator=estimator)
+
+        # features
+        features = self.datasets[model_name]
+
+        # estimated exposure
+        (train_pscores, val_pscores, test_pscores) = self._get_exposure(
+            estimator=estimator
+        )
+
+        # negative sampling
+        if estimator in {"IPS", "Naive"}:
+            (
+                sampled_train_X,
+                sampled_train_y,
+                sampled_train_pscores,
+            ) = self._get_sampled_traindata(
+                train_feature=features["train"],
+                train_y=train_y,
+                train_pscores=train_pscores,
+            )
+            train = [sampled_train_X, sampled_train_y, sampled_train_pscores]
+        else:
+            train = [features["train"], train_y, train_pscores]
+
+        val = [features["val"], val_y, val_pscores]
+        test = [features["test"], test_y, test_pscores]
+
+        return train, val, test
+
+    def _validate_params(self, model_name: str, estimator: str) -> None:
+        """パラメータのバリデーションを行う
+
+        Args:
+        - model_name (str): モデルの名前。FMまたは、MF
+        - estimator (str): 推定量の名前。Ideal, IPSまたは、Naive
+
+        Raises:
+        - ValueError: model_nameがFMまたは、MFでない場合
+        - ValueError: estimatorがIdeal, IPSまたは、Naiveでない場合
+        """
 
         # params validation
         if model_name not in {"FM", "MF"}:
@@ -98,41 +143,67 @@ class DataLoader(BaseLoader):
             self.logger.error(ESTIMATOR_NAME_ERROR_MESSAGE.format(estimator))
             raise ValueError(ESTIMATOR_NAME_ERROR_MESSAGE.format(estimator))
 
-        # target variable
-        if estimator == "Ideal":
-            train_y = self.datasets["relevances"]["train"]
-            val_y = self.datasets["relevances"]["val"]
-        else:
-            train_y = self.datasets["clicks"]["train"]
-            val_y = self.datasets["clicks"]["val"]
+    def _get_y_true(self, estimator: str) -> Tuple[np.ndarray]:
+        """推定量に応じた目的変数を返す
 
+        Args:
+        - estimator (str): 推定量の名前。Ideal, IPSまたは、Naive
+
+        Returns:
+        - Tuple[np.ndarray]: train, val, testデータの目的変数
+        """
+        # target variable
+        key_value = "relevances" if estimator == "Ideal" else "clicks"
+        train_y = self.datasets[key_value]["train"]
+        val_y = self.datasets[key_value]["val"]
         test_y = self.datasets["clicks"]["test"]
 
-        # features
-        features = self.datasets[model_name]
+        return train_y, val_y, test_y
 
-        # estimated exposure
-        if estimator == "IPS":
-            train_pscores = self.datasets["pscores"]["train"]
-            val_pscores = self.datasets["pscores"]["val"]
-        else:
-            train_pscores = np.ones_like(train_y)
-            val_pscores = np.ones_like(val_y)
+    def _get_exposure(self, estimator: str) -> Tuple[np.ndarray]:
+        """推定量に応じた曝露変数を返す
 
-        # negative sampling
-        if estimator in {"IPS", "Naive"}:
-            sampled_train_indices = self.datasets["sampled_train_indices"]
-            sampled_train_X = features["train"][sampled_train_indices]
-            sampled_train_y = train_y[sampled_train_indices]
-            sampled_train_pscores = train_pscores[sampled_train_indices]
-            train = [sampled_train_X, sampled_train_y, sampled_train_pscores]
-        else:
-            train = [features["train"], train_y, train_pscores]
+        Args:
+            estimator (str): 推定量の名前。Ideal, IPSまたは、Naive
 
-        val = [features["val"], val_y, val_pscores]
-        test = [features["test"], test_y]
+        Returns:
+            Tuple[np.ndarray]: train, val, testデータの露出確率
+        """
 
-        return train, val, test
+        train_pscores = self.datasets["pscores"]["train"]
+        val_pscores = self.datasets["pscores"]["val"]
+
+        if estimator in {"Ideal", "Naive"}:
+            train_pscores = np.ones_like(train_pscores)
+            val_pscores = np.ones_like(val_pscores)
+
+        test_pscores = self.datasets["pscores"]["test"]
+
+        return train_pscores, val_pscores, test_pscores
+
+    def _get_sampled_traindata(
+        self,
+        train_feature: Union[csr_matrix, np.ndarray],
+        train_y: np.ndarray,
+        train_pscores: np.ndarray,
+    ) -> Tuple[np.ndarray]:
+        """negative samplingを行ったtrainデータを返す
+
+        Args:
+            train_feature (Union[csr_matrix, np.ndarray]): 学習データの特徴量
+            train_y (np.ndarray): 学習データの目的変数
+            train_pscores (np.ndarray): 学習データの露出確率
+
+        Returns:
+            Tuple[np.ndarray]: サンプリング済みの学習データ
+        """
+
+        sampled_train_indices = self.datasets["sampled_train_indices"]
+        sampled_train_X = train_feature[sampled_train_indices]
+        sampled_train_y = train_y[sampled_train_indices]
+        sampled_train_pscores = train_pscores[sampled_train_indices]
+
+        return sampled_train_X, sampled_train_y, sampled_train_pscores
 
     @property
     def val_user2data_indices(self) -> dict:
@@ -147,16 +218,18 @@ class DataLoader(BaseLoader):
         val_data = defaultdict(dict)
         for estimator in estimators:
             if estimator == "Ideal":
-                val_data[estimator]["y_true"] = self.datasets["relevances"][
-                    "val"
-                ]
-                val_data[estimator]["pscore"] = None
-            elif estimator == "IPS":
-                val_data[estimator]["y_true"] = self.datasets["clicks"]["val"]
-                val_data[estimator]["pscore"] = self.datasets["pscores"]["val"]
+                value_key = "relevances"
             else:
-                val_data[estimator]["y_true"] = self.datasets["clicks"]["val"]
-                val_data[estimator]["pscore"] = None
+                value_key = "clicks"
+
+            val_data[estimator]["y_true"] = self.datasets[value_key]["val"]
+
+            if estimator == "IPS":
+                pscore = self.datasets["pscores"]["val"]
+            else:
+                pscore = np.ones_like(val_data[estimator]["y_true"])
+
+            val_data[estimator]["pscore"] = pscore
 
         return val_data
 
@@ -166,6 +239,13 @@ class DataLoader(BaseLoader):
         return self.datasets["user2data_indices"]["test"]
 
     @property
-    def test_y(self) -> np.ndarray:
-        """testデータのターゲット変数を返す"""
-        return self.datasets["clicks"]["test"]
+    def test_data_for_random_policy(self) -> dict:
+        """ランダムベースラインの評価に用いるtestデータを返す
+
+        Returns:
+            dict: ランダムベースラインの評価に用いるtestデータ
+        """
+        return dict(
+            y_true=self.datasets["clicks"]["test"],
+            pscore=self.datasets["pscores"]["test"],
+        )

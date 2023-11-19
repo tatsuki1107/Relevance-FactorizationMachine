@@ -70,7 +70,7 @@ class DatasetPreparer(BaseLoader):
         test_user2data_indices = self._create_user2data_indices(
             interaction_df=interaction_df[usecols],
             df_indices=dataset_indices["test"],
-            frequency={"all", "popular", "rare"},
+            frequency={"all", "rare"},
         )
         user2data_indices = {
             "val": val_user2data_indices,
@@ -211,11 +211,12 @@ class DatasetPreparer(BaseLoader):
             data_df = interaction_df.iloc[indices]
 
             if datatype in {"train", "val"}:
-                pscores[datatype] = data_df["exposure"].values
                 clicks[datatype] = data_df["biased_click"].values
                 relevances[datatype] = data_df["relevance"].values
             else:
                 clicks[datatype] = data_df["unbiased_click"].values
+
+            pscores[datatype] = data_df["exposure"].values
 
         return relevances, pscores, clicks
 

@@ -11,7 +11,7 @@ import numpy as np
 
 # Internal modules imports
 from utils.dataloader.loader import DataLoader
-from utils.evaluate import Evaluator
+from utils.evaluate import ValEvaluator
 from utils.plot import plot_loss_curve
 from src.fm import FactorizationMachines as FM
 from src.mf import LogisticMatrixFactorization as MF
@@ -73,9 +73,9 @@ def random_search(
     seed: int,
     dataloader: DataLoader,
     logger: Logger,
-    n_trials: int = 10,
-    K: int = 5,
-    used_metrics: str = "DCG",
+    n_trials: int = 15,
+    k: int = 5,
+    used_metric: str = "DCG",
 ) -> None:
     """ランダムサーチを実行する関数
 
@@ -100,41 +100,37 @@ def random_search(
     user2data_indices = dataloader.val_user2data_indices
     dumped_metric = defaultdict(dict)
     for estimator, val_data in random_val_data.items():
-        evaluator = Evaluator(
+        evaluator = ValEvaluator(
             _seed=seed,
             X=None,
             y_true=val_data["y_true"],
             indices_per_user=user2data_indices,
-            used_metrics=set([used_metrics]),
-            K=[K],
-            thetahold=None
+            metric_name=used_metric,
+            k=k,
         )
-        metrics = evaluator.evaluate(
+        metric_value = evaluator.evaluate(
             model=model_name, pscores=val_data["pscore"]
         )
-        dumped_metric[estimator][model_name] = metrics[used_metrics][0]
-        logger.info(
-            f"{used_metrics} of Random_{estimator}: {metrics[used_metrics][0]}"
-        )
+        dumped_metric[estimator][model_name] = metric_value
+        logger.info(f"{used_metric} of Random_{estimator}: {metric_value}")
 
     logger.info("start random search...")
 
     for model_name in ["FM", "MF"]:
-        for estimator in ["IPS", "Naive"]:
+        for estimator in ["Ideal", "IPS", "Naive"]:
             (
                 train,
                 val,
                 _,
             ) = dataloader.load(model_name=model_name, estimator=estimator)
 
-            evaluator = Evaluator(
+            evaluator = ValEvaluator(
                 _seed=seed,
                 X=val[0],
                 y_true=val[1],
                 indices_per_user=user2data_indices,
-                used_metrics=set([used_metrics]),
-                K=[K],
-                thetahold=None
+                metric_name=used_metric,
+                k=k,
             )
             # search_results = [(trial, params, metric),(...),(...)]
             search_results = []
@@ -166,15 +162,12 @@ def random_search(
 
                 train_loss, val_loss = model.fit(train, val)
                 plot_loss_curve(
-                    train_loss,
-                    val_loss,
-                    f"{model_name}_{estimator}"
+                    train_loss=train_loss,
+                    val_loss=val_loss,
+                    model_name=f"{model_name}_{estimator}",
                 )
-                metrics = evaluator.evaluate(model, pscores=val[2])
-                search_results.append((
-                    trial,
-                    model_params,
-                    metrics[used_metrics][0]))
+                metric_value = evaluator.evaluate(model, pscores=val[2])
+                search_results.append((trial, model_params, metric_value))
 
                 logger.info(
                     MODEL_PARAMS_MESSAGE.format(
@@ -182,9 +175,9 @@ def random_search(
                         estimator,
                         trial,
                         model_params,
-                        used_metrics,
-                        K,
-                        metrics[used_metrics][0],
+                        used_metric,
+                        k,
+                        metric_value,
                     )
                 )
 
@@ -202,8 +195,8 @@ def random_search(
             best_result = sorted(
                 search_results, key=lambda x: x[2], reverse=True
             )[0]
-            best_result = dict(zip(
-                ("trial", "params", used_metrics), best_result)
+            best_result = dict(
+                zip(("trial", "params", used_metric), best_result)
             )
             logger.info(f"best result: {best_result}")
 
@@ -211,8 +204,8 @@ def random_search(
             with open(log_path / f"{base_name}_best_param.json", "w") as f:
                 json.dump(best_result["params"], f)
 
-            dumped_metric[estimator][model_name] = best_result[used_metrics]
-            with open(log_path / f"best_{used_metrics}.json", "w") as f:
+            dumped_metric[estimator][model_name] = best_result[used_metric]
+            with open(log_path / f"best_{used_metric}.json", "w") as f:
                 json.dump(dumped_metric, f)
 
     logger.info("random search is done.")

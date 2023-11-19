@@ -1,6 +1,6 @@
 # Standard library imports
 import json
-from typing import Set, List
+from typing import List
 from pathlib import Path
 from dataclasses import dataclass, field
 
@@ -22,11 +22,13 @@ class Visualizer:
     - estimators (List[str]): 評価する推定量
     """
 
-    metrics: Set[str]
     K: List[int]
     result_df: pd.DataFrame
     estimators: List[str] = field(
         default_factory=lambda: ["Ideal", "IPS", "Naive"]
+    )
+    metrics: List[str] = field(
+        default_factory=lambda: ["DCG", "Recall", "MAP"]
     )
 
     def __post_init__(self):
@@ -40,6 +42,7 @@ class Visualizer:
         self._plot_metric_vs_model()
         self._plot_metric_per_frequency()
         self._plot_ips_estimated_values()
+        self._plot_mean_exposure()
 
     def _plot_metrics_per_model(self) -> None:
         """モデル(FM, MF)ごとのランク指標を描画して保存する"""
@@ -52,18 +55,14 @@ class Visualizer:
 
                 for estimator in self.estimators:
                     column = f"{model_name}_{estimator}_all_{metric}@K"
-                    plt.scatter(self.K, self.result_df[column], marker="o")
-                    plt.plot(
-                        self.K,
-                        self.result_df[column],
+                    self._plot_and_scatter(
+                        df_column=column,
                         label=f"{model_name}_{estimator}",
                     )
 
                 column = f"Random_all_{metric}@K"
-                plt.scatter(self.K, self.result_df[column], marker="o")
-                plt.plot(
-                    self.K,
-                    self.result_df[column],
+                self._plot_and_scatter(
+                    df_column=column,
                     label="Random",
                     linestyle="--",
                 )
@@ -95,21 +94,16 @@ class Visualizer:
 
             for model_name in ["FM", "MF"]:
                 column = f"{model_name}_{estimator}_all_{metric}@K"
-                plt.scatter(self.K, self.result_df[column], marker="o")
-                plt.plot(
-                    self.K,
-                    self.result_df[column],
+                self._plot_and_scatter(
+                    df_column=column,
                     label=f"{model_name}_{estimator}",
                 )
 
             column = f"Random_all_{metric}@K"
-            plt.scatter(self.K, self.result_df[column], marker="o", color="r")
-            plt.plot(
-                self.K,
-                self.result_df[column],
+            self._plot_and_scatter(
+                df_column=column,
                 label="Random",
                 linestyle="--",
-                color="r",
             )
 
             plt.xticks(self.K)
@@ -119,6 +113,56 @@ class Visualizer:
         plt.tight_layout()
         plt.show()
         plt.savefig(self.log_path / f"{metric}_vs_model.png")
+        plt.close()
+
+    def _plot_mean_exposure(self, metric: str = "ME") -> None:
+        """カスタム評価指標Mean Exposure @ Kの描画
+
+        Args:
+            metric (str, optional): 比較するランク指標。
+        """
+
+        plt.figure(figsize=(20, 6))
+        for i, model_name in enumerate(["FM", "MF"]):
+            plt.subplot(1, 3, i + 1)
+            plt.title(
+                f"Mean Exposure@K of {model_name}", fontdict=dict(size=25)
+            )
+
+            for estimator in self.estimators:
+                column = f"{model_name}_{estimator}_all_{metric}@K"
+                self._plot_and_scatter(
+                    df_column=column,
+                    label=f"{model_name}_{estimator}",
+                )
+
+            column = f"Random_all_{metric}@K"
+            self._plot_and_scatter(
+                df_column=column,
+                label="Random",
+                linestyle="--",
+            )
+
+            plt.xticks(self.K)
+            plt.xlabel("varying K")
+            plt.legend(loc="best", fontsize=15)
+
+        plt.subplot(1, 3, 3)
+        plt.title("Mean Exposure@K: FM_Naive vs MF_Naive", fontsize=20)
+        for model_name in ["FM", "MF"]:
+            column = f"{model_name}_Naive_all_{metric}@K"
+            self._plot_and_scatter(
+                df_column=column,
+                label=f"{model_name}_Naive",
+            )
+
+        plt.xticks(self.K)
+        plt.xlabel("varying K")
+        plt.legend(loc="best", fontsize=20)
+
+        plt.tight_layout()
+        plt.show()
+        plt.savefig(self.log_path / "mean_exposure.png")
         plt.close()
 
     def _plot_metric_per_frequency(
@@ -141,17 +185,16 @@ class Visualizer:
 
             for estimator in self.estimators:
                 column = f"{model_name}_{estimator}_{frequency}_{metric}@K"
-                plt.scatter(self.K, self.result_df[column], marker="o")
-                plt.plot(
-                    self.K,
-                    self.result_df[column],
+                self._plot_and_scatter(
+                    df_column=column,
                     label=f"{model_name}_{estimator}",
                 )
 
             column = f"Random_{frequency}_{metric}@K"
-            plt.scatter(self.K, self.result_df[column], marker="o")
-            plt.plot(
-                self.K, self.result_df[column], label="Random", linestyle="--"
+            self._plot_and_scatter(
+                df_column=column,
+                label="Random",
+                linestyle="--",
             )
 
             plt.xticks(self.K)
@@ -199,17 +242,39 @@ class Visualizer:
         plt.savefig(self.log_path / f"IPS_estimator_of_{metric_name}.png")
         plt.close()
 
+    def _plot_and_scatter(
+        self,
+        df_column: str,
+        label: str,
+        linestyle: str = "-",
+    ) -> None:
+        """折れ線グラフと散布図を描画する
 
-def plot_loss_curve(
-    train_loss: list,
-    val_loss: list,
-    model_name: str
-) -> None:
+        Args:
+            df_column (str): 描画するデータフレームの列名
+            label (str): 凡例のラベル
+            linestyle (str, optional): 折れ線グラフのスタイル。デフォルトでは、実線
+        """
+
+        plt.scatter(
+            self.K,
+            self.result_df[df_column],
+            marker="o",
+        )
+        plt.plot(
+            self.K,
+            self.result_df[df_column],
+            label=label,
+            linestyle=linestyle,
+        )
+
+
+def plot_loss_curve(train_loss: list, val_loss: list, model_name: str) -> None:
     """学習曲線を描画する関数
 
     Args:
-        train_loss (list): 学習データの損失関数の値
-        val_loss (list): 検証データの損失関数の値
+        train_loss (list): ミニバッチデータのエポックごとの損失値の平均と標準偏差
+        val_loss (list): 検証データのエポックごとの損失値
         model_name (str): モデルの名前
     """
     sns.set()
@@ -217,15 +282,14 @@ def plot_loss_curve(
     mean_train_loss, std_train_loss = map(np.array, zip(*train_loss))
     epochs = range(len(mean_train_loss))
     plt.plot(
-        mean_train_loss,
-        label=f"train (last loss: {mean_train_loss[-1]:.2f})"
+        mean_train_loss, label=f"train (last loss: {mean_train_loss[-1]:.2f})"
     )
     plt.fill_between(
         epochs,
         mean_train_loss - std_train_loss,
         mean_train_loss + std_train_loss,
         color="blue",
-        alpha=0.1
+        alpha=0.1,
     )
 
     plt.plot(val_loss, label=f"val (last loss: {val_loss[-1]:.2f})")

@@ -1,62 +1,23 @@
 # Standard library imports
-from typing import Tuple, Callable, Dict
+from typing import Tuple, Callable, Dict, Union
 
 # Third-party library imports
 import numpy as np
 
-NOT_IMPLEMENTED_ERROR_MESSAGE = "Re-implement if for SNIPS estimator"
-
-
-def calc_precision_at_k(
-    y_true: np.ndarray,
-    ranked_indices: np.ndarray,
-    k: int,
-    pscores: np.ndarray,
-) -> float:
-    """Precision@kを計算する
-
-    Args:
-    - y_true (np.ndarray): 正解ラベルの配列
-    - y_scores (np.ndarray): 予測確率の配列
-    - k (int): 上位k件のみを対象とする
-    - pscores (np.ndarray): 傾向スコアの配列
-
-    Raises:
-    - NotImplementedError: pscoresが全て1の場合のみ実装済み
-
-    Returns:
-    - (float): Precision@kの値
-    """
-    y_true_sorted_by_scores = y_true[ranked_indices][:k]
-
-    if np.all(pscores == 1):
-        return np.mean(y_true_sorted_by_scores)
-    else:
-        raise NotImplementedError(NOT_IMPLEMENTED_ERROR_MESSAGE)
-
 
 def calc_average_precision_at_k(
-    y_true: np.ndarray,
-    ranked_indices: np.ndarray,
+    y_true_sorted_by_scores: np.ndarray,
     k: int,
-    pscores: np.ndarray,
 ) -> float:
     """Average Precision@kを計算する
 
     Args:
-    - y_true (np.ndarray): 正解ラベルの配列
-    - y_scores (np.ndarray): 予測確率の配列
+    - y_true_sorted_by_scores (np.ndarray): ソート済み正解ラベルの配列
     - k (int): 上位k件のみを対象とする
-    - pscores (np.ndarray): 傾向スコアの配列
-
-    Raises:
-    - NotImplementedError: pscoresが全て1の場合のみ実装済み
 
     Returns:
     - (float): Average Precision@kの値
     """
-
-    y_true_sorted_by_scores = y_true[ranked_indices]
 
     average_precision = 0.0
     if not np.sum(y_true_sorted_by_scores) == 0:
@@ -66,73 +27,54 @@ def calc_average_precision_at_k(
                     y_true_sorted_by_scores[: i + 1]
                 ) / (i + 1)
 
-    if np.all(pscores == 1):
-        return average_precision
-
-    raise NotImplementedError(NOT_IMPLEMENTED_ERROR_MESSAGE)
+    return average_precision
 
 
 def calc_recall_at_k(
-    y_true: np.ndarray,
-    ranked_indices: np.ndarray,
+    y_true_sorted_by_scores: np.ndarray,
     k: int,
-    pscores: np.ndarray,
 ) -> float:
     """Recall@kを計算する
 
     Args:
-    - y_true (np.ndarray): 正解ラベルの配列
-    - y_scores (np.ndarray): 予測確率の配列
+    - y_true_sorted_by_scores (np.ndarray): ソート済み正解ラベルの配列
     - k (int): 上位k件のみを対象とする
-    - pscores (np.ndarray): 傾向スコアの配列
-
-    Raises:
-    - NotImplementedError: pscoresが全て1の場合のみ実装済み
 
     Returns:
     - (float): Recall@kの値
     """
-    y_true_sorted_by_scores = y_true[ranked_indices]
 
     recall = 0.0
     if not np.sum(y_true_sorted_by_scores) == 0:
-        recall = np.sum(y_true_sorted_by_scores[:k]) \
-            / np.sum(y_true_sorted_by_scores)
+        recall = np.sum(y_true_sorted_by_scores[:k]) / np.sum(
+            y_true_sorted_by_scores
+        )
 
-    if np.all(pscores == 1):
-        return recall
-
-    raise NotImplementedError(NOT_IMPLEMENTED_ERROR_MESSAGE)
+    return recall
 
 
-def calc_dcg_at_k(
-    y_true: np.ndarray,
-    ranked_indices: np.ndarray,
+def calc_ips_of_dcg_at_k(
+    y_true_sorted_by_scores: np.ndarray,
     k: int,
-    pscores: np.ndarray,
+    pscores_sorted_by_scores: np.ndarray,
 ) -> float:
-    """DCG@kを計算する
+    """DCG@kのIPS推定値を計算する
 
     Args:
-    - y_true (np.ndarray): 正解ラベルの配列
-    - y_scores (np.ndarray): 予測確率の配列
+    - y_true_sorted_by_scores (np.ndarray): ソート済み正解ラベルの配列
     - k (int): 上位k件のみを対象とする
-    - pscores (np.ndarray): 傾向スコアの配列
+    - pscores_sorted_by_scores (np.ndarray): 傾向スコアの配列
 
     Returns:
-    - float: DCG@kの値。pscoresがすべて1ではない場合は、DCG@KのSNIPS推定量を返す。
-    すなわち、バイアスのかかったvalデータからIPS推定量を評価する。
+    - float: DCG@kのIPS推定値。pscores_sorted_by_scoresがすべて1ならば、
+            通常のDCG@kを返す。
     """
-
-    y_true_sorted_by_scores = y_true[ranked_indices]
-    pscores_sorted_by_scores = pscores[ranked_indices]
 
     dcg_score = 0.0
     if np.sum(y_true_sorted_by_scores) == 0:
         return np.nan
     else:
-        dcg_score += y_true_sorted_by_scores[0] \
-            / pscores_sorted_by_scores[0]
+        dcg_score += y_true_sorted_by_scores[0] / pscores_sorted_by_scores[0]
 
         molecules = y_true_sorted_by_scores[1:k]
         indices = np.arange(1, molecules.shape[0] + 1)
@@ -140,6 +82,53 @@ def calc_dcg_at_k(
         dcg_score += np.sum(molecules / denominator)
 
     return dcg_score
+
+
+def calc_dcg_at_k(
+    y_true_sorted_by_scores: np.ndarray,
+    k: int,
+) -> float:
+    """DCG@kのIPS推定値を計算する
+
+    Args:
+    - y_true_sorted_by_scores (np.ndarray): ソート済み正解ラベルの配列
+    - k (int): 上位k件のみを対象とする
+
+    Returns:
+    - float: DCG@kの値
+    """
+
+    dcg_score = 0.0
+    if np.sum(y_true_sorted_by_scores) == 0:
+        return np.nan
+    else:
+        dcg_score += y_true_sorted_by_scores[0]
+        molecules = y_true_sorted_by_scores[1:k]
+        indices = np.arange(1, molecules.shape[0] + 1)
+        denominator = np.log2(indices + 1)
+        dcg_score += np.sum(molecules / denominator)
+
+    return dcg_score
+
+
+def return_exposure_at_k(
+    pscores_sorted_by_scores: np.ndarray,
+    k: int,
+) -> Union[int, None]:
+    """推薦位置kのモデルが出力したアイテムの露出確率を返す
+
+    Args:
+        pscores_sorted_by_scores (np.ndarray): ソート済み傾向スコアの配列
+        k (int): 推薦位置
+
+    Returns:
+        Union[int, None]: 露出確率。ユーザの正解データがk件未満の場合は、np.nanを返す。
+    """
+
+    if len(pscores_sorted_by_scores) >= k:
+        return pscores_sorted_by_scores[k - 1]
+    else:
+        return np.nan
 
 
 def calc_roc_auc(
@@ -170,7 +159,7 @@ def calc_roc_auc(
 
 metric_candidates: Dict[str, Callable] = {
     "Recall": calc_recall_at_k,
-    "Precision": calc_precision_at_k,
     "MAP": calc_average_precision_at_k,
     "DCG": calc_dcg_at_k,
+    "ME": return_exposure_at_k,
 }

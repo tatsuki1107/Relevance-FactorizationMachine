@@ -8,13 +8,11 @@ import hydra
 from hydra.core.config_store import ConfigStore
 import pandas as pd
 
-import numpy as np
-
 # Internal modules imports
 from conf.config import ExperimentConfig
 from utils.search_params import random_search
 from utils.dataloader.loader import DataLoader
-from utils.evaluate import Evaluator
+from utils.evaluate import TestEvaluator
 from utils.plot import Visualizer, plot_loss_curve
 from src.fm import FactorizationMachines as FM
 from src.mf import LogisticMatrixFactorization as MF
@@ -24,7 +22,12 @@ LOG_PATH = Path("./logs/result")
 PARAMS_PATH = Path("./data/best_params")
 
 K = [i for i in range(1, 6)]
-METRICS = {"DCG", "Recall", "MAP"}
+METRICS = {
+    "DCG",
+    "Recall",
+    "MAP",
+    "ME",
+}
 
 
 cs = ConfigStore.instance()
@@ -98,21 +101,18 @@ def main(cfg: ExperimentConfig) -> None:
 
             train_loss, val_loss = model.fit(train, val)
             plot_loss_curve(train_loss, val_loss, base_name)
-            pred_y = model.predict(val[0])
-            thetahold = np.quantile(pred_y, 0.75)
 
             for frequency, user2indices in user2data_indices.items():
-                evaluator = Evaluator(
+                evaluator = TestEvaluator(
                     _seed=cfg.seed,
                     X=test[0],
                     y_true=test[1],
                     indices_per_user=user2indices,
                     used_metrics=METRICS,
                     K=K,
-                    thetahold=thetahold,
                 )
 
-                results = evaluator.evaluate(model)
+                results = evaluator.evaluate(model, pscores=test[2])
                 for metric_name, values in results.items():
                     metric_df[
                         f"{base_name}_{frequency}_{metric_name}@K"
@@ -122,18 +122,20 @@ def main(cfg: ExperimentConfig) -> None:
 
     # random baseline
     model_name = "Random"
+    test_data = dataloader.test_data_for_random_policy
     for frequency, user2indices in user2data_indices.items():
-        evaluator = Evaluator(
+        evaluator = TestEvaluator(
             _seed=cfg.seed,
             X=None,
-            y_true=dataloader.test_y,
+            y_true=test_data["y_true"],
             indices_per_user=user2indices,
             used_metrics=METRICS,
             K=K,
-            thetahold=0.75
         )
 
-        results = evaluator.evaluate(model=model_name)
+        results = evaluator.evaluate(
+            model=model_name, pscores=test_data["pscore"]
+        )
         for metric_name, values in results.items():
             metric_df[f"Random_{frequency}_{metric_name}@K"] = values
 
@@ -145,7 +147,6 @@ def main(cfg: ExperimentConfig) -> None:
     Visualizer(
         result_df=metric_df,
         K=K,
-        metrics=METRICS,
     )
 
 

@@ -8,7 +8,7 @@ from hydra import initialize, compose
 
 # Internal modules imports
 from conf.config import ExperimentConfig
-from utils.evaluate import Evaluator
+from utils.evaluate import TestEvaluator
 from utils.dataloader.loader import DataLoader
 from src.fm import FactorizationMachines as FM
 
@@ -42,7 +42,7 @@ class TestFM(ModelTestBase):
 
         user2data_indices = self.loader.test_user2data_indices["all"]
 
-        self.evaluator = Evaluator(
+        self.evaluator = TestEvaluator(
             _seed=self.cfg.seed,
             X=self.test[0],
             y_true=self.test[1],

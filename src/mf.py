@@ -27,7 +27,7 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
     n_users: int
     n_items: int
     reg: float
-    alpha: float = 3.0
+    alpha: float = 4.0
 
     def __post_init__(self) -> None:
         """モデルのパラメータを初期化
@@ -98,7 +98,8 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
                 for feature, click, pscore in zip(features, clicks, pscores):
                     user_id, item_id = feature[0], feature[1]
                     err = (click / pscore) - self._predict_pair(
-                        user_id, item_id)
+                        user_id, item_id
+                    )
 
                     # update user embeddings
                     self._update_P(user_id=user_id, item_id=item_id, err=err)
@@ -117,10 +118,7 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
                 )
                 batch_loss.append(batch_logloss)
 
-            train_loss.append((
-                np.mean(batch_loss),
-                np.std(batch_loss)
-            ))
+            train_loss.append((np.mean(batch_loss), np.std(batch_loss)))
 
             pred_scores = self.predict(val_X)
             val_logloss = self._cross_entropy_loss(
@@ -209,13 +207,29 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         grad_b_i = -err + self.reg * self.b_i(item_id)
         self.b_i.update(grad=grad_b_i, index=item_id)
 
-    def _get_batch_data(self, train_X, train_y, train_pscores):
+    def _get_batch_data(
+        self,
+        train_X: np.ndarray,
+        train_y: np.ndarray,
+        train_pscores: np.ndarray,
+    ) -> Tuple[list, list, list]:
+        """学習データをバッチサイズ毎に分割する
+
+        Args:
+            train_X (np.ndarray): 特徴量の配列
+            train_y (np.ndarray): 正解ラベルの配列
+            train_pscores (np.ndarray): 傾向スコアの配列
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray, np.ndarray]: バッチサイズ毎に分割した学習データ
+        """
         train_X, train_y, train_pscores = shuffle(
             train_X, train_y, train_pscores, random_state=self.seed
         )
-        batch_X = np.array_split(train_X, len(train_X) // self.batch_size+1)
-        batch_y = np.array_split(train_y, len(train_y) // self.batch_size+1)
+        batch_X = np.array_split(train_X, len(train_X) // self.batch_size + 1)
+        batch_y = np.array_split(train_y, len(train_y) // self.batch_size + 1)
         batch_pscores = np.array_split(
-            train_pscores, len(train_pscores) // self.batch_size+1)
+            train_pscores, len(train_pscores) // self.batch_size + 1
+        )
 
         return batch_X, batch_y, batch_pscores
