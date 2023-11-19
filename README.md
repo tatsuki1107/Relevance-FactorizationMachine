@@ -95,6 +95,7 @@
 - **`train_val_test_ratio`**: データセットの訓練、検証、テストへの分割比率
 - **`density`**: 評価値行列の密度
 - **`behavior_policy`**: ログデータ生成のアルゴリズム。露出バイアスのみを仮定し、ランダムポリシーを使用
+- **`exposure_bias`**: 露出バイアスの強度
 
 ## 4.3 KuaiRecデータセットのテーブル設定 (`tables`)
 
@@ -162,8 +163,10 @@ docker compose run unbiased-fm poetry run python main.py is_search_params=False
 ![Alt text](logs/result/img/DCG_vs_model.png)
 ### 画像3: ログデータにおけるレアアイテムのランク指標性能。Factorization Machines (FM)を取り入れた各推定量の比較。
 ![Alt text](logs/result/img/metrics_per_frequency.png)
-### 画像4: 検証データを用いた各SNIPS推定量の性能を比較
-![Alt text](logs/result/img/snips_estimator.png)  
+### 画像4: カスタム評価指標Mean Exposure(ME)@Kを用いた性能比較
+![Alt text](logs/result/img/mean_exposure.png)
+### 画像5: 検証データを用いた各IPS推定量の性能を比較
+![Alt text](logs/result/img/IPS_estimator_of_DCG.png)  
 
 
 # 付録
