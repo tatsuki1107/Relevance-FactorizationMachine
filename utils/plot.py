@@ -1,8 +1,7 @@
 # Standard library imports
-import json
 from typing import List
-from pathlib import Path
-from dataclasses import dataclass, field
+from pathlib import PosixPath
+from dataclasses import dataclass
 
 # Third-party library imports
 import matplotlib.pyplot as plt
@@ -13,285 +12,167 @@ import numpy as np
 
 @dataclass
 class Visualizer:
-    """実験結果の描画をするためのクラス
+    """Visualizer for evaluating the performance of recommendation models
 
     Args:
-    - metrics (Set[str]): 使用する評価指標の集合
-    - K (List[int]): ランク指標を算出するランキング位置
-    - result_df (pd.DataFrame): 実験結果
-    - estimators (List[str]): 評価する推定量
+    - K (List[int]): list of K
+    - result_df (pd.DataFrame): result of evaluation
+    - log_path (PosixPath): path to save the log
+    - quantitative_metrics (str): quantitative metrics
+    - qualitative_metrics (str): qualitative metrics
     """
 
     K: List[int]
     result_df: pd.DataFrame
-    estimators: List[str] = field(
-        default_factory=lambda: ["Ideal", "IPS", "Naive"]
-    )
-    metrics: List[str] = field(
-        default_factory=lambda: ["DCG", "Recall", "MAP"]
-    )
+    log_path: PosixPath
+    quantitative_metrics: str
+    qualitative_metrics: str
 
     def __post_init__(self):
-        """描画の実行"""
+        """initialize the Visualizer class"""
 
         sns.set()
-        self.log_path = Path("./logs/result/img")
         self.log_path.mkdir(exist_ok=True, parents=True)
 
-        self._plot_metrics_per_model()
-        self._plot_metric_vs_model()
-        self._plot_metric_per_frequency()
-        self._plot_ips_estimated_values()
+        self.colors = {"FM": "#1f77b4", "MF": "#ff7f0e", "Random": "#2ca02c"}
+        self.linestyles = {"IPS": "-", "Naive": "--", "Random": "-."}
+
+        self._plot_vs_model()
         self._plot_mean_exposure()
+        self._plot_metric_vs_estimator(self.quantitative_metrics)
 
-    def _plot_metrics_per_model(self) -> None:
-        """モデル(FM, MF)ごとのランク指標を描画して保存する"""
-
-        for model_name in ["FM", "MF"]:
-            plt.figure(figsize=(20, 6))
-            for i, metric in enumerate(self.metrics):
-                plt.subplot(1, len(self.metrics), i + 1)
-                plt.title(f"{metric}@K", fontdict=dict(size=25))
-
-                for estimator in self.estimators:
-                    column = f"{model_name}_{estimator}_all_{metric}@K"
-                    self._plot_and_scatter(
-                        df_column=column,
-                        label=f"{model_name}_{estimator}",
-                    )
-
-                column = f"Random_all_{metric}@K"
-                self._plot_and_scatter(
-                    df_column=column,
-                    label="Random",
-                    linestyle="--",
-                )
-
-                plt.xticks(self.K)
-                plt.xlabel("varying K")
-                plt.legend(loc="best", fontsize=20)
-
-            plt.tight_layout()
-            plt.show()
-            plt.savefig(self.log_path / f"{model_name}_metrics.png")
-            plt.close()
-
-    def _plot_metric_vs_model(self, metric: str = "DCG"):
-        """MFとFMの性能を比べるための描画
-
-        Args:
-            metric (str, optional): 比較するランク指標。デフォルトでは、DCG@K
-        """
+    def _plot_vs_model(self, estimator="IPS") -> None:
+        """plot metrics MF vs FM."""
 
         plt.figure(figsize=(20, 6))
-
-        for i, estimator in enumerate(self.estimators):
-            plt.subplot(1, len(self.estimators), i + 1)
-            plt.title(
-                f"{metric}@K: FM_{estimator} vs MF_{estimator}",
-                fontdict=dict(size=25),
-            )
-
+        for i, metric_name in enumerate(
+            [self.quantitative_metrics, self.qualitative_metrics]
+        ):
+            plt.subplot(1, 2, i + 1)
             for model_name in ["FM", "MF"]:
-                column = f"{model_name}_{estimator}_all_{metric}@K"
-                self._plot_and_scatter(
-                    df_column=column,
+                col = f"{model_name}_{estimator}_{metric_name}@K"
+                plt.title(f"{metric_name}@K", fontsize=25)
+                plt.plot(
+                    self.K,
+                    self.result_df[col],
+                    marker="o",
                     label=f"{model_name}_{estimator}",
+                    color=self.colors[model_name],
+                    linestyle=self.linestyles[estimator],
                 )
 
-            column = f"Random_all_{metric}@K"
-            self._plot_and_scatter(
-                df_column=column,
+            col = f"Random_{metric_name}@K"
+            plt.plot(
+                self.K,
+                self.result_df[col],
+                marker="o",
                 label="Random",
-                linestyle="--",
+                color=self.colors["Random"],
+                linestyle=self.linestyles["Random"],
             )
 
-            plt.xticks(self.K)
-            plt.xlabel("varying K")
+            plt.xticks(self.K, fontsize=15)
+            plt.xlabel("varying K", fontsize=20)
             plt.legend(loc="best", fontsize=20)
 
         plt.tight_layout()
         plt.show()
-        plt.savefig(self.log_path / f"{metric}_vs_model.png")
+        plt.savefig(self.log_path / "metrics_vs_model.png")
         plt.close()
 
-    def _plot_mean_exposure(self, metric: str = "ME") -> None:
-        """カスタム評価指標Mean Exposure @ Kの描画
+    def _plot_mean_exposure(self) -> None:
+        """plot mean exposure."""
 
-        Args:
-            metric (str, optional): 比較するランク指標。
-        """
-
-        plt.figure(figsize=(20, 6))
-        for i, model_name in enumerate(["FM", "MF"]):
-            plt.subplot(1, 3, i + 1)
-            plt.title(
-                f"Mean Exposure@K of {model_name}", fontdict=dict(size=25)
-            )
-
-            for estimator in self.estimators:
-                column = f"{model_name}_{estimator}_all_{metric}@K"
-                self._plot_and_scatter(
-                    df_column=column,
+        plt.figure(figsize=(15, 6))
+        for model_name in ["FM", "MF"]:
+            for estimator in ["IPS", "Naive"]:
+                col = f"{model_name}_{estimator}_ME@K"
+                plt.title("Mean Exposure @ K", fontsize=25)
+                plt.plot(
+                    self.K,
+                    self.result_df[col],
+                    marker="o",
                     label=f"{model_name}_{estimator}",
+                    color=self.colors[model_name],
+                    linestyle=self.linestyles[estimator],
                 )
 
-            column = f"Random_all_{metric}@K"
-            self._plot_and_scatter(
-                df_column=column,
-                label="Random",
-                linestyle="--",
-            )
+        col = "Random_ME@K"
+        plt.plot(
+            self.K,
+            self.result_df[col],
+            marker="o",
+            label="Random",
+            color=self.colors["Random"],
+            linestyle=self.linestyles["Random"],
+        )
 
-            plt.xticks(self.K)
-            plt.xlabel("varying K")
-            plt.legend(loc="best", fontsize=15)
-
-        plt.subplot(1, 3, 3)
-        plt.title("Mean Exposure@K: FM_Naive vs MF_Naive", fontsize=20)
-        for model_name in ["FM", "MF"]:
-            column = f"{model_name}_Naive_all_{metric}@K"
-            self._plot_and_scatter(
-                df_column=column,
-                label=f"{model_name}_Naive",
-            )
-
-        plt.xticks(self.K)
-        plt.xlabel("varying K")
-        plt.legend(loc="best", fontsize=20)
-
-        plt.tight_layout()
+        plt.xticks(self.K, fontsize=15)
+        plt.xlabel("varying K", fontsize=20)
+        plt.legend(loc="best", fontsize=15)
         plt.show()
         plt.savefig(self.log_path / "mean_exposure.png")
         plt.close()
 
-    def _plot_metric_per_frequency(
-        self, model_name: str = "FM", frequency: str = "rare"
-    ):
-        """露出頻度ごとのモデルのランク性能を描画
+    def _plot_metric_vs_estimator(self, metric_name: str) -> None:
+        """plot metric. IPS vs Naive.
 
         Args:
-            model_name (str): 比較するモデル。デフォルトでは、FM
-            frequency (str): 比較する露出頻度。デフォルトでは、rare
+            metric_name (str): metric name
         """
 
         plt.figure(figsize=(20, 6))
-
-        for i, metric in enumerate(self.metrics):
-            plt.subplot(1, len(self.metrics), i + 1)
-            plt.title(
-                f"{metric}@K: {frequency} items only", fontdict=dict(size=25)
-            )
-
-            for estimator in self.estimators:
-                column = f"{model_name}_{estimator}_{frequency}_{metric}@K"
-                self._plot_and_scatter(
-                    df_column=column,
+        for i, model_name in enumerate(["FM", "MF"]):
+            plt.subplot(1, 2, i + 1)
+            for estimator in ["IPS", "Naive"]:
+                col = f"{model_name}_{estimator}_{metric_name}@K"
+                plt.title(f"{metric_name}@K Of {model_name}", fontsize=25)
+                plt.plot(
+                    self.K,
+                    self.result_df[col],
+                    marker="o",
                     label=f"{model_name}_{estimator}",
+                    color=self.colors[model_name],
+                    linestyle=self.linestyles[estimator],
                 )
 
-            column = f"Random_{frequency}_{metric}@K"
-            self._plot_and_scatter(
-                df_column=column,
+            col = f"Random_{metric_name}@K"
+            plt.plot(
+                self.K,
+                self.result_df[col],
+                marker="o",
                 label="Random",
-                linestyle="--",
+                color=self.colors["Random"],
+                linestyle=self.linestyles["Random"],
             )
 
-            plt.xticks(self.K)
-            plt.xlabel("varying K")
+            plt.xticks(self.K, fontsize=15)
+            plt.xlabel("varying K", fontsize=20)
             plt.legend(loc="best", fontsize=20)
 
         plt.tight_layout()
         plt.show()
-        plt.savefig(self.log_path / "metrics_per_frequency.png")
+        plt.savefig(self.log_path / "metric_vs_estimator.png")
         plt.close()
 
-    def _plot_ips_estimated_values(self, metric_name: str = "DCG") -> None:
-        """MFとFMの検証データにおけるIPS推定値を描画
 
-        Args:
-            metric_name (str): 描画するランク指標。デフォルトでは、DCG
-        """
-        metric_path = Path("./data/best_params")
-        with open(metric_path / f"best_{metric_name}.json", "r") as f:
-            val_metric: dict = json.load(f)
-
-        ips_val_metrics = val_metric["IPS"]
-
-        width = 0.5
-        plt.figure(figsize=(10, 6))
-        plt.bar(0, ips_val_metrics["FM"], width, label="FM")
-        plt.bar(1, ips_val_metrics["MF"], width, label="MF")
-        plt.axhline(
-            ips_val_metrics["Random"],
-            linestyle="--",
-            color="r",
-            label="Random",
-        )
-        plt.xticks([0, 1], ["FM", "MF"])
-        plt.xlabel("varying model")
-        plt.ylabel(f"IPS of {metric_name} value")
-        plt.legend()
-        plt.title(
-            "IPS Estimator of " + f"{metric_name} per Model",
-            fontdict=dict(size=22),
-        )
-
-        plt.tight_layout()
-        plt.show()
-        plt.savefig(self.log_path / f"IPS_estimator_of_{metric_name}.png")
-        plt.close()
-
-    def _plot_and_scatter(
-        self,
-        df_column: str,
-        label: str,
-        linestyle: str = "-",
-    ) -> None:
-        """折れ線グラフと散布図を描画する
-
-        Args:
-            df_column (str): 描画するデータフレームの列名
-            label (str): 凡例のラベル
-            linestyle (str, optional): 折れ線グラフのスタイル。デフォルトでは、実線
-        """
-
-        plt.scatter(
-            self.K,
-            self.result_df[df_column],
-            marker="o",
-        )
-        plt.plot(
-            self.K,
-            self.result_df[df_column],
-            label=label,
-            linestyle=linestyle,
-        )
-
-
-def plot_loss_curve(train_loss: list, val_loss: list, model_name: str) -> None:
-    """学習曲線を描画する関数
+def plot_loss_curve(
+    train_loss: list, val_loss: list, model_name: str, loss_img_path: PosixPath
+) -> None:
+    """Plot loss curve
 
     Args:
-        train_loss (list): ミニバッチデータのエポックごとの損失値の平均と標準偏差
-        val_loss (list): 検証データのエポックごとの損失値
-        model_name (str): モデルの名前
+    - train_loss (list): train loss per epoch
+    - val_loss (list): val loss per epoch
+    - model_name (str): model name
+    - loss_img_path (PosixPath): path to save the loss curve
     """
+
+    loss_img_path.mkdir(exist_ok=True, parents=True)
+
     sns.set()
     plt.figure(figsize=(10, 6))
-    mean_train_loss, std_train_loss = map(np.array, zip(*train_loss))
-    epochs = range(len(mean_train_loss))
-    plt.plot(
-        mean_train_loss, label=f"train (last loss: {mean_train_loss[-1]:.2f})"
-    )
-    plt.fill_between(
-        epochs,
-        mean_train_loss - std_train_loss,
-        mean_train_loss + std_train_loss,
-        color="blue",
-        alpha=0.1,
-    )
-
+    plt.plot(train_loss, label=f"train (last loss: {train_loss[-1]:.2f})")
     plt.plot(val_loss, label=f"val (last loss: {val_loss[-1]:.2f})")
     plt.xlabel("epoch")
     plt.ylabel("loss")
@@ -300,24 +181,54 @@ def plot_loss_curve(train_loss: list, val_loss: list, model_name: str) -> None:
 
     plt.tight_layout()
     plt.show()
-    plt.savefig(f"./data/loss_curve/{model_name}.png")
+    plt.savefig(f"{loss_img_path}/{model_name}.png")
     plt.close()
 
 
-def plot_exposure(exposure_probabilities: np.ndarray) -> None:
-    """露出度の確率を描画する関数
+def plot_val_metric_curve(
+    metric_name: str, val_metric: list, model_name: str, metric_img_path: PosixPath
+) -> None:
+    """Plot validation metric (DCG) curve
 
     Args:
-        exposure_probabilities (np.ndarray): 露出度の確率
+    - metric_name (str): metric name
+    - val_metric (list): val metric per epoch
+    - model_name (str): model name
+    - metric_img_path (PosixPath): path to save the metric curve
     """
+
+    metric_img_path.mkdir(exist_ok=True, parents=True)
+
     sns.set()
     plt.figure(figsize=(10, 6))
-    plt.plot(np.sort(exposure_probabilities)[::-1])
-    plt.xlabel("sorted num of video_id")
-    plt.ylabel("exposure probability")
-    plt.title("Exposure Probability Distribution", fontdict=dict(size=22))
+    plt.plot(val_metric, label=f"val (max value: {max(val_metric):.2f})")
+    plt.xlabel("epoch")
+    plt.ylabel(f"{metric_name}@K")
+    plt.legend()
+    plt.title(f"Val {metric_name}@K Curve of {model_name}", fontdict=dict(size=22))
 
     plt.tight_layout()
     plt.show()
-    plt.savefig("./data/exposure_probability.png")
+    plt.savefig(f"{metric_img_path}/{model_name}.png")
+    plt.close()
+
+
+def plot_populality(populalities: np.ndarray, data_name: str) -> None:
+    """Plot item populality
+
+    Args:
+    - populalities (np.ndarray): item populality
+    - data_name (str): data name. kuairec or coat.
+    """
+
+    sns.set()
+    plt.figure(figsize=(10, 6))
+    plt.plot(np.sort(populalities)[::-1])
+    plt.xlabel("Sorted Num Of Video_id")
+    plt.ylabel("Sum Of Label ")
+    plt.title("Item Populality", fontdict=dict(size=22))
+
+    plt.tight_layout()
+    plt.show()
+    plt.savefig(f"./data/{data_name}_item_populality.png")
     plt.close()

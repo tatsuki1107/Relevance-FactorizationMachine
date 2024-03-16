@@ -1,0 +1,31 @@
+setting:
+  name: coat
+  seed: 12345
+  data_logging_settings:
+    val_ratio: 0.2
+  tables:
+    train:
+      data_path: ./data/coat/train.ascii
+    test:
+      data_path: ./data/coat/test.ascii
+    propensities:
+      data_path: ./data/coat/propensities.ascii
+    user_features:
+      data_path: ./data/coat/user_item_features/user_features.ascii
+      txt_path: ./data/coat/user_item_features/user_features_map.txt
+    item_features:
+      data_path: ./data/coat/user_item_features/item_features.ascii
+      txt_path: ./data/coat/user_item_features/item_features_map.txt
+  pow_used: 0.1
+  is_search_params: true
+  model_params:
+    n_factors: 300
+    reg: 0.5
+    batch_size: 500
+    lr:
+      MF:
+        IPS: 0.02
+        Naive: 0.03
+      FM:
+        IPS: 0.0001
+        Naive: 0.0002

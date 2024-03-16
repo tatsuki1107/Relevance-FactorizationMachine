@@ -1,0 +1,29 @@
+[2024-03-16 06:20:11,885][__main__][INFO] - start data loading...
+[2024-03-16 06:20:39,909][__main__][INFO] - created small_matrix_df
+[2024-03-16 06:20:40,293][__main__][INFO] - log data size: 327359
+[2024-03-16 06:20:40,333][__main__][INFO] - gamma distribution mean: 0.415463545670883, std: 0.2511205236492744, min: 0.0, max: 1.0
+[2024-03-16 06:21:52,746][__main__][INFO] - pscore distribution mean: 0.26665547540251044, std: 0.2914485067115417, min: 0.1, max: 1.0
+[2024-03-16 06:21:52,781][__main__][INFO] - biased click through rate: 0.10904236633176422, unbiased click through rate: 0.4157942808965081
+[2024-03-16 06:21:52,785][__main__][INFO] - created interaction_df
+[2024-03-16 06:22:13,101][__main__][INFO] - created features
+[2024-03-16 06:22:13,165][__main__][INFO] - train_size: 196415, sampled_train_size: 43036, val_size: 65471, sampled_val_size: 14308,  test_size: 65473, 
+[2024-03-16 06:22:13,167][__main__][INFO] - prepared train and evaluation datasets
+[2024-03-16 06:22:13,415][__main__][INFO] - data loading is done.
+[2024-03-16 06:22:13,614][__main__][INFO] - DCG of Random_IPS: 1.4336469418374085
+[2024-03-16 06:22:13,904][__main__][INFO] - DCG of Random_Naive: 0.3915006900756706
+[2024-03-16 06:22:13,906][__main__][INFO] - start searching param...
+[2024-03-16 06:33:10,944][__main__][INFO] - model: FM, estimator: IPS, best_epoch: 221, val DCG@5: 2.0306853354206242
+[2024-03-16 06:33:10,947][__main__][INFO] - log loss: 0.4865708152948156, prediction min: 6.9650001539578454e-06, max: 0.9999933990921203, mean: 0.500485399105985, std: 0.2891942005518678
+[2024-03-16 06:45:09,136][__main__][INFO] - model: FM, estimator: Naive, best_epoch: 494, val DCG@5: 1.0721662349228482
+[2024-03-16 06:45:09,139][__main__][INFO] - log loss: 0.6949725451418343, prediction min: 6.9650001539578454e-06, max: 0.9999933990921203, mean: 0.500485399105985, std: 0.2891942005518678
+[2024-03-16 06:50:20,658][__main__][INFO] - model: MF, estimator: IPS, best_epoch: 467, val DCG@5: 2.0014905553393274
+[2024-03-16 06:50:20,660][__main__][INFO] - log loss: 0.41045384650665656, prediction min: 6.9650001539578454e-06, max: 0.9999933990921203, mean: 0.500485399105985, std: 0.2891942005518678
+[2024-03-16 06:55:26,779][__main__][INFO] - model: MF, estimator: Naive, best_epoch: 165, val DCG@5: 1.4803226577572774
+[2024-03-16 06:55:26,781][__main__][INFO] - log loss: 0.6247522164612012, prediction min: 6.9650001539578454e-06, max: 0.9999933990921203, mean: 0.500485399105985, std: 0.2891942005518678
+[2024-03-16 06:55:26,791][__main__][INFO] - searching param is done.
+[2024-03-16 06:55:26,792][__main__][INFO] - start experiment...
+[2024-03-16 06:57:44,128][__main__][INFO] - FM_IPS is done.
+[2024-03-16 07:03:13,107][__main__][INFO] - FM_Naive is done.
+[2024-03-16 07:04:04,523][__main__][INFO] - MF_IPS is done.
+[2024-03-16 07:04:22,953][__main__][INFO] - MF_Naive is done.
+[2024-03-16 07:04:23,186][__main__][INFO] - Random is done.

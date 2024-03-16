@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 @dataclass
 class BaseLoader(ABC):
-    """データのロードに使う基底クラス"""
+    """base class for data loaders"""
 
     @abstractmethod
     def load(self, *args, **kwargs):

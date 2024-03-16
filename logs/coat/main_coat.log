@@ -1,0 +1,24 @@
+[2024-03-16 06:12:48,675][__main__][INFO] - start data loading...
+[2024-03-16 06:12:48,857][__main__][INFO] - pscore distribution mean: 0.2666221332650009, std: 0.13841287213515605, min: 0.11025972000572846, max: 1.0
+[2024-03-16 06:12:48,953][__main__][INFO] - loaded csv files
+[2024-03-16 06:12:48,962][__main__][INFO] - train_size: 5568, sampled_train_size: 3660, val_size: 1392, sampled_val_size: 842,  test_size: 4640, 
+[2024-03-16 06:12:48,963][__main__][INFO] - prepared train and evaluation datasets
+[2024-03-16 06:12:49,149][__main__][INFO] - data loading is done.
+[2024-03-16 06:12:49,176][__main__][INFO] - DCG of Random_IPS: 1.4479934761682127
+[2024-03-16 06:12:49,199][__main__][INFO] - DCG of Random_Naive: 1.2879416214088002
+[2024-03-16 06:12:49,201][__main__][INFO] - start searching param...
+[2024-03-16 06:13:59,695][__main__][INFO] - model: FM, estimator: IPS, best_epoch: 401, val DCG@5: 1.506379931101543
+[2024-03-16 06:13:59,696][__main__][INFO] - log loss: 0.8138802652069972, prediction min: 0.0001072565197369757, max: 0.9994141734640487, mean: 0.502945653937183, std: 0.28895077482603054
+[2024-03-16 06:15:08,277][__main__][INFO] - model: FM, estimator: Naive, best_epoch: 386, val DCG@5: 1.3513445428395967
+[2024-03-16 06:15:08,278][__main__][INFO] - log loss: 0.8141652999721968, prediction min: 0.0001072565197369757, max: 0.9994141734640487, mean: 0.502945653937183, std: 0.28895077482603054
+[2024-03-16 06:15:27,157][__main__][INFO] - model: MF, estimator: IPS, best_epoch: 85, val DCG@5: 1.523500568805479
+[2024-03-16 06:15:27,159][__main__][INFO] - log loss: 0.6568354734619349, prediction min: 0.0001072565197369757, max: 0.9994141734640487, mean: 0.502945653937183, std: 0.28895077482603054
+[2024-03-16 06:15:45,940][__main__][INFO] - model: MF, estimator: Naive, best_epoch: 470, val DCG@5: 1.3625782279442937
+[2024-03-16 06:15:45,941][__main__][INFO] - log loss: 0.6739133744488118, prediction min: 0.0001072565197369757, max: 0.9994141734640487, mean: 0.502945653937183, std: 0.28895077482603054
+[2024-03-16 06:15:45,947][__main__][INFO] - searching param is done.
+[2024-03-16 06:15:45,948][__main__][INFO] - start experiment...
+[2024-03-16 06:16:49,397][__main__][INFO] - FM_IPS is done.
+[2024-03-16 06:17:55,760][__main__][INFO] - FM_Naive is done.
+[2024-03-16 06:17:57,341][__main__][INFO] - MF_IPS is done.
+[2024-03-16 06:18:05,685][__main__][INFO] - MF_Naive is done.
+[2024-03-16 06:18:05,718][__main__][INFO] - Random is done.

@@ -1,21 +1,17 @@
 # Standard library imports
 from logging import Logger
-from pathlib import Path
-from time import time
+from pathlib import PosixPath
 import json
-from collections import defaultdict
 
 # Third-party library imports
-from omegaconf import OmegaConf
 import numpy as np
 
 # Internal modules imports
-from utils.dataloader.loader import DataLoader
+from utils.dataloader.kuairec.loader import DataLoader
 from utils.evaluate import ValEvaluator
-from utils.plot import plot_loss_curve
+from utils.plot import plot_loss_curve, plot_val_metric_curve
 from src.fm import FactorizationMachines as FM
 from src.mf import LogisticMatrixFactorization as MF
-from conf.config import ModelConfig
 
 
 VALUE_ERROR_MESSAGE = (
@@ -24,188 +20,135 @@ VALUE_ERROR_MESSAGE = (
     + "You need to rewrite conf/config.yaml"
 )
 
-MODEL_PARAMS_MESSAGE = (
-    "model: {}, estimator: {}, trial: {}, params: {}, " + "{}@{}: {}"
-)
+MODEL_PARAMS_MESSAGE = "model: {}, estimator: {}, best_epoch: {}, " + "val {}@{}: {}"
 
 MODEL_DISTRIBUTION_MESSAGE = (
     "log loss: {}, " + "prediction min: {}, max: {}, " + "mean: {}, std: {}"
 )
 
-
-def _get_params(model_config: dict, logger: Logger) -> dict:
-    """パラメータ探索範囲からランダムにパラメータをサンプリングする関数
-
-    Args:
-    - model_config (dict): モデルごとのパラメータ探索範囲の設定
-    - logger (Logger): Loggerクラスのインスタンス
-
-    Raises:
-        ValueError: パラメータがintかfloatの範囲でない場合
-
-    Returns:
-        dict: パラメータの辞書
-    """
-
-    dynamic_seed = int(time())
-    np.random.seed(dynamic_seed)
-    params = {}
-    for param_name, values in model_config.items():
-        value_range = list(values.values())
-        if all(isinstance(value, int) for value in value_range):
-            params[param_name] = np.random.randint(
-                value_range[0], value_range[1]
-            )
-        elif all(isinstance(value, float) for value in value_range):
-            params[param_name] = np.random.uniform(
-                value_range[0], value_range[1]
-            )
-        else:
-            logger.error(VALUE_ERROR_MESSAGE.format(param_name, value_range))
-            raise ValueError(
-                VALUE_ERROR_MESSAGE.format(param_name, value_range)
-            )
-    return params
+ESTIMATOR = ["IPS", "Naive"]
+MODEL = ["FM", "MF"]
 
 
-def random_search(
-    model_config: ModelConfig,
+def search_params(
+    model_params: dict,
     seed: int,
     dataloader: DataLoader,
     logger: Logger,
-    n_trials: int = 15,
+    params_path: PosixPath,
+    log_path: PosixPath,
     k: int = 5,
+    max_epoch: int = 500,
     used_metric: str = "DCG",
 ) -> None:
-    """ランダムサーチを実行する関数
+    """search best hyper parameter (n_epoch only)
 
     Args:
-    - model_config (ModelConfig): モデルごとのパラメータ探索範囲の設定
-    - seed (int): 乱数シード (read only)
-    - dataloader (DataLoader): DataLoaderクラスのインスタンス
-    - logger (Logger): Loggerクラスのインスタンス
-    - n_trials (int, optional): パラメータをサーチするエポック数. デフォルトは100.
-    - K (int, optional):  最適化するランキング位置. デフォルトは3.
-    - used_metrics (str, optional): 最適化する評価指標. デフォルトは"DCG".
+        model_params (dict): decided hyper parameters
+        seed (int): random seed
+        dataloader (DataLoader): data loader instance
+        logger (Logger): logger instance
+        params_path (PosixPath): path to save best hyper parameter
+        log_path (PosixPath): path to save loss curve and metric curve
+        k (int, optional): recommend position. Defaults to 5.
+        max_epoch (int, optional): max of num epoch. Defaults to 500.
+        used_metric (str, optional): used metric. Defaults to "DCG".
     """
 
-    model_config = OmegaConf.to_container(model_config)
-
-    log_path = Path("./data/best_params")
-    log_path.mkdir(exist_ok=True, parents=True)
+    # init evaluator
+    evaluator = ValEvaluator(
+        interaction_df=dataloader.val_df,
+        features=dataloader.val_evaluation_features,
+        k=k,
+        metric_name=used_metric,
+    )
 
     # random baseline
     model_name = "Random"
-    random_val_data = dataloader.val_data_for_random_policy
-    user2data_indices = dataloader.val_user2data_indices
-    dumped_metric = defaultdict(dict)
-    for estimator, val_data in random_val_data.items():
-        evaluator = ValEvaluator(
-            _seed=seed,
-            X=None,
-            y_true=val_data["y_true"],
-            indices_per_user=user2data_indices,
-            metric_name=used_metric,
-            k=k,
-        )
-        metric_value = evaluator.evaluate(
-            model=model_name, pscores=val_data["pscore"]
-        )
-        dumped_metric[estimator][model_name] = metric_value
+    np.random.seed(seed)
+    y_scores = np.random.uniform(0, 1, dataloader.val_df.shape[0])
+
+    params_path.mkdir(exist_ok=True, parents=True)
+
+    for estimator in ESTIMATOR:
+        metric_value = evaluator.evaluate(y_scores=y_scores, estimator=estimator)
         logger.info(f"{used_metric} of Random_{estimator}: {metric_value}")
 
-    logger.info("start random search...")
+    logger.info("start searching param...")
 
-    for model_name in ["FM", "MF"]:
-        for estimator in ["Ideal", "IPS", "Naive"]:
-            (
-                train,
-                val,
-                _,
-            ) = dataloader.load(model_name=model_name, estimator=estimator)
+    for model_name in MODEL:
+        for estimator in ESTIMATOR:
+            train, val = dataloader.load(model_name=model_name, estimator=estimator)
 
-            evaluator = ValEvaluator(
-                _seed=seed,
-                X=val[0],
-                y_true=val[1],
-                indices_per_user=user2data_indices,
+            if model_name == "FM":
+                model = FM(
+                    estimator=estimator,
+                    n_epochs=max_epoch,
+                    n_factors=model_params["n_factors"],
+                    n_features=train["features"].shape[1],
+                    lr=model_params["lr"][model_name][estimator],
+                    batch_size=model_params["batch_size"],
+                    seed=seed,
+                    evaluator=evaluator,
+                )
+            elif model_name == "MF":
+                model = MF(
+                    estimator=estimator,
+                    n_epochs=max_epoch,
+                    n_factors=model_params["n_factors"],
+                    n_users=dataloader.n_users,
+                    n_items=dataloader.n_items,
+                    lr=model_params["lr"][model_name][estimator],
+                    reg=model_params["reg"],
+                    batch_size=model_params["batch_size"],
+                    seed=seed,
+                    evaluator=evaluator,
+                )
+
+            train_loss, val_loss = model.fit(train, val)
+            plot_loss_curve(
+                train_loss=train_loss,
+                val_loss=val_loss,
+                model_name=f"{model_name}_{estimator}",
+                loss_img_path=log_path / "val" / "loss_curve",
+            )
+            plot_val_metric_curve(
                 metric_name=used_metric,
-                k=k,
+                val_metric=model.val_metrics,
+                model_name=f"{model_name}_{estimator}",
+                metric_img_path=log_path / "val" / f"{used_metric}_curve",
             )
-            # search_results = [(trial, params, metric),(...),(...)]
-            search_results = []
-            for trial in range(n_trials):
-                model_params = _get_params(
-                    model_config=model_config[model_name], logger=logger
+
+            best_epoch = int(np.argmax(model.val_metrics))
+            metric_value = model.val_metrics[best_epoch]
+
+            logger.info(
+                MODEL_PARAMS_MESSAGE.format(
+                    model_name,
+                    estimator,
+                    best_epoch,
+                    used_metric,
+                    k,
+                    metric_value,
                 )
-
-                if model_name == "FM":
-                    model = FM(
-                        n_epochs=model_params["n_epochs"],
-                        n_factors=model_params["n_factors"],
-                        n_features=train[0].shape[1],
-                        lr=model_params["lr"],
-                        batch_size=model_params["batch_size"],
-                        seed=seed,
-                    )
-                elif model_name == "MF":
-                    model = MF(
-                        n_epochs=model_params["n_epochs"],
-                        n_factors=model_params["n_factors"],
-                        n_users=dataloader.n_users,
-                        n_items=dataloader.n_items,
-                        lr=model_params["lr"],
-                        reg=model_params["reg"],
-                        batch_size=model_params["batch_size"],
-                        seed=seed,
-                    )
-
-                train_loss, val_loss = model.fit(train, val)
-                plot_loss_curve(
-                    train_loss=train_loss,
-                    val_loss=val_loss,
-                    model_name=f"{model_name}_{estimator}",
-                )
-                metric_value = evaluator.evaluate(model, pscores=val[2])
-                search_results.append((trial, model_params, metric_value))
-
-                logger.info(
-                    MODEL_PARAMS_MESSAGE.format(
-                        model_name,
-                        estimator,
-                        trial,
-                        model_params,
-                        used_metric,
-                        k,
-                        metric_value,
-                    )
-                )
-
-                pred_scores = model.predict(val[0])
-                logger.info(
-                    MODEL_DISTRIBUTION_MESSAGE.format(
-                        val_loss[-1],
-                        pred_scores.min(),
-                        pred_scores.max(),
-                        pred_scores.mean(),
-                        pred_scores.std(),
-                    )
-                )
-
-            best_result = sorted(
-                search_results, key=lambda x: x[2], reverse=True
-            )[0]
-            best_result = dict(
-                zip(("trial", "params", used_metric), best_result)
             )
-            logger.info(f"best result: {best_result}")
+
+            logger.info(
+                MODEL_DISTRIBUTION_MESSAGE.format(
+                    val_loss[-1],
+                    y_scores.min(),
+                    y_scores.max(),
+                    y_scores.mean(),
+                    y_scores.std(),
+                )
+            )
 
             base_name = f"{model_name}_{estimator}"
-            with open(log_path / f"{base_name}_best_param.json", "w") as f:
-                json.dump(best_result["params"], f)
+            param_result = {
+                "n_epochs": best_epoch,
+                f"val_{used_metric}": metric_value,
+            }
+            with open(params_path / f"{base_name}.json", "w") as f:
+                json.dump(param_result, f)
 
-            dumped_metric[estimator][model_name] = best_result[used_metric]
-            with open(log_path / f"best_{used_metric}.json", "w") as f:
-                json.dump(dumped_metric, f)
-
-    logger.info("random search is done.")
+    logger.info("searching param is done.")

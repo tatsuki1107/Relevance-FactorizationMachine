@@ -24,11 +24,6 @@ pytest = "^7.4.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.flake8]
-max-line-length = 79
-max-complexity = 18
-ignore = "E203,E266,W503,"
-
 [tool.black]
 target-version = ['py39']
-line-length = 79
+line-length = 88

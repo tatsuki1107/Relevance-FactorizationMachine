@@ -1,41 +1,39 @@
 # Standard library imports
-from typing import Tuple
+from typing import Dict, Optional
 from dataclasses import dataclass
 from tqdm import tqdm
 
 # Third-party library imports
 import numpy as np
-from sklearn.utils import shuffle
+from sklearn.utils import resample
 
 # Internal modules imports
 from utils.optimizer import SGD
 from src.base import PointwiseBaseRecommender
+from utils.evaluate import ValEvaluator
 
 
 @dataclass
 class LogisticMatrixFactorization(PointwiseBaseRecommender):
-    """
-    Logistic Matrix Factorization model for recommendation.
+    """Logistic Matrix Factorization (MF) model
 
     Args:
-    - n_users (int): ユーザー数
-    - n_items (int): アイテム数
-    - reg (float): L2正則化項の係数
-    - alpha (float, optional): 因子行列のスケール調整パラメータ .Defaults to 2.
+    - n_users (int): The number of users.
+    - n_items (int): The number of items.
+    - reg (float): The regularization parameter.
+    - alpha (float): The scaling factor for the random initialization of the weights.
+    - evaluator (Optional[ValEvaluator]): evaluator for the model
     """
 
     n_users: int
     n_items: int
     reg: float
     alpha: float = 4.0
+    evaluator: Optional[ValEvaluator] = None
 
     def __post_init__(self) -> None:
-        """モデルのパラメータを初期化
-        - P: ユーザーの因子行列
-        - Q: アイテムの因子行列
-        - b_u: ユーザーのバイアス項
-        - b_i: アイテムのバイアス項
-        """
+        """initialize the model's parameters"""
+
         np.random.seed(self.seed)
 
         # init user embeddings
@@ -63,82 +61,88 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         b_i = np.random.normal(scale=0.001, size=self.n_items)
         self.b_i = SGD(params=b_i, lr=self.lr)
 
+        if self.evaluator is not None:
+            self.val_metrics = []
+            self.model_name = "MF"
+
     def fit(
         self,
-        train: Tuple[np.ndarray, np.ndarray, np.ndarray],
-        val: Tuple[np.ndarray, np.ndarray, np.ndarray],
+        train: Dict[str, np.ndarray],
+        val: Dict[str, np.ndarray],
     ) -> list:
-        """
-        モデルの学習を実行するメソッド
+        """fit the model to the training data
 
         Args:
-        - train (Tuple[特徴量, ラベル, 傾向スコア]): 学習データ.
-        - val (tuple[特徴量, ラベル, 傾向スコア]): 検証データ.
+        - train (Dict[str, np.ndarray]): training data
+        - val (Dict[str, np.ndarray]): validation data
 
         Returns:
-        - list: 学習データと検証データのエポック毎の損失.
+            list: training loss and validation loss
         """
 
-        train_X, train_y, train_pscores = train
-        val_X, val_y, val_pscores = val
-
-        batch_data = self._get_batch_data(
-            train_X.copy(),
-            train_y.copy(),
-            train_pscores.copy(),
-        )
-
         # init global bias
-        self.b = np.mean(train_y)
+        self.b = np.mean(train["labels"])
 
         train_loss, val_loss = [], []
-        for _ in tqdm(range(self.n_epochs)):
-            batch_loss = []
-            for features, clicks, pscores in zip(*batch_data):
-                for feature, click, pscore in zip(features, clicks, pscores):
-                    user_id, item_id = feature[0], feature[1]
-                    err = (click / pscore) - self._predict_pair(
-                        user_id, item_id
-                    )
+        for epoch in tqdm(range(self.n_epochs)):
+            batch_X, batch_y, batch_pscores = resample(
+                train["features"],
+                train["labels"],
+                train["pscores"],
+                replace=False,
+                n_samples=self.batch_size,
+                random_state=epoch,
+            )
 
-                    # update user embeddings
-                    self._update_P(user_id=user_id, item_id=item_id, err=err)
-                    # update item embeddings
-                    self._update_Q(user_id=user_id, item_id=item_id, err=err)
-                    # update user bias
-                    self._update_b_u(user_id=user_id, err=err)
-                    # update item bias
-                    self._update_b_i(item_id=item_id, err=err)
+            for feature, click, pscore in zip(batch_X, batch_y, batch_pscores):
+                user_id, item_id = feature[0], feature[1]
+                err = (click / pscore) - self._predict_pair(user_id, item_id)
 
-                pred_scores = self.predict(features)
-                batch_logloss = self._cross_entropy_loss(
-                    y_trues=clicks,
-                    y_scores=pred_scores,
-                    pscores=pscores,
-                )
-                batch_loss.append(batch_logloss)
+                # update user embeddings
+                self._update_P(user_id=user_id, item_id=item_id, err=err)
+                # update item embeddings
+                self._update_Q(user_id=user_id, item_id=item_id, err=err)
+                # update user bias
+                self._update_b_u(user_id=user_id, err=err)
+                # update item bias
+                self._update_b_i(item_id=item_id, err=err)
 
-            train_loss.append((np.mean(batch_loss), np.std(batch_loss)))
-
-            pred_scores = self.predict(val_X)
-            val_logloss = self._cross_entropy_loss(
-                y_trues=val_y,
+            pred_scores = self.predict(batch_X)
+            batch_logloss = self._cross_entropy_loss(
+                y_trues=batch_y,
                 y_scores=pred_scores,
-                pscores=val_pscores,
+                pscores=batch_pscores,
+            )
+            train_loss.append(batch_logloss)
+
+            pred_scores = self.predict(val["features"])
+            val_logloss = self._cross_entropy_loss(
+                y_trues=val["labels"],
+                y_scores=pred_scores,
+                pscores=val["pscores"],
             )
             val_loss.append(val_logloss)
+
+            if self.evaluator is not None:
+                eval_features = self.evaluator.features[self.model_name]
+                y_scores = self.predict(eval_features)
+                metric_value = self.evaluator.evaluate(
+                    y_scores=y_scores, estimator=self.estimator
+                )
+                self.val_metrics.append(metric_value)
 
         return train_loss, val_loss
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """特徴量(ユーザー、アイテムのID)から予測確率を計算する
+        """predict the probability of the given samples
 
         Args:
-        - X (np.ndarray): 特徴量の配列
+        - X (np.ndarray): The input samples.
 
         Returns:
-        - (np.ndarray): 予測確率の配列
+            np.ndarray: The predicted probabilities.
         """
+
         user_ids, item_ids = X[:, 0], X[:, 1]
         return np.array(
             [
@@ -148,15 +152,16 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         )
 
     def _predict_pair(self, user_id: int, item_id: int) -> float:
-        """ユーザーとアイテムのペアから予測確率を計算する
+        """predict the probability of the given pair of user and item
 
         Args:
-        - user_id (int): 単一のユーザーID
-        - item_id (int): 単一のアイテムID
+            user_id (int): user ID
+            item_id (int): item ID
 
         Returns:
-        - (float): 単一の予測確率
+            float: The predicted probability.
         """
+
         return self._sigmoid(
             np.dot(self.P(user_id), self.Q(item_id))
             + self.b_u(user_id)
@@ -165,71 +170,47 @@ class LogisticMatrixFactorization(PointwiseBaseRecommender):
         )
 
     def _update_P(self, user_id: int, item_id: int, err: float) -> None:
-        """ユーザーの因子行列を更新する。更新の詳細は、README.mdを参照
+        """update user embeddings. see README.md for more details.
 
         Args:
-            user_id (int): 単一のユーザーID
-            item_id (int): 単一のアイテムID
-            err (float): 予測値と正解ラベルの残差
+        - user_id (int): user ID
+        - item_id (int): item ID
+        - err (float): The residual between the predicted value and the true label.
         """
+
         grad_P = -err * self.Q(item_id) + self.reg * self.P(user_id)
         self.P.update(grad=grad_P, index=user_id)
 
     def _update_Q(self, user_id: int, item_id: int, err: float) -> None:
-        """アイテムの因子行列を更新する。更新の詳細は、README.mdを参照
+        """update item embeddings. see README.md for more details.
 
         Args:
-            user_id (int): 単一のユーザーID
-            item_id (int): 単一のアイテムID
-            err (float): 予測値と正解ラベルの残差
+        - user_id (int): user ID
+        - item_id (int): item ID
+        - err (float): The residual between the predicted value and the true label.
         """
+
         grad_Q = -err * self.P(user_id) + self.reg * self.Q(item_id)
         self.Q.update(grad=grad_Q, index=item_id)
 
     def _update_b_u(self, user_id: int, err: float) -> None:
-        """ユーザーのバイアス項を更新する。更新の詳細は、README.mdを参照
+        """update user bias. see README.md for more details.
 
         Args:
-            user_id (int): 単一のユーザーID
-            err (float): 予測値と正解ラベルの残差
+        - user_id (int): user ID
+        - err (float): The residual between the predicted value and the true label.
         """
+
         grad_b_u = -err + self.reg * self.b_u(user_id)
         self.b_u.update(grad=grad_b_u, index=user_id)
 
     def _update_b_i(self, item_id: int, err: float) -> None:
-        """アイテムのバイアス項を更新する。更新の詳細は、README.mdを参照
+        """update item embeddings. see README.md for more details.
 
         Args:
-            item_id (int): 単一のアイテムID
-            err (float): 予測値と正解ラベルの残差
+        - item_id (int): item ID
+        - err (float): The residual between the predicted value and the true label.
         """
 
         grad_b_i = -err + self.reg * self.b_i(item_id)
         self.b_i.update(grad=grad_b_i, index=item_id)
-
-    def _get_batch_data(
-        self,
-        train_X: np.ndarray,
-        train_y: np.ndarray,
-        train_pscores: np.ndarray,
-    ) -> Tuple[list, list, list]:
-        """学習データをバッチサイズ毎に分割する
-
-        Args:
-            train_X (np.ndarray): 特徴量の配列
-            train_y (np.ndarray): 正解ラベルの配列
-            train_pscores (np.ndarray): 傾向スコアの配列
-
-        Returns:
-            Tuple[np.ndarray, np.ndarray, np.ndarray]: バッチサイズ毎に分割した学習データ
-        """
-        train_X, train_y, train_pscores = shuffle(
-            train_X, train_y, train_pscores, random_state=self.seed
-        )
-        batch_X = np.array_split(train_X, len(train_X) // self.batch_size + 1)
-        batch_y = np.array_split(train_y, len(train_y) // self.batch_size + 1)
-        batch_pscores = np.array_split(
-            train_pscores, len(train_pscores) // self.batch_size + 1
-        )
-
-        return batch_X, batch_y, batch_pscores

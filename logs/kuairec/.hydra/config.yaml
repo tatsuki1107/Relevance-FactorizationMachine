@@ -1,0 +1,52 @@
+setting:
+  name: kuairec
+  seed: 12345
+  data_logging_settings:
+    data_path: ./data/kuairec/big_matrix.csv
+    train_val_test_ratio:
+    - 0.6
+    - 0.2
+    - 0.2
+    density: 0.07
+    behavior_policy: random
+    exposure_bias: 3.0
+  tables:
+    interaction:
+      data_path: ./data/kuairec/small_matrix.csv
+      used_features:
+        timestamp: float
+    user:
+      data_path: ./data/kuairec/user_features.csv
+      used_features:
+        user_active_degree: label
+        onehot_feat0: label
+        onehot_feat1: label
+        onehot_feat2: label
+        onehot_feat13: label
+        onehot_feat14: label
+        onehot_feat15: label
+    video:
+      daily:
+        data_path: ./data/kuairec/item_daily_features.csv
+        used_features:
+          play_progress: float
+          video_duration: float
+          cancel_like_cnt: int
+          double_click_cnt: int
+      category:
+        data_path: ./data/kuairec/item_categories.csv
+        used_features:
+          feat: multilabel
+  pow_used: 0.5
+  is_search_params: true
+  model_params:
+    n_factors: 400
+    reg: 0.5
+    batch_size: 2000
+    lr:
+      MF:
+        IPS: 0.01
+        Naive: 0.03
+      FM:
+        IPS: 9.0e-06
+        Naive: 0.0003

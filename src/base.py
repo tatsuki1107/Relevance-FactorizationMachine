@@ -8,16 +8,18 @@ import numpy as np
 
 @dataclass
 class PointwiseBaseRecommender(ABC):
-    """ポイントワイズ損失を用いた推薦アルゴリズムの基底クラス
+    """base class for pointwise recommenders
 
     Args:
-        n_epochs: 学習エポック数
-        n_factors: 因子行列の次元数
-        lr: 学習率
-        batch_size: バッチサイズ
-        seed: パラメータ初期化のシード値
+    - estimator (str): estimator name
+    - n_epochs (int): number of epochs
+    - n_factors (int): number of factors
+    - lr (float): learning rate
+    - batch_size (int): batch size
+    - seed (int): random seed
     """
 
+    estimator: str
     n_epochs: int
     n_factors: int
     lr: float
@@ -39,17 +41,18 @@ class PointwiseBaseRecommender(ABC):
         pscores: np.ndarray,
         eps: float = 1e-8,
     ) -> float:
-        """与えられたデータを元にクロスエントロピー損失を計算する
+        """calculate cross entropy loss
 
         Args:
-        - y_trues (np.ndarray): 正解ラベルの配列
-        - y_scores (np.ndarray): 予測確率の配列
-        - pscores (np.ndarray): 傾向スコアの配列
-        - eps (float): ゼロ除算を防ぐための微小値
+        - y_trues (np.ndarray): true labels
+        - y_scores (np.ndarray): predicted scores
+        - pscores (np.ndarray): propensity scores
+        - eps (float, optional): small value to avoid overflow. Defaults to 1e-8.
 
         Returns:
-        - logloss (float): クロスエントロピー損失
+            float: cross entropy loss
         """
+
         logloss = -np.sum(
             (y_trues / pscores) * np.log(y_scores + eps)
             + (1 - y_trues / pscores) * np.log(1 - y_scores + eps)
@@ -58,13 +61,6 @@ class PointwiseBaseRecommender(ABC):
         return logloss
 
     def _sigmoid(self, x: np.ndarray) -> np.ndarray:
-        """シグモイド関数。予測値に対してシグモイド関数を適用することで確率に変換する。オーバーフローを防ぐためにクリッピングを行う。
-
-        Args:
-            x: 予測値
-
-        Returns:
-            np.ndarray: 確率
-        """
+        """sigmoid function"""
         x = np.clip(x, -700, 700)
         return 1 / (1 + np.exp(-x))

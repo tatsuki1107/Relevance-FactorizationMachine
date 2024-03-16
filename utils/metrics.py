@@ -1,5 +1,6 @@
 # Standard library imports
-from typing import Tuple, Callable, Dict, Union
+from typing import Callable, Dict, Union, List
+from collections import Counter
 
 # Third-party library imports
 import numpy as np
@@ -9,23 +10,21 @@ def calc_average_precision_at_k(
     y_true_sorted_by_scores: np.ndarray,
     k: int,
 ) -> float:
-    """Average Precision@kを計算する
+    """calculate average precision at k
 
     Args:
-    - y_true_sorted_by_scores (np.ndarray): ソート済み正解ラベルの配列
-    - k (int): 上位k件のみを対象とする
+    - y_true_sorted_by_scores (np.ndarray): sorted true labels
+    - k (int): recommend position
 
     Returns:
-    - (float): Average Precision@kの値
+        float: average precision at k
     """
 
     average_precision = 0.0
     if not np.sum(y_true_sorted_by_scores) == 0:
         for i in range(min(k, len(y_true_sorted_by_scores))):
-            if y_true_sorted_by_scores[i] == 1:
-                average_precision += np.sum(
-                    y_true_sorted_by_scores[: i + 1]
-                ) / (i + 1)
+            if y_true_sorted_by_scores[i] >= 1:
+                average_precision += np.sum(y_true_sorted_by_scores[: i + 1]) / (i + 1)
 
     return average_precision
 
@@ -34,21 +33,19 @@ def calc_recall_at_k(
     y_true_sorted_by_scores: np.ndarray,
     k: int,
 ) -> float:
-    """Recall@kを計算する
+    """calculate recall at k
 
     Args:
-    - y_true_sorted_by_scores (np.ndarray): ソート済み正解ラベルの配列
-    - k (int): 上位k件のみを対象とする
+    - y_true_sorted_by_scores (np.ndarray): sorted true labels
+    - k (int): recommend position
 
     Returns:
-    - (float): Recall@kの値
+        float: recall at k
     """
 
     recall = 0.0
     if not np.sum(y_true_sorted_by_scores) == 0:
-        recall = np.sum(y_true_sorted_by_scores[:k]) / np.sum(
-            y_true_sorted_by_scores
-        )
+        recall = np.sum(y_true_sorted_by_scores[:k]) / np.sum(y_true_sorted_by_scores)
 
     return recall
 
@@ -58,16 +55,15 @@ def calc_ips_of_dcg_at_k(
     k: int,
     pscores_sorted_by_scores: np.ndarray,
 ) -> float:
-    """DCG@kのIPS推定値を計算する
+    """calculate IPS estimation of DCG@k
 
     Args:
-    - y_true_sorted_by_scores (np.ndarray): ソート済み正解ラベルの配列
-    - k (int): 上位k件のみを対象とする
-    - pscores_sorted_by_scores (np.ndarray): 傾向スコアの配列
+    - y_true_sorted_by_scores (np.ndarray): sorted true labels
+    - k (int): recommend position
+    - pscores_sorted_by_scores (np.ndarray): sorted propensity scores
 
     Returns:
-    - float: DCG@kのIPS推定値。pscores_sorted_by_scoresがすべて1ならば、
-            通常のDCG@kを返す。
+        float: IPS estimation of DCG@k
     """
 
     dcg_score = 0.0
@@ -88,14 +84,14 @@ def calc_dcg_at_k(
     y_true_sorted_by_scores: np.ndarray,
     k: int,
 ) -> float:
-    """DCG@kのIPS推定値を計算する
+    """calculate DCG at k
 
     Args:
-    - y_true_sorted_by_scores (np.ndarray): ソート済み正解ラベルの配列
-    - k (int): 上位k件のみを対象とする
+    - y_true_sorted_by_scores (np.ndarray): sorted true labels
+    - k (int): recommend position
 
     Returns:
-    - float: DCG@kの値
+        float: DCG at k
     """
 
     dcg_score = 0.0
@@ -115,14 +111,14 @@ def return_exposure_at_k(
     pscores_sorted_by_scores: np.ndarray,
     k: int,
 ) -> Union[int, None]:
-    """推薦位置kのモデルが出力したアイテムの露出確率を返す
+    """return exposure at k. return exposure probability of ranked kth item.
 
     Args:
-        pscores_sorted_by_scores (np.ndarray): ソート済み傾向スコアの配列
-        k (int): 推薦位置
+    - pscores_sorted_by_scores (np.ndarray): sorted propensity scores
+    - k (int): recommend position
 
     Returns:
-        Union[int, None]: 露出確率。ユーザの正解データがk件未満の場合は、np.nanを返す。
+        Union[int, None]: exposure at k
     """
 
     if len(pscores_sorted_by_scores) >= k:
@@ -131,35 +127,52 @@ def return_exposure_at_k(
         return np.nan
 
 
-def calc_roc_auc(
-    y_true: np.ndarray, y_scores: np.ndarray, interval: float = 0.0001
-) -> Tuple[list, list, float]:
-    thetahold = np.arange(0, 1 + interval, interval)[::-1]
-    tpr, fpr = [], []
-    for theta in thetahold:
-        y_pred = (y_scores >= theta).astype(int)
+def calc_gini_at_k(rec_items: List[int], n_items: int) -> float:
+    """calculate Gini coefficient at k
 
-        TP = np.sum((y_true == 1) & (y_pred == 1))
-        FN = np.sum((y_true == 1) & (y_pred == 0))
-        TN = np.sum((y_true == 0) & (y_pred == 0))
-        FP = np.sum((y_true == 0) & (y_pred == 1))
+    Args:
+    - rec_items (List[int]): recommended items at k
+    - n_items (int): number of items
 
-        TPR = TP / (TP + FN)
-        FPR = FP / (FP + TN)
+    Returns:
+        float: Gini coefficient at k
+    """
 
-        tpr.append(TPR)
-        fpr.append(FPR)
+    item_counter = Counter(rec_items)
+    rec_freqs = np.array([item_counter.get(i, 0) for i in range(n_items)])
 
-    roc = 0.0
-    for i in range(len(thetahold) - 1):
-        roc += (tpr[i + 1] + tpr[i]) * (fpr[i + 1] - fpr[i]) / 2
+    indices = np.arange(1, n_items + 1)
+    rec_freqs = np.sort(rec_freqs, kind="merge")
 
-    return tpr, fpr, roc
+    return np.sum((2 * indices - n_items - 1) * rec_freqs) / (
+        n_items * np.sum(rec_freqs)
+    )
+
+
+def calc_catalog_coverage_at_k(
+    rec_items: np.ndarray,
+    n_items: int,
+) -> float:
+    """calculate catalog coverage at k
+
+    Args:
+    - rec_items (np.ndarray): recommended items at k
+    - n_items (int): number of items
+
+    Returns:
+        float: catalog coverage at k
+    """
+
+    return len(set(rec_items)) / n_items
 
 
 metric_candidates: Dict[str, Callable] = {
+    # quantitive metrics
     "Recall": calc_recall_at_k,
     "MAP": calc_average_precision_at_k,
     "DCG": calc_dcg_at_k,
+    # qualitative metrics
     "ME": return_exposure_at_k,
+    "CatalogCoverage": calc_catalog_coverage_at_k,
+    "Gini": calc_gini_at_k,
 }
