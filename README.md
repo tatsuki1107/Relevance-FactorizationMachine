@@ -1,4 +1,4 @@
-# Unbiased Recommender Learning With Relevance-FactorizationMachines
+# Unbiased Recommender Learning for Enhanced Relevance and Coverage
 
 # 1. Main Technologies used
 See <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/pyproject.toml">`pyproject.toml`</a> for more details
