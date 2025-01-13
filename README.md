@@ -1,5 +1,8 @@
 # Unbiased Recommender Learning for Enhanced Relevance and Coverage
 
+This repository contains the experimental code for the journal paper titled [“Unbiased Recommender Learning for Enhanced Relevance and Coverage”](https://link.springer.com/chapter/10.1007/978-3-031-76827-9_13), which was presented as a late-breaking paper at the Human-Computer Interaction 2024 (HCII2024) conference.
+
+
 # 1. Main Technologies used
 See <a href="https://github.com/tatsuki1107/Relevance-FactorizationMachine/blob/master/pyproject.toml">`pyproject.toml`</a> for more details
 
